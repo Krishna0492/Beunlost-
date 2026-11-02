@@ -12,6 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <!-- jsPDF for vector multi-page report generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script type="module" src="/src/firebase-init.ts"></script>
 </head>
 <body>
 
@@ -437,6 +438,11 @@
         // Generate Analysis
         const analysis = computeAnalysis(surveyData);
         localStorage.setItem('unlost_survey_analysis', JSON.stringify(analysis));
+
+        // Save to Firebase Firestore
+        if (window.UnlostFirebase && typeof window.UnlostFirebase.saveSurveyResult === 'function') {
+          window.UnlostFirebase.saveSurveyResult(surveyData, analysis).catch(err => console.debug('Firestore save deferred:', err));
+        }
 
         // Render Results
         renderResults(surveyData, analysis);

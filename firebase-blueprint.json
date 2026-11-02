@@ -10,6 +10,8 @@
         "fullName": { "type": "string", "maxLength": 100 },
         "emailVerified": { "type": "boolean" },
         "role": { "type": "string", "enum": ["student", "admin"] },
+        "status": { "type": "string", "enum": ["active", "pending_verification", "deletion_requested", "suspended"] },
+        "lastSignInAt": { "type": "string", "format": "date-time" },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
@@ -21,13 +23,19 @@
       "type": "object",
       "properties": {
         "userId": { "type": "string", "maxLength": 128 },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 256 },
         "grade": { "type": "string", "maxLength": 50 },
         "stream": { "type": "string", "maxLength": 50 },
         "targetExam": { "type": "string", "maxLength": 100 },
+        "marksSubmitted": { "type": "string", "maxLength": 200 },
+        "careerInterests": { "type": "array" },
         "savedCareers": { "type": "array" },
         "savedColleges": { "type": "array" },
         "savedRoadmaps": { "type": "array" },
         "guidanceChecklist": { "type": "array" },
+        "pdfGeneratedCount": { "type": "number" },
+        "lastReportDate": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "updatedAt"]
@@ -43,9 +51,11 @@
         "studentEmail": { "type": "string", "maxLength": 256 },
         "grade": { "type": "string", "maxLength": 50 },
         "stream": { "type": "string", "maxLength": 50 },
+        "marksDetails": { "type": "string", "maxLength": 200 },
         "interests": { "type": "array" },
         "workStyle": { "type": "string", "maxLength": 100 },
         "topCareers": { "type": "array" },
+        "answers": { "type": "object" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "studentName", "stream", "topCareers", "createdAt"]
@@ -60,9 +70,24 @@
         "userEmail": { "type": "string", "maxLength": 256 },
         "actionType": { "type": "string", "maxLength": 100 },
         "resourceTitle": { "type": "string", "maxLength": 200 },
+        "details": { "type": "string", "maxLength": 500 },
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "actionType", "timestamp"]
+    },
+    "DeletionRequest": {
+      "title": "DeletionRequest",
+      "description": "Student data deletion request under privacy regulations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userEmail": { "type": "string", "maxLength": 256 },
+        "reason": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["pending", "processed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "userEmail", "status", "createdAt"]
     },
     "Admin": {
       "title": "Admin",
@@ -106,6 +131,10 @@
     "/studentActivity/{activityId}": {
       "schema": "StudentActivity",
       "description": "Platform audit and activity log"
+    },
+    "/deletionRequests/{requestId}": {
+      "schema": "DeletionRequest",
+      "description": "User data privacy and erasure requests"
     },
     "/admins/{adminId}": {
       "schema": "Admin",

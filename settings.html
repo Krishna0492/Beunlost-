@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script type="module" src="/src/firebase-init.ts"></script>
 </head>
 <body>
 
@@ -95,9 +96,12 @@
 
         <!-- Danger Zone -->
         <div class="charcoal-card" style="border-color: rgba(239, 68, 68, 0.4);">
-          <h2 class="card-title" style="color:#ef4444;">Danger Zone</h2>
-          <p class="card-desc">Reset your local student bookmarks, milestones, and goals. This action cannot be undone.</p>
-          <div style="display:flex; gap:1rem;">
+          <h2 class="card-title" style="color:#ef4444;">Account Actions & Privacy Rights</h2>
+          <p class="card-desc">Request complete data erasure under privacy compliance (DPDP Act 2023 / GDPR) or reset your local student workspace.</p>
+          <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+            <button id="request-deletion-btn" class="btn btn-danger btn-sm">
+              Request Complete Data Erasure
+            </button>
             <button id="clear-data-btn" class="btn btn-outline btn-sm" style="color:#ef4444; border-color:#ef4444;">
               Reset Local Student Workspace
             </button>
