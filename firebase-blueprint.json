@@ -1,0 +1,119 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Registered student account record",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "emailVerified": { "type": "boolean" },
+        "role": { "type": "string", "enum": ["student", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "fullName", "role", "createdAt"]
+    },
+    "StudentProfile": {
+      "title": "StudentProfile",
+      "description": "Student academic preferences, saved careers, colleges and readiness",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "grade": { "type": "string", "maxLength": 50 },
+        "stream": { "type": "string", "maxLength": 50 },
+        "targetExam": { "type": "string", "maxLength": 100 },
+        "savedCareers": { "type": "array" },
+        "savedColleges": { "type": "array" },
+        "savedRoadmaps": { "type": "array" },
+        "guidanceChecklist": { "type": "array" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "updatedAt"]
+    },
+    "SurveyResult": {
+      "title": "SurveyResult",
+      "description": "Student 5-step career survey assessment result and match recommendations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "studentName": { "type": "string", "maxLength": 100 },
+        "studentEmail": { "type": "string", "maxLength": 256 },
+        "grade": { "type": "string", "maxLength": 50 },
+        "stream": { "type": "string", "maxLength": 50 },
+        "interests": { "type": "array" },
+        "workStyle": { "type": "string", "maxLength": 100 },
+        "topCareers": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "studentName", "stream", "topCareers", "createdAt"]
+    },
+    "StudentActivity": {
+      "title": "StudentActivity",
+      "description": "Log of student events such as career exploration, survey completion, and PDF generation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userEmail": { "type": "string", "maxLength": 256 },
+        "actionType": { "type": "string", "maxLength": 100 },
+        "resourceTitle": { "type": "string", "maxLength": 200 },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "actionType", "timestamp"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized administrator accounts with RBAC access to admin dashboard",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "role": { "type": "string", "enum": ["admin"] },
+        "grantedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "AnalyticsEvent": {
+      "title": "AnalyticsEvent",
+      "description": "Custom GA4 and website platform analytics telemetry event",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "eventName": { "type": "string", "maxLength": 100 },
+        "category": { "type": "string", "maxLength": 100 },
+        "label": { "type": "string", "maxLength": 250 },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "eventName", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile and authentication document"
+    },
+    "/studentProfiles/{userId}": {
+      "schema": "StudentProfile",
+      "description": "Student private preferences and bookmarks"
+    },
+    "/surveyResults/{resultId}": {
+      "schema": "SurveyResult",
+      "description": "Career assessment survey results"
+    },
+    "/studentActivity/{activityId}": {
+      "schema": "StudentActivity",
+      "description": "Platform audit and activity log"
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Privileged admin identifiers for dashboard security"
+    },
+    "/analyticsEvents/{eventId}": {
+      "schema": "AnalyticsEvent",
+      "description": "Platform telemetry and visitor engagement statistics"
+    }
+  }
+}

@@ -714,3 +714,63 @@ button, input, select, textarea {
   color: var(--text-dim);
   font-size: 0.825rem;
 }
+
+
+/* ===================================================
+   CINEMATIC ANIMATIONS & SCROLL REVEALS
+   =================================================== */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes heroReveal {
+  0% { opacity: 0; transform: translateY(24px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes silverPulse {
+  0%, 100% { border-color: rgba(255, 255, 255, 0.12); box-shadow: 0 0 0 rgba(192, 192, 200, 0); }
+  50% { border-color: rgba(192, 192, 200, 0.45); box-shadow: 0 0 25px rgba(192, 192, 200, 0.12); }
+}
+
+.animate-hero-reveal {
+  animation: heroReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Card lifting with metallic silver border glow */
+.charcoal-card, .career-card, .college-card, .roadmap-card, .step-card {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease, box-shadow 0.28s ease;
+}
+
+.charcoal-card:hover, .career-card:hover, .college-card:hover, .roadmap-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(192, 192, 200, 0.35);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(192, 192, 200, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .scroll-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

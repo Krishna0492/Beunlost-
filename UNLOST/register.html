@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script type="module" src="/src/firebase-init.ts"></script>
 </head>
 <body style="display:flex; flex-direction:column; min-height:100vh; justify-content:center; background-color:var(--bg-pitch);">
 
@@ -19,14 +20,14 @@
         <span class="un">UN</span><span class="lost">LOST</span>
       </a>
       <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">
-        Start finding your way. Create your student account.
+        Not lost. Just finding my way.
       </p>
     </div>
 
     <div class="charcoal-card" style="padding: 2.25rem 2rem; box-shadow: 0 12px 36px rgba(0,0,0,0.6);">
       <div id="auth-alert" style="display:none; padding:0.75rem 1rem; border-radius:var(--radius-md); font-size:0.85rem; margin-bottom:1.25rem;"></div>
 
-      <!-- STEP 1: Registration Credentials Form -->
+      <!-- STEP 1: Registration Form -->
       <form id="register-form">
         <div class="form-group">
           <label class="form-label" for="reg-name">Full Name</label>
@@ -65,47 +66,51 @@
         </div>
 
         <button type="submit" class="btn btn-primary" id="reg-submit-btn" style="width:100%; padding:0.8rem;">
-          Continue to Verification →
+          Create Student Account →
+        </button>
+
+        <div style="display:flex; align-items:center; margin:1.5rem 0; gap:1rem;">
+          <div style="flex:1; height:1px; background:var(--border-subtle);"></div>
+          <span style="font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em;">OR</span>
+          <div style="flex:1; height:1px; background:var(--border-subtle);"></div>
+        </div>
+
+        <button type="button" class="btn btn-secondary" id="google-signin-btn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:0.6rem; padding:0.75rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.1 8.9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5.1 3.7-8.8z"/><path fill="#FBBC05" d="M5.3 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.6 6.3C.6 8.3 0 10.1 0 12s.6 3.7 1.6 5.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5.3L1.6 16C3.5 19.8 7.4 23 12 23z"/></svg>
+          Continue with Google
         </button>
       </form>
 
-      <!-- STEP 2: 6-Digit OTP Verification Form -->
-      <div id="otp-step" style="display:none;">
-        <div style="text-align:center; margin-bottom:1.5rem;">
-          <div style="display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid var(--border-subtle); margin-bottom:0.75rem;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--silver-metallic)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-          </div>
-          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.25rem;">Verify Your Email</h3>
-          <p style="font-size:0.85rem; color:var(--text-muted);">
-            We have generated a 6-digit verification code for <br><span id="target-email-disp" style="color:#ffffff; font-weight:600;"></span>
-          </p>
+      <!-- STEP 2: Genuine Firebase Email Verification Sent Notice -->
+      <div id="email-verification-step" style="display:none; text-align:center;">
+        <div style="display:inline-flex; align-items:center; justify-content:center; width:56px; height:56px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid var(--border-silver); margin-bottom:1rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--silver-metallic)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
         </div>
 
-        <!-- Simulated Dispatch Inbox Notice -->
-        <div id="simulated-otp-banner" style="background:rgba(255,255,255,0.04); border:1px solid var(--border-silver); border-radius:var(--radius-md); padding:0.85rem 1rem; margin-bottom:1.5rem; text-align:center;">
-          <div style="font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem;">Simulated Email Dispatch</div>
-          <div style="font-size:0.825rem; color:var(--text-muted); margin-bottom:0.4rem;">Your UNLOST Verification Code:</div>
-          <div id="display-otp-code" style="font-size:1.5rem; font-weight:800; letter-spacing:0.25em; color:var(--silver-metallic); font-family:monospace;">------</div>
-          <div style="font-size:0.75rem; color:var(--text-dim); margin-top:0.3rem;">Valid for 10 minutes</div>
+        <h3 style="font-size:1.25rem; font-weight:800; letter-spacing:-0.01em; margin-bottom:0.5rem; color:#ffffff;">
+          ONE MORE STEP BEFORE YOU BEGIN
+        </h3>
+
+        <p style="font-size:0.875rem; color:var(--text-muted); line-height:1.6; margin-bottom:1.5rem;">
+          We've sent a verification link to your email address:<br>
+          <strong id="target-email-disp" style="color:#ffffff; font-size:0.95rem;">student@unlost.in</strong><br>
+          Please check your inbox (and spam/promotions folder) and click the link to activate your student account.
+        </p>
+
+        <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:1rem; margin-bottom:1.5rem; text-align:left; font-size:0.825rem; color:var(--text-muted);">
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem; color:var(--silver-metallic); font-weight:600;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            Official Firebase Authentication
+          </div>
+          Zero spam. Zero advertising. We only verify your email to securely safeguard your academic records, career roadmaps, and personalized guidance reports.
         </div>
 
-        <form id="otp-form">
-          <div class="form-group" style="text-align:center;">
-            <label class="form-label" for="reg-otp" style="text-align:center; display:block;">Enter 6-Digit Code</label>
-            <input type="text" id="reg-otp" class="form-input" placeholder="• • • • • •" maxlength="6" pattern="[0-9]{6}" required style="text-align:center; font-size:1.4rem; letter-spacing:0.3em; font-family:monospace; max-width:240px; margin:0 auto; padding:0.6rem;">
-          </div>
-
-          <button type="submit" class="btn btn-primary" id="otp-submit-btn" style="width:100%; padding:0.8rem; margin-top:1rem;">
-            Verify & Activate Account
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+          <button type="button" class="btn btn-primary" id="verified-continue-btn" style="width:100%; padding:0.85rem;">
+            I've Verified My Email — Continue to Dashboard →
           </button>
-        </form>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem; font-size:0.825rem;">
-          <button type="button" id="resend-otp-btn" style="background:none; border:none; color:var(--silver-metallic); cursor:pointer; text-decoration:underline;">
-            Resend Code
-          </button>
-          <button type="button" id="edit-details-btn" style="background:none; border:none; color:var(--text-dim); cursor:pointer;">
-            Edit details
+          <button type="button" class="btn btn-secondary" id="resend-email-btn" style="width:100%; padding:0.75rem;">
+            Resend Verification Link
           </button>
         </div>
       </div>
@@ -127,26 +132,19 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const regForm = document.getElementById('register-form');
-      const otpStep = document.getElementById('otp-step');
-      const otpForm = document.getElementById('otp-form');
-
+      const emailStep = document.getElementById('email-verification-step');
       const nameInput = document.getElementById('reg-name');
       const emailInput = document.getElementById('reg-email');
       const passInput = document.getElementById('reg-password');
       const confirmInput = document.getElementById('reg-confirm');
-      const termsCheckbox = document.getElementById('reg-terms');
       const alertBox = document.getElementById('auth-alert');
       const regSubmitBtn = document.getElementById('reg-submit-btn');
-      const otpSubmitBtn = document.getElementById('otp-submit-btn');
-      const resendBtn = document.getElementById('resend-otp-btn');
-      const editDetailsBtn = document.getElementById('edit-details-btn');
-      const otpInput = document.getElementById('reg-otp');
-      const displayOtpCode = document.getElementById('display-otp-code');
+      const resendBtn = document.getElementById('resend-email-btn');
+      const verifiedContinueBtn = document.getElementById('verified-continue-btn');
       const targetEmailDisp = document.getElementById('target-email-disp');
       const strengthFill = document.getElementById('strength-fill');
       const strengthText = document.getElementById('strength-text');
-
-      let currentEmail = '';
+      const googleBtn = document.getElementById('google-signin-btn');
 
       function showAlert(msg, isError = true) {
         alertBox.style.display = 'block';
@@ -162,154 +160,108 @@
         alertBox.textContent = msg;
       }
 
-      function clearAlert() {
-        alertBox.style.display = 'none';
-      }
-
-      // Password toggle
-      document.getElementById('toggle-reg-pass').addEventListener('click', () => {
-        passInput.type = passInput.type === 'password' ? 'text' : 'password';
-      });
-
-      // Password strength
+      // Password strength meter
       passInput.addEventListener('input', () => {
         const val = passInput.value;
         let score = 0;
         if (val.length >= 6) score += 25;
         if (val.length >= 10) score += 25;
-        if (/[A-Z]/.test(val)) score += 25;
-        if (/[0-9!@#$%^&*]/.test(val)) score += 25;
+        if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
+        if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score += 25;
 
         strengthFill.style.width = score + '%';
         if (score <= 25) {
-          strengthFill.style.backgroundColor = '#ef4444';
-          strengthText.textContent = 'Weak password';
-          strengthText.style.color = '#ef4444';
+          strengthFill.style.background = '#ef4444';
+          strengthText.textContent = 'Password strength: Weak';
         } else if (score <= 50) {
-          strengthFill.style.backgroundColor = '#f59e0b';
-          strengthText.textContent = 'Moderate password';
-          strengthText.style.color = '#f59e0b';
+          strengthFill.style.background = '#f59e0b';
+          strengthText.textContent = 'Password strength: Medium';
         } else if (score <= 75) {
-          strengthFill.style.backgroundColor = '#3b82f6';
-          strengthText.textContent = 'Good password';
-          strengthText.style.color = '#3b82f6';
+          strengthFill.style.background = '#3b82f6';
+          strengthText.textContent = 'Password strength: Good';
         } else {
-          strengthFill.style.backgroundColor = '#10b981';
-          strengthText.textContent = 'Strong password';
-          strengthText.style.color = '#10b981';
+          strengthFill.style.background = '#10b981';
+          strengthText.textContent = 'Password strength: Strong';
         }
       });
 
-      // Step 1: Initiate registration
+      // Password toggle
+      document.getElementById('toggle-reg-pass').addEventListener('click', () => {
+        const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passInput.setAttribute('type', type);
+      });
+
+      // Submit Form
       regForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        clearAlert();
+        alertBox.style.display = 'none';
 
-        if (passInput.value !== confirmInput.value) {
-          showAlert('Passwords do not match. Please re-enter.');
-          return;
-        }
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const pass = passInput.value;
+        const confirm = confirmInput.value;
 
-        if (!termsCheckbox.checked) {
-          showAlert('You must agree to the Terms and Privacy Policy.');
+        if (pass !== confirm) {
+          showAlert('Passwords do not match. Please verify and try again.');
           return;
         }
 
         regSubmitBtn.disabled = true;
-        regSubmitBtn.textContent = 'Generating verification code...';
+        regSubmitBtn.textContent = 'Creating account...';
 
         try {
-          const res = await window.UnlostAuth.initiateRegistration(
-            nameInput.value,
-            emailInput.value,
-            passInput.value
-          );
-
-          currentEmail = res.email;
-          targetEmailDisp.textContent = currentEmail;
-          displayOtpCode.textContent = res.otp;
-
-          // Transition to OTP step
+          const res = await window.UnlostAuth.initiateRegistration(name, email, pass);
+          targetEmailDisp.textContent = res.email;
           regForm.style.display = 'none';
-          otpStep.style.display = 'block';
-          showAlert(`A 6-digit code has been generated for ${currentEmail}`, false);
-          otpInput.focus();
+          emailStep.style.display = 'block';
+          showAlert('Account created! A verification link has been sent to your email.', false);
         } catch (err) {
-          showAlert(err.message);
+          showAlert(err.message || 'Registration failed. Please check your details.');
           regSubmitBtn.disabled = false;
-          regSubmitBtn.textContent = 'Continue to Verification →';
+          regSubmitBtn.textContent = 'Create Student Account →';
         }
       });
 
-      // Step 2: Verify OTP
-      otpForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        clearAlert();
-
-        const entered = otpInput.value.trim();
-        if (entered.length !== 6) {
-          showAlert('Please enter the full 6-digit verification code.');
-          return;
-        }
-
-        otpSubmitBtn.disabled = true;
-        otpSubmitBtn.textContent = 'Activating account...';
-
-        try {
-          const session = await window.UnlostAuth.verifyOtpAndComplete(currentEmail, entered);
-
-          // Update student profile with registered name & email
-          const prof = window.UnlostApp ? window.UnlostApp.getStudentProfile() : {};
-          prof.fullName = nameInput.value;
-          prof.email = currentEmail;
-          if (window.UnlostApp) window.UnlostApp.saveStudentProfile(prof);
-
-          showAlert('Account verified and activated successfully!', false);
-
-          const urlParams = new URLSearchParams(window.location.search);
-          const redirectUrl = urlParams.get('redirect');
-
-          setTimeout(() => {
-            if (redirectUrl) {
-              window.location.href = redirectUrl;
-            } else {
-              window.location.href = './onboarding.html';
-            }
-          }, 600);
-        } catch (err) {
-          showAlert(err.message);
-          otpSubmitBtn.disabled = false;
-          otpSubmitBtn.textContent = 'Verify & Activate Account';
-        }
-      });
-
-      // Resend OTP
+      // Resend Link
       resendBtn.addEventListener('click', async () => {
+        resendBtn.disabled = true;
+        resendBtn.textContent = 'Sending...';
         try {
-          clearAlert();
-          resendBtn.disabled = true;
-          resendBtn.textContent = 'Resending...';
-          const res = await window.UnlostAuth.resendRegistrationOtp(currentEmail);
-          displayOtpCode.textContent = res.otp;
-          showAlert('A new verification code has been generated.', false);
+          const res = await window.UnlostAuth.resendVerificationEmail();
+          showAlert(res.message, false);
+        } catch (err) {
+          showAlert(err.message || 'Failed to resend link.');
+        } finally {
           setTimeout(() => {
             resendBtn.disabled = false;
-            resendBtn.textContent = 'Resend Code';
+            resendBtn.textContent = 'Resend Verification Link';
           }, 3000);
-        } catch (e) {
-          showAlert(e.message);
-          resendBtn.disabled = false;
-          resendBtn.textContent = 'Resend Code';
         }
       });
 
-      // Edit details (back to step 1)
-      editDetailsBtn.addEventListener('click', () => {
-        otpStep.style.display = 'none';
-        regForm.style.display = 'block';
-        regSubmitBtn.disabled = false;
-        regSubmitBtn.textContent = 'Continue to Verification →';
-        clearAlert();
+      // Verified Continue
+      verifiedContinueBtn.addEventListener('click', async () => {
+        verifiedContinueBtn.disabled = true;
+        verifiedContinueBtn.textContent = 'Checking status...';
+        await window.UnlostAuth.checkVerificationStatus();
+        window.location.href = './onboarding.html';
+      });
+
+      // Google Sign-In
+      googleBtn.addEventListener('click', async () => {
+        try {
+          googleBtn.disabled = true;
+          googleBtn.textContent = 'Signing in with Google...';
+          await window.UnlostAuth.loginWithGoogle();
+          window.location.href = './dashboard.html';
+        } catch (err) {
+          showAlert(err.message || 'Google Sign-In failed.');
+          googleBtn.disabled = false;
+          googleBtn.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.1 8.9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5.1 3.7-8.8z"/><path fill="#FBBC05" d="M5.3 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.6 6.3C.6 8.3 0 10.1 0 12s.6 3.7 1.6 5.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5.3L1.6 16C3.5 19.8 7.4 23 12 23z"/></svg>
+            Continue with Google
+          `;
+        }
       });
     });
   </script>

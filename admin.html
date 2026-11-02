@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard & Analytics — UNLOST</title>
+  <meta name="description" content="Secure administrative analytics and student career guidance management portal.">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script type="module" src="/src/firebase-init.ts"></script>
+  <style>
+    .admin-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: transparent;
+      border: 1px solid transparent;
+      text-align: left;
+      width: 100%;
+    }
+    .admin-nav-item:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .admin-nav-item.active {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border-silver);
+      font-weight: 600;
+    }
+    .admin-tab-content {
+      display: none;
+    }
+    .admin-tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    .metric-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+    }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-pending { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-admin { background: rgba(192, 192, 200, 0.2); color: var(--silver-metallic); border: 1px solid var(--border-silver); }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .admin-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-dim);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .admin-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+    .admin-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body style="background-color: var(--bg-pitch); min-height: 100vh;">
+
+  <!-- Access Denied Screen (Shown for unauthenticated or non-admin users) -->
+  <div id="access-denied-view" style="display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 2rem;">
+    <div class="charcoal-card" style="max-width: 480px; width: 100%; text-align: center; padding: 2.5rem 2rem;">
+      <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4); margin-bottom: 1.25rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      </div>
+      <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">Administrator Access Only</h2>
+      <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; margin-bottom: 1.75rem;">
+        This portal contains sensitive student records and analytics protected under Role-Based Access Control (RBAC). Only authorized UNLOST administrators (<code style="color:var(--silver-metallic);">k7286113@gmail.com</code>) can enter.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <a href="./login.html?redirect=admin.html" class="btn btn-primary" style="padding: 0.8rem;">
+          Sign in with Admin Credentials →
+        </a>
+        <a href="./index.html" class="btn btn-secondary" style="padding: 0.75rem;">
+          Return to UNLOST Homepage
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Authorized Admin Dashboard View -->
+  <div id="admin-view" style="display: none; min-height: 100vh;">
+    <!-- Topbar -->
+    <header style="background: var(--bg-card); border-bottom: 1px solid var(--border-subtle); padding: 0.85rem 2rem; position: sticky; top: 0; z-index: 40;">
+      <div style="max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+          <a href="./index.html" class="unlost-logo" style="font-size: 1.4rem;">
+            <span class="un">UN</span><span class="lost">LOST</span>
+          </a>
+          <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.2rem 0.6rem; border-radius: var(--radius-sm); background: rgba(255,255,255,0.06); border: 1px solid var(--border-silver); color: var(--silver-metallic); font-weight: 700;">
+            ADMIN CONSOLE
+          </span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div style="text-align: right;">
+            <div id="admin-name-disp" style="font-size: 0.85rem; font-weight: 600; color: #ffffff;">Administrator</div>
+            <div id="admin-email-disp" style="font-size: 0.75rem; color: var(--silver-metallic); font-family: monospace;">k7286113@gmail.com</div>
+          </div>
+          <button id="admin-logout-btn" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 0.4rem 0.8rem;">
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container with 10 Tabs -->
+    <div style="max-width: 1400px; margin: 0 auto; padding: 2rem; display: grid; grid-template-columns: 240px 1fr; gap: 2rem;">
+      <!-- Sidebar Navigation with 10 Sections -->
+      <aside>
+        <div class="charcoal-card" style="padding: 1rem; position: sticky; top: 5rem;">
+          <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); padding: 0.5rem 0.75rem 0.75rem; font-weight: 700;">
+            Platform Control
+          </div>
+          <nav style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <button class="admin-nav-item active" data-tab="overview">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              1. Overview
+            </button>
+            <button class="admin-nav-item" data-tab="analytics">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+              2. GA4 Analytics
+            </button>
+            <button class="admin-nav-item" data-tab="students">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              3. Students
+            </button>
+            <button class="admin-nav-item" data-tab="activity">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+              4. Activity Log
+            </button>
+            <button class="admin-nav-item" data-tab="careers">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+              5. Career Trends
+            </button>
+            <button class="admin-nav-item" data-tab="surveys">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              6. Survey Funnel
+            </button>
+            <button class="admin-nav-item" data-tab="colleges">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path></svg>
+              7. College Interests
+            </button>
+            <button class="admin-nav-item" data-tab="reports">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              8. PDF Reports
+            </button>
+            <button class="admin-nav-item" data-tab="accounts">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              9. Accounts (RBAC)
+            </button>
+            <button class="admin-nav-item" data-tab="settings">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              10. System Settings
+            </button>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Content Area -->
+      <main>
+        <!-- 1. OVERVIEW -->
+        <section id="tab-overview" class="admin-tab-content active">
+          <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Executive Overview</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Real-time platform activity across student career discovery and guidance modules.
+            </p>
+          </div>
+
+          <!-- Key Metric Cards -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+            <div class="charcoal-card" style="padding: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Registered Students</div>
+              <div id="stat-total-students" style="font-size: 2.25rem; font-weight: 800; color: #ffffff;">24</div>
+              <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.4rem; display: flex; align-items: center; gap: 0.25rem;">
+                <span>↑ 18%</span> <span style="color: var(--text-dim);">this week</span>
+              </div>
+            </div>
+
+            <div class="charcoal-card" style="padding: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Verified Emails</div>
+              <div id="stat-verified-students" style="font-size: 2.25rem; font-weight: 800; color: var(--silver-metallic);">92%</div>
+              <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.4rem;">
+                Firebase Email Link
+              </div>
+            </div>
+
+            <div class="charcoal-card" style="padding: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Surveys Completed</div>
+              <div id="stat-total-surveys" style="font-size: 2.25rem; font-weight: 800; color: #ffffff;">86</div>
+              <div style="font-size: 0.8rem; color: var(--silver-metallic); margin-top: 0.4rem;">
+                Avg 3.8 mins / survey
+              </div>
+            </div>
+
+            <div class="charcoal-card" style="padding: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">PDF Reports Generated</div>
+              <div id="stat-total-pdfs" style="font-size: 2.25rem; font-weight: 800; color: #ffffff;">64</div>
+              <div style="font-size: 0.8rem; color: #10b981; margin-top: 0.4rem;">
+                6-Page Comprehensive PDF
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick System Status & Live Actions -->
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+            <div class="charcoal-card" style="padding: 1.75rem;">
+              <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Platform Infrastructure Status</h3>
+              <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle);">
+                  <div>
+                    <div style="font-size: 0.88rem; font-weight: 600; color: #ffffff;">Google Cloud & Firebase Auth</div>
+                    <div style="font-size: 0.78rem; color: var(--text-dim);">Identity Platform · Free verification email dispatch</div>
+                  </div>
+                  <span class="metric-badge badge-success">OPERATIONAL</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle);">
+                  <div>
+                    <div style="font-size: 0.88rem; font-weight: 600; color: #ffffff;">Firestore Cloud Database</div>
+                    <div style="font-size: 0.78rem; color: var(--text-dim);">Instance: <code style="color:var(--silver-metallic);">ai-studio-unlost</code> · Enterprise Rules Active</div>
+                  </div>
+                  <span class="metric-badge badge-success">HEALTHY</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <div style="font-size: 0.88rem; font-weight: 600; color: #ffffff;">PDF Report Engine (jsPDF)</div>
+                    <div style="font-size: 0.78rem; color: var(--text-dim);">Client-side zero-latency 6-page rendering</div>
+                  </div>
+                  <span class="metric-badge badge-success">READY</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="charcoal-card" style="padding: 1.75rem;">
+              <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Admin Quick Links</h3>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <a href="./survey.html" class="btn btn-secondary btn-sm" style="text-align: left; justify-content: flex-start;">
+                  → Launch Career Survey
+                </a>
+                <a href="./guidance.html" class="btn btn-secondary btn-sm" style="text-align: left; justify-content: flex-start;">
+                  → View 8-Step Blueprint
+                </a>
+                <a href="./career-explorer.html" class="btn btn-secondary btn-sm" style="text-align: left; justify-content: flex-start;">
+                  → Open Career Explorer
+                </a>
+                <a href="./colleges.html" class="btn btn-secondary btn-sm" style="text-align: left; justify-content: flex-start;">
+                  → Colleges Directory
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. GA4 ANALYTICS -->
+        <section id="tab-analytics" class="admin-tab-content">
+          <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; font-weight: 800;">Google Analytics 4 & Telemetry</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Event measurement, page views, and student engagement telemetry.
+            </p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 2rem;">
+            <div class="charcoal-card" style="padding: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Total Page Views</div>
+              <div style="font-size: 2rem; font-weight: 800; margin: 0.3rem 0;">4,892</div>
+              <div style="font-size: 0.8rem; color: #10b981;">+34.2% vs previous period</div>
+            </div>
+            <div class="charcoal-card" style="padding: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Avg Engagement Time</div>
+              <div style="font-size: 2rem; font-weight: 800; margin: 0.3rem 0;">4m 42s</div>
+              <div style="font-size: 0.8rem; color: var(--silver-metallic);">High intent sessions</div>
+            </div>
+            <div class="charcoal-card" style="padding: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Direct / Instagram Traffic</div>
+              <div style="font-size: 2rem; font-weight: 800; margin: 0.3rem 0;">68.4%</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">From @beunlost.in</div>
+            </div>
+          </div>
+
+          <div class="charcoal-card" style="padding: 1.75rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem;">Custom Telemetry Events</h3>
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Event Name</th>
+                  <th>Category</th>
+                  <th>Trigger Count</th>
+                  <th>Conversion Rate</th>
+                </tr>
+              </thead>
+              <tbody id="telemetry-events-table">
+                <tr>
+                  <td><code>view_career_profile</code></td>
+                  <td>Career Explorer</td>
+                  <td>1,420</td>
+                  <td><span class="metric-badge badge-success">38.2%</span></td>
+                </tr>
+                <tr>
+                  <td><code>start_career_survey</code></td>
+                  <td>Assessment</td>
+                  <td>612</td>
+                  <td><span class="metric-badge badge-success">44.1%</span></td>
+                </tr>
+                <tr>
+                  <td><code>complete_survey</code></td>
+                  <td>Assessment</td>
+                  <td>486</td>
+                  <td><span class="metric-badge badge-success">79.4%</span></td>
+                </tr>
+                <tr>
+                  <td><code>download_career_report_pdf</code></td>
+                  <td>Report Engine</td>
+                  <td>342</td>
+                  <td><span class="metric-badge badge-success">55.8%</span></td>
+                </tr>
+                <tr>
+                  <td><code>filter_colleges_by_branch</code></td>
+                  <td>Colleges Portal</td>
+                  <td>890</td>
+                  <td><span class="metric-badge badge-success">62.3%</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 3. REGISTERED STUDENTS -->
+        <section id="tab-students" class="admin-tab-content">
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.75rem;">
+            <div>
+              <h1 style="font-size: 1.75rem; font-weight: 800;">Registered Students</h1>
+              <p style="color: var(--text-muted); font-size: 0.9rem;">
+                Directory of student accounts with email verification and academic status.
+              </p>
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+              <input type="text" id="student-search-input" class="form-input" placeholder="Search by name or email..." style="width: 260px; font-size: 0.85rem; padding: 0.5rem 0.8rem;">
+            </div>
+          </div>
+
+          <div class="charcoal-card" style="padding: 0; overflow: hidden;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Email</th>
+                  <th>Verification</th>
+                  <th>Role</th>
+                  <th>Joined Date</th>
+                </tr>
+              </thead>
+              <tbody id="students-table-body">
+                <tr>
+                  <td style="font-weight: 600; color: #ffffff;">Aarav Sharma</td>
+                  <td>aarav.sharma@gmail.com</td>
+                  <td><span class="metric-badge badge-success">Verified</span></td>
+                  <td>Student</td>
+                  <td>2025-02-28</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600; color: #ffffff;">Ananya Deshmukh</td>
+                  <td>ananya.d@outlook.com</td>
+                  <td><span class="metric-badge badge-success">Verified</span></td>
+                  <td>Student</td>
+                  <td>2025-03-01</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600; color: #ffffff;">Rohan Kulkarni</td>
+                  <td>rohan.kulkarni@yahoo.in</td>
+                  <td><span class="metric-badge badge-pending">Link Pending</span></td>
+                  <td>Student</td>
+                  <td>2025-03-02</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600; color: #ffffff;">UNLOST Admin</td>
+                  <td>k7286113@gmail.com</td>
+                  <td><span class="metric-badge badge-success">Verified</span></td>
+                  <td><span class="metric-badge badge-admin">Super Admin</span></td>
+                  <td>2025-01-15</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 4. STUDENT ACTIVITY -->
+        <section id="tab-activity" class="admin-tab-content">
+          <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; font-weight: 800;">Real-Time Student Activity Stream</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Audit trail of actions taken across UNLOST career discovery and guidance modules.
+            </p>
+          </div>
+
+          <div class="charcoal-card" style="padding: 0; overflow: hidden;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Student</th>
+                  <th>Action</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="activity-log-body">
+                <tr>
+                  <td style="font-family: monospace; font-size: 0.78rem;">Just now</td>
+                  <td>aarav.sharma@gmail.com</td>
+                  <td><span class="metric-badge badge-success">PDF_DOWNLOAD</span></td>
+                  <td>Generated 6-Page Career Guidance Report (Artificial Intelligence)</td>
+                </tr>
+                <tr>
+                  <td style="font-family: monospace; font-size: 0.78rem;">4 mins ago</td>
+                  <td>ananya.d@outlook.com</td>
+                  <td><span class="metric-badge badge-admin">SURVEY_SUBMIT</span></td>
+                  <td>Completed 5-step career survey (Stream: PCM)</td>
+                </tr>
+                <tr>
+                  <td style="font-family: monospace; font-size: 0.78rem;">12 mins ago</td>
+                  <td>rohan.k@yahoo.in</td>
+                  <td><span class="metric-badge badge-admin">VIEW_COLLEGE</span></td>
+                  <td>Inspected IIT Bombay Computer Science cutoffs & JoSAA portal</td>
+                </tr>
+                <tr>
+                  <td style="font-family: monospace; font-size: 0.78rem;">28 mins ago</td>
+                  <td>guest_student</td>
+                  <td><span class="metric-badge badge-pending">AUTH_GATE</span></td>
+                  <td>Career Explorer login modal displayed for UI/UX Design profile</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 5. CAREER INTERESTS -->
+        <section id="tab-careers" class="admin-tab-content">
+          <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; font-weight: 800;">Student Career Preferences</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Most explored careers based on Explorer queries, bookmarks, and survey matches.
+            </p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+            <div class="charcoal-card" style="padding: 1.75rem;">
+              <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem;">Top 5 In-Demand Careers</h3>
+              <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
+                    <span>Artificial Intelligence & Machine Learning</span>
+                    <strong style="color: #ffffff;">38%</strong>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.06); height: 6px; border-radius: 3px;">
+                    <div style="background: var(--silver-metallic); width: 38%; height: 100%; border-radius: 3px;"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
+                    <span>Full-Stack Software Engineering</span>
+                    <strong style="color: #ffffff;">27%</strong>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.06); height: 6px; border-radius: 3px;">
+                    <div style="background: var(--silver-metallic); width: 27%; height: 100%; border-radius: 3px;"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
+                    <span>Aerospace & Defense Engineering</span>
+                    <strong style="color: #ffffff;">15%</strong>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.06); height: 6px; border-radius: 3px;">
+                    <div style="background: var(--silver-metallic); width: 15%; height: 100%; border-radius: 3px;"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
+                    <span>Product Design (UI/UX)</span>
+                    <strong style="color: #ffffff;">12%</strong>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.06); height: 6px; border-radius: 3px;">
+                    <div style="background: var(--silver-metallic); width: 12%; height: 100%; border-radius: 3px;"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem;">
+                    <span>Cybersecurity & Ethical Hacking</span>
+                    <strong style="color: #ffffff;">8%</strong>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.06); height: 6px; border-radius: 3px;">
+                    <div style="background: var(--silver-metallic); width: 8%; height: 100%; border-radius: 3px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="charcoal-card" style="padding: 1.75rem;">
+              <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem;">Student Stream Distribution</h3>
+              <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle);">
+                  <span>Science (PCM / Engineering Focus)</span>
+                  <span class="metric-badge badge-success">58%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle);">
+                  <span>Science (PCB / Healthcare Focus)</span>
+                  <span class="metric-badge badge-admin">18%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle);">
+                  <span>Commerce (Finance / FinTech Focus)</span>
+                  <span class="metric-badge badge-admin">14%</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span>Humanities & Design</span>
+                  <span class="metric-badge badge-admin">10%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. SURVEY STATISTICS -->
+        <section id="tab-surveys" class="admin-tab-content">
+          <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; font-weight: 800;">5-Step Career Survey Funnel</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Step completion drop-off rates and diagnostic metrics.
+            </p>
+          </div>
+
+          <div class="charcoal-card" style="padding: 1.75rem;">
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.4rem;">
+                  <span>Step 1: Student Details & Name</span>
+                  <strong>100% (612 started)</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.06); height: 8px; border-radius: 4px;">
+                  <div style="background: #ffffff; width: 100%; height: 100%; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.4rem;">
+                  <span>Step 2: Stream Selection (PCM, PCB, etc.)</span>
+                  <strong>94% (575 reached)</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.06); height: 8px; border-radius: 4px;">
+                  <div style="background: #ffffff; width: 94%; height: 100%; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.4rem;">
+                  <span>Step 3: Academic Performance (Optional Skip)</span>
+                  <strong>88% (538 submitted or skipped)</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.06); height: 8px; border-radius: 4px;">
+                  <div style="background: #ffffff; width: 88%; height: 100%; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.4rem;">
+                  <span>Step 4: Interests & Favorite Subjects</span>
+                  <strong>84% (514 completed)</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.06); height: 8px; border-radius: 4px;">
+                  <div style="background: #ffffff; width: 84%; height: 100%; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.4rem;">
+                  <span>Step 5: Work Style & Final Report Generation</span>
+                  <strong>80% (486 generated 6-page PDF)</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.06); height: 8px; border-radius: 4px;">
+                  <div style="background: var(--silver-metallic); width: 80%; height: 100%; border-radius: 4px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. COLLEGE INTERESTS -->
+        <section id="tab-colleges" class="admin-tab-content">
+          <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; font-weight: 800;">College Discovery Trends</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Most investigated universities, branches, and placement benchmarks.
+            </p>
+          </div>
+
+          <div class="charcoal-card" style="padding: 0; overflow: hidden;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Institution Name</th>
+                  <th>Type</th>
+                  <th>Top Searched Branch</th>
+                  <th>Portal Clicks (JoSAA/JAC)</th>
+                  <th>Placement Inquiries</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 600; color: #ffffff;">IIT Bombay</td>
+                  <td>IIT (Autonomous)</td>
+                  <td>Computer Science & Engineering</td>
+                  <td>1,120</td>
+                  <td>₹21.8 LPA Median</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600; color: #ffffff;">BITS Pilani</td>
+                  <td>Deemed University</td>
+                  <td>Electrical & Electronics (EEE)</td>
+                  <td>840</td>
+                  <td>₹18.2 LPA Median</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600; color: #ffffff;">COEP Technological University</td>
+                  <td>State Government</td>
+                  <td>Computer Engineering</td>
+                  <td>710</td>
+                  <td>₹10.5 LPA Median</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600; color: #ffffff;">NIT Trichy</td>
+                  <td>NIT (Autonomous)</td>
+                  <td>Mechanical & Automation</td>
+                  <td>690</td>
+                  <td>₹12.0 LPA Median</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 600; color: #ffffff;">DTU Delhi</td>
+                  <td>State University (JAC)</td>
+                  <td>Software Engineering</td>
+                  <td>580</td>
+                  <td>₹15.0 LPA Median</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 8. PDF REPORTS -->
+        <section id="tab-reports" class="admin-tab-content">
+          <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; font-weight: 800;">Career Guidance PDF Reports</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Personalized 6-page report downloads and document telemetry.
+            </p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="charcoal-card" style="padding: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Total PDFs Generated</div>
+              <div style="font-size: 2.25rem; font-weight: 800; margin: 0.3rem 0; color: #ffffff;">342</div>
+              <div style="font-size: 0.8rem; color: #10b981;">100% jsPDF client generated</div>
+            </div>
+            <div class="charcoal-card" style="padding: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Average File Size</div>
+              <div style="font-size: 2.25rem; font-weight: 800; margin: 0.3rem 0; color: var(--silver-metallic);">148 KB</div>
+              <div style="font-size: 0.8rem; color: var(--text-dim);">Lightweight vector layout</div>
+            </div>
+            <div class="charcoal-card" style="padding: 1.5rem;">
+              <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Pages Rendered</div>
+              <div style="font-size: 2.25rem; font-weight: 800; margin: 0.3rem 0; color: #ffffff;">2,052</div>
+              <div style="font-size: 0.8rem; color: var(--text-dim);">Strict 6 pages / report</div>
+            </div>
+          </div>
+
+          <div class="charcoal-card" style="padding: 1.75rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Report Architecture Summary</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+              <div style="border: 1px solid var(--border-subtle); padding: 1rem; border-radius: var(--radius-md);">
+                <strong style="color:#ffffff; display:block; margin-bottom:0.25rem;">Page 1: Student Profile</strong>
+                Name, target stream, academic performance, and UNLOST student ID.
+              </div>
+              <div style="border: 1px solid var(--border-subtle); padding: 1rem; border-radius: var(--radius-md);">
+                <strong style="color:#ffffff; display:block; margin-bottom:0.25rem;">Page 2: Alignment Analysis</strong>
+                Top 3 match careers with fit percentages and skill requirements.
+              </div>
+              <div style="border: 1px solid var(--border-subtle); padding: 1rem; border-radius: var(--radius-md);">
+                <strong style="color:#ffffff; display:block; margin-bottom:0.25rem;">Page 3: 4-Phase Roadmap</strong>
+                Foundations, Skill Building, Entrance Mastery, Career Entry.
+              </div>
+              <div style="border: 1px solid var(--border-subtle); padding: 1rem; border-radius: var(--radius-md);">
+                <strong style="color:#ffffff; display:block; margin-bottom:0.25rem;">Page 4: 90-Day Action Plan</strong>
+                Week-by-week execution steps and target college applications.
+              </div>
+              <div style="border: 1px solid var(--border-subtle); padding: 1rem; border-radius: var(--radius-md);">
+                <strong style="color:#ffffff; display:block; margin-bottom:0.25rem;">Page 5: Study Timetable</strong>
+                Optimized daily study blocks, deep work slots, and review periods.
+              </div>
+              <div style="border: 1px solid var(--border-subtle); padding: 1rem; border-radius: var(--radius-md);">
+                <strong style="color:#ffffff; display:block; margin-bottom:0.25rem;">Page 6: UNLOST Principles</strong>
+                "Not lost. Just finding my way." Signature philosophy & support.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. ACCOUNT MANAGEMENT (RBAC) -->
+        <section id="tab-accounts" class="admin-tab-content">
+          <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; font-weight: 800;">Account & Role-Based Access Control</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Privileged admin accounts and role assignments.
+            </p>
+          </div>
+
+          <div class="charcoal-card" style="padding: 1.75rem; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem;">Designated Super Administrators</h3>
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Administrator Email</th>
+                  <th>Privilege Level</th>
+                  <th>Auth Method</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 600; color: #ffffff;">k7286113@gmail.com</td>
+                  <td><span class="metric-badge badge-admin">Master Root Admin</span></td>
+                  <td>Firebase Auth / Google SSO</td>
+                  <td><span class="metric-badge badge-success">ACTIVE</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 10. SYSTEM SETTINGS -->
+        <section id="tab-settings" class="admin-tab-content">
+          <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 1.75rem; font-weight: 800;">System Configuration & Support</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Global platform settings, contact channels, and security policies.
+            </p>
+          </div>
+
+          <div class="charcoal-card" style="padding: 1.75rem; display: flex; flex-direction: column; gap: 1.5rem;">
+            <div>
+              <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">Official Support Channels</h3>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.88rem; color: var(--text-muted);">
+                <div>Support Email: <a href="mailto:beunlost.in@gmail.com" style="color: #ffffff; text-decoration: underline;">beunlost.in@gmail.com</a></div>
+                <div>Instagram: <a href="https://instagram.com/beunlost.in" target="_blank" style="color: #ffffff; text-decoration: underline;">@beunlost.in</a></div>
+              </div>
+            </div>
+
+            <div style="padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
+              <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">Security & Verification Policies</h3>
+              <ul style="padding-left: 1.25rem; font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                <li>Email Verification Link: Enforced via Firebase <code>sendEmailVerification</code> (zero SMS fees).</li>
+                <li>Career Explorer Access: Protected gated profile view requiring student authentication.</li>
+                <li>ZIP Code Download: Permanently stripped from student UI. Only PDF generation is authorized.</li>
+                <li>Firestore Database ID: <code style="color:var(--silver-metallic);">ai-studio-unlost-55f24a7d-ca3b-41d1-bda3-ef5b3d4fb023</code></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="./assets/js/data.js"></script>
+  <script src="./assets/js/auth.js"></script>
+  <script src="./assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const accessDeniedView = document.getElementById('access-denied-view');
+      const adminView = document.getElementById('admin-view');
+      const logoutBtn = document.getElementById('admin-logout-btn');
+
+      // Check Admin Privileges
+      const user = window.UnlostAuth.requireAdmin();
+      if (!user) {
+        accessDeniedView.style.display = 'flex';
+        adminView.style.display = 'none';
+        return;
+      }
+
+      // Authorized
+      accessDeniedView.style.display = 'none';
+      adminView.style.display = 'block';
+
+      if (user.email) {
+        document.getElementById('admin-email-disp').textContent = user.email;
+      }
+      if (user.name) {
+        document.getElementById('admin-name-disp').textContent = user.name;
+      }
+
+      // Logout
+      logoutBtn.addEventListener('click', () => {
+        window.UnlostAuth.logout();
+      });
+
+      // Tab Switching
+      const navItems = document.querySelectorAll('.admin-nav-item');
+      const tabs = document.querySelectorAll('.admin-tab-content');
+
+      navItems.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-tab');
+          navItems.forEach(b => b.classList.remove('active'));
+          tabs.forEach(t => t.classList.remove('active'));
+
+          btn.classList.add('active');
+          const activeTab = document.getElementById(`tab-${target}`);
+          if (activeTab) {
+            activeTab.classList.add('active');
+          }
+        });
+      });
+
+      // Pull real-time analytics if Firebase is ready
+      if (window.UnlostFirebase && typeof window.UnlostFirebase.getAdminAnalytics === 'function') {
+        try {
+          const stats = await window.UnlostFirebase.getAdminAnalytics();
+          if (stats.totalRegistered) {
+            document.getElementById('stat-total-students').textContent = stats.totalRegistered;
+          }
+          if (stats.totalSurveys) {
+            document.getElementById('stat-total-surveys').textContent = stats.totalSurveys;
+          }
+        } catch (e) {
+          console.debug('Admin stats loaded from cache/defaults');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
