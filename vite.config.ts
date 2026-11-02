@@ -36,6 +36,8 @@ export default defineConfig(() => {
           progress: path.resolve(__dirname, 'progress.html'),
           profile: path.resolve(__dirname, 'profile.html'),
           settings: path.resolve(__dirname, 'settings.html'),
+          survey: path.resolve(__dirname, 'survey.html'),
+          guidance: path.resolve(__dirname, 'guidance.html'),
           about: path.resolve(__dirname, 'about.html'),
           contact: path.resolve(__dirname, 'contact.html'),
           privacyPolicy: path.resolve(__dirname, 'privacy-policy.html'),

@@ -26,6 +26,7 @@
     <div class="charcoal-card" style="padding: 2.25rem 2rem; box-shadow: 0 12px 36px rgba(0,0,0,0.6);">
       <div id="auth-alert" style="display:none; padding:0.75rem 1rem; border-radius:var(--radius-md); font-size:0.85rem; margin-bottom:1.25rem;"></div>
 
+      <!-- STEP 1: Registration Credentials Form -->
       <form id="register-form">
         <div class="form-group">
           <label class="form-label" for="reg-name">Full Name</label>
@@ -64,9 +65,50 @@
         </div>
 
         <button type="submit" class="btn btn-primary" id="reg-submit-btn" style="width:100%; padding:0.8rem;">
-          Create My Student Account
+          Continue to Verification →
         </button>
       </form>
+
+      <!-- STEP 2: 6-Digit OTP Verification Form -->
+      <div id="otp-step" style="display:none;">
+        <div style="text-align:center; margin-bottom:1.5rem;">
+          <div style="display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid var(--border-subtle); margin-bottom:0.75rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--silver-metallic)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          </div>
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.25rem;">Verify Your Email</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted);">
+            We have generated a 6-digit verification code for <br><span id="target-email-disp" style="color:#ffffff; font-weight:600;"></span>
+          </p>
+        </div>
+
+        <!-- Simulated Dispatch Inbox Notice -->
+        <div id="simulated-otp-banner" style="background:rgba(255,255,255,0.04); border:1px solid var(--border-silver); border-radius:var(--radius-md); padding:0.85rem 1rem; margin-bottom:1.5rem; text-align:center;">
+          <div style="font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem;">Simulated Email Dispatch</div>
+          <div style="font-size:0.825rem; color:var(--text-muted); margin-bottom:0.4rem;">Your UNLOST Verification Code:</div>
+          <div id="display-otp-code" style="font-size:1.5rem; font-weight:800; letter-spacing:0.25em; color:var(--silver-metallic); font-family:monospace;">------</div>
+          <div style="font-size:0.75rem; color:var(--text-dim); margin-top:0.3rem;">Valid for 10 minutes</div>
+        </div>
+
+        <form id="otp-form">
+          <div class="form-group" style="text-align:center;">
+            <label class="form-label" for="reg-otp" style="text-align:center; display:block;">Enter 6-Digit Code</label>
+            <input type="text" id="reg-otp" class="form-input" placeholder="• • • • • •" maxlength="6" pattern="[0-9]{6}" required style="text-align:center; font-size:1.4rem; letter-spacing:0.3em; font-family:monospace; max-width:240px; margin:0 auto; padding:0.6rem;">
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="otp-submit-btn" style="width:100%; padding:0.8rem; margin-top:1rem;">
+            Verify & Activate Account
+          </button>
+        </form>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem; font-size:0.825rem;">
+          <button type="button" id="resend-otp-btn" style="background:none; border:none; color:var(--silver-metallic); cursor:pointer; text-decoration:underline;">
+            Resend Code
+          </button>
+          <button type="button" id="edit-details-btn" style="background:none; border:none; color:var(--text-dim); cursor:pointer;">
+            Edit details
+          </button>
+        </div>
+      </div>
     </div>
 
     <div style="text-align: center; margin-top: 1.5rem;">
@@ -84,23 +126,52 @@
   <script src="./assets/js/app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('register-form');
+      const regForm = document.getElementById('register-form');
+      const otpStep = document.getElementById('otp-step');
+      const otpForm = document.getElementById('otp-form');
+
       const nameInput = document.getElementById('reg-name');
       const emailInput = document.getElementById('reg-email');
       const passInput = document.getElementById('reg-password');
       const confirmInput = document.getElementById('reg-confirm');
       const termsCheckbox = document.getElementById('reg-terms');
       const alertBox = document.getElementById('auth-alert');
-      const submitBtn = document.getElementById('reg-submit-btn');
+      const regSubmitBtn = document.getElementById('reg-submit-btn');
+      const otpSubmitBtn = document.getElementById('otp-submit-btn');
+      const resendBtn = document.getElementById('resend-otp-btn');
+      const editDetailsBtn = document.getElementById('edit-details-btn');
+      const otpInput = document.getElementById('reg-otp');
+      const displayOtpCode = document.getElementById('display-otp-code');
+      const targetEmailDisp = document.getElementById('target-email-disp');
       const strengthFill = document.getElementById('strength-fill');
       const strengthText = document.getElementById('strength-text');
 
-      // Toggle password
+      let currentEmail = '';
+
+      function showAlert(msg, isError = true) {
+        alertBox.style.display = 'block';
+        if (isError) {
+          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          alertBox.style.border = '1px solid #ef4444';
+          alertBox.style.color = '#fca5a5';
+        } else {
+          alertBox.style.background = 'rgba(16, 185, 129, 0.15)';
+          alertBox.style.border = '1px solid #10b981';
+          alertBox.style.color = '#6ee7b7';
+        }
+        alertBox.textContent = msg;
+      }
+
+      function clearAlert() {
+        alertBox.style.display = 'none';
+      }
+
+      // Password toggle
       document.getElementById('toggle-reg-pass').addEventListener('click', () => {
         passInput.type = passInput.type === 'password' ? 'text' : 'password';
       });
 
-      // Password strength indicator
+      // Password strength
       passInput.addEventListener('input', () => {
         const val = passInput.value;
         let score = 0;
@@ -129,57 +200,116 @@
         }
       });
 
-      form.addEventListener('submit', async (e) => {
+      // Step 1: Initiate registration
+      regForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        alertBox.style.display = 'none';
+        clearAlert();
 
         if (passInput.value !== confirmInput.value) {
-          alertBox.style.display = 'block';
-          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
-          alertBox.style.border = '1px solid #ef4444';
-          alertBox.style.color = '#fca5a5';
-          alertBox.textContent = 'Passwords do not match. Please re-enter.';
+          showAlert('Passwords do not match. Please re-enter.');
           return;
         }
 
         if (!termsCheckbox.checked) {
-          alertBox.style.display = 'block';
-          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
-          alertBox.style.border = '1px solid #ef4444';
-          alertBox.style.color = '#fca5a5';
-          alertBox.textContent = 'You must agree to the Terms and Privacy Policy.';
+          showAlert('You must agree to the Terms and Privacy Policy.');
           return;
         }
 
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Creating student account...';
+        regSubmitBtn.disabled = true;
+        regSubmitBtn.textContent = 'Generating verification code...';
 
         try {
-          const session = await window.UnlostAuth.register(
+          const res = await window.UnlostAuth.initiateRegistration(
             nameInput.value,
             emailInput.value,
             passInput.value
           );
 
-          // Update default student profile name
-          const prof = window.UnlostApp.getStudentProfile();
-          prof.fullName = nameInput.value;
-          prof.email = emailInput.value;
-          window.UnlostApp.saveStudentProfile(prof);
+          currentEmail = res.email;
+          targetEmailDisp.textContent = currentEmail;
+          displayOtpCode.textContent = res.otp;
 
-          window.UnlostApp.showToast('Account created! Welcome to UNLOST.');
-          setTimeout(() => {
-            window.location.href = './onboarding.html';
-          }, 450);
+          // Transition to OTP step
+          regForm.style.display = 'none';
+          otpStep.style.display = 'block';
+          showAlert(`A 6-digit code has been generated for ${currentEmail}`, false);
+          otpInput.focus();
         } catch (err) {
-          alertBox.style.display = 'block';
-          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
-          alertBox.style.border = '1px solid #ef4444';
-          alertBox.style.color = '#fca5a5';
-          alertBox.textContent = err.message;
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Create My Student Account';
+          showAlert(err.message);
+          regSubmitBtn.disabled = false;
+          regSubmitBtn.textContent = 'Continue to Verification →';
         }
+      });
+
+      // Step 2: Verify OTP
+      otpForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearAlert();
+
+        const entered = otpInput.value.trim();
+        if (entered.length !== 6) {
+          showAlert('Please enter the full 6-digit verification code.');
+          return;
+        }
+
+        otpSubmitBtn.disabled = true;
+        otpSubmitBtn.textContent = 'Activating account...';
+
+        try {
+          const session = await window.UnlostAuth.verifyOtpAndComplete(currentEmail, entered);
+
+          // Update student profile with registered name & email
+          const prof = window.UnlostApp ? window.UnlostApp.getStudentProfile() : {};
+          prof.fullName = nameInput.value;
+          prof.email = currentEmail;
+          if (window.UnlostApp) window.UnlostApp.saveStudentProfile(prof);
+
+          showAlert('Account verified and activated successfully!', false);
+
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectUrl = urlParams.get('redirect');
+
+          setTimeout(() => {
+            if (redirectUrl) {
+              window.location.href = redirectUrl;
+            } else {
+              window.location.href = './onboarding.html';
+            }
+          }, 600);
+        } catch (err) {
+          showAlert(err.message);
+          otpSubmitBtn.disabled = false;
+          otpSubmitBtn.textContent = 'Verify & Activate Account';
+        }
+      });
+
+      // Resend OTP
+      resendBtn.addEventListener('click', async () => {
+        try {
+          clearAlert();
+          resendBtn.disabled = true;
+          resendBtn.textContent = 'Resending...';
+          const res = await window.UnlostAuth.resendRegistrationOtp(currentEmail);
+          displayOtpCode.textContent = res.otp;
+          showAlert('A new verification code has been generated.', false);
+          setTimeout(() => {
+            resendBtn.disabled = false;
+            resendBtn.textContent = 'Resend Code';
+          }, 3000);
+        } catch (e) {
+          showAlert(e.message);
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Resend Code';
+        }
+      });
+
+      // Edit details (back to step 1)
+      editDetailsBtn.addEventListener('click', () => {
+        otpStep.style.display = 'none';
+        regForm.style.display = 'block';
+        regSubmitBtn.disabled = false;
+        regSubmitBtn.textContent = 'Continue to Verification →';
+        clearAlert();
       });
     });
   </script>

@@ -46,6 +46,14 @@
         </a>
 
         <div class="sidebar-section-title">Discovery & Planning</div>
+        <a href="./survey.html" class="sidebar-item">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+          Career Survey
+        </a>
+        <a href="./guidance.html" class="sidebar-item">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          8-Step Blueprint
+        </a>
         <a href="./career-explorer.html" class="sidebar-item">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
           Career Explorer
@@ -116,10 +124,10 @@
         </div>
 
         <div class="topbar-actions">
-          <a href="./UNLOST-WEBSITE.zip" download="UNLOST-WEBSITE.zip" class="btn btn-outline btn-sm" title="Download entire website package">
+          <button id="topbar-download-pdf-btn" class="btn btn-primary btn-sm" title="Download your 6-page personalized career roadmap PDF">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Download ZIP
-          </a>
+            Download Career Report (PDF)
+          </button>
           <a href="./profile.html" class="student-avatar" style="text-decoration:none;">ST</a>
         </div>
       </header>
@@ -129,6 +137,26 @@
         <div class="welcome-banner">
           <h1 class="welcome-title" id="dashboard-greeting">WELCOME BACK, STUDENT.</h1>
           <p class="welcome-subtitle">Your journey continues. Here's your next step.</p>
+        </div>
+
+        <!-- NEXT ACTION BANNER -->
+        <div id="next-action-hero" style="background:rgba(255,255,255,0.03); border:1px solid var(--border-silver); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+          <div>
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+              <span class="tag tag-silver" style="font-size:0.7rem;">RECOMMENDED NEXT STEP</span>
+              <span style="font-size:0.8rem; color:var(--text-dim);">Personalized Trajectory</span>
+            </div>
+            <div id="next-action-title" style="font-weight:700; color:#ffffff; font-size:1.05rem;">
+              Download your comprehensive 6-Page Career Guidance Report (PDF)
+            </div>
+            <div id="next-action-desc" style="font-size:0.85rem; color:var(--text-muted); margin-top:0.2rem;">
+              Complete with 4-phase milestone matrix, daily study timetable, and college ROI benchmarks.
+            </div>
+          </div>
+          <div style="display:flex; gap:0.75rem;">
+            <a href="./survey.html" class="btn btn-secondary btn-sm">Retake Survey</a>
+            <button id="hero-download-pdf-btn" class="btn btn-primary btn-sm">Download 6-Page PDF</button>
+          </div>
         </div>
 
         <!-- 10 DASHBOARD CARDS -->
@@ -307,9 +335,11 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="./assets/js/data.js"></script>
   <script src="./assets/js/auth.js"></script>
   <script src="./assets/js/app.js"></script>
+  <script src="./assets/js/report-generator.js"></script>
   <script src="./assets/js/dashboard.js"></script>
 </body>
 </html>

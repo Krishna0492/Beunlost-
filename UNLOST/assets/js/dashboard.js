@@ -379,6 +379,81 @@ window.UnlostDashboard = {
         backdrop.classList.remove('active');
       });
     }
+
+    // PDF Report Generator Download Triggers
+    const triggerReportDownload = () => {
+      let surveyData = null;
+      try {
+        const raw = localStorage.getItem('unlost_survey_result');
+        if (raw) surveyData = JSON.parse(raw);
+      } catch (e) {}
+
+      if (!surveyData) {
+        // Build fallback survey data from student profile
+        const activeCareer = (this.student.careerGoals && this.student.careerGoals[0]) || 'Software Architect';
+        surveyData = {
+          answers: {
+            fullName: this.student.fullName || 'Student',
+            currentClass: this.student.stream || '12th Standard',
+            stream: this.student.stream || 'Science (PCM)',
+            primaryMotivation: 'Mastering core technologies, technical depth, and solving complex problems.',
+            workEnvironment: 'Hybrid / Deep focus studio',
+            dailyStudyHours: '4-6 Hours'
+          },
+          recommendedCareers: [
+            {
+              id: 'software-engineer',
+              title: activeCareer,
+              fitScore: 94,
+              matchReason: 'Direct alignment with your analytical problem solving and quantitative aptitude.',
+              primarySkills: ['Systems Design', 'Algorithms', 'Full-stack Architecture', 'Data Structures'],
+              roadmapStages: [
+                'Phase 1: Foundations & Core Mathematics',
+                'Phase 2: Data Structures & Project Portfolio',
+                'Phase 3: Real-World Systems & Distributed Apps',
+                'Phase 4: Industry Leadership & System Architecture'
+              ]
+            },
+            {
+              id: 'ai-researcher',
+              title: 'AI / Machine Learning Engineer',
+              fitScore: 91,
+              matchReason: 'Exceptional mathematical interest and curiosity for automated intelligence models.',
+              primarySkills: ['Linear Algebra', 'PyTorch', 'Vector Embeddings', 'Model Fine-tuning'],
+              roadmapStages: ['Math Foundations', 'Core ML Algorithms', 'Deep Learning & Transformers', 'Production Deployment']
+            },
+            {
+              id: 'data-scientist',
+              title: 'Data & Quantitative Analyst',
+              fitScore: 87,
+              matchReason: 'High affinity for pattern recognition, statistical reasoning, and data analysis.',
+              primarySkills: ['Python', 'SQL', 'Statistical Modeling', 'Visualization'],
+              roadmapStages: ['Statistics Fundamentals', 'Data Wrangling', 'Predictive Modeling', 'Strategic Impact']
+            }
+          ]
+        };
+      }
+
+      if (window.UnlostReportGenerator) {
+        window.UnlostApp.showToast('Generating your personalized 6-page PDF report...');
+        if (typeof window.UnlostReportGenerator.generate6PageReport === 'function') {
+          window.UnlostReportGenerator.generate6PageReport(surveyData, surveyData.analysis);
+        } else if (typeof window.UnlostReportGenerator.downloadReportPDF === 'function') {
+          window.UnlostReportGenerator.downloadReportPDF(surveyData, surveyData.analysis);
+        }
+      } else {
+        window.location.href = './survey.html';
+      }
+    };
+
+    const topbarPdfBtn = document.getElementById('topbar-download-pdf-btn');
+    if (topbarPdfBtn) {
+      topbarPdfBtn.addEventListener('click', triggerReportDownload);
+    }
+    const heroPdfBtn = document.getElementById('hero-download-pdf-btn');
+    if (heroPdfBtn) {
+      heroPdfBtn.addEventListener('click', triggerReportDownload);
+    }
   }
 };
 

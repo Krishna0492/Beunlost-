@@ -5,6 +5,10 @@ import {
   calculateRoadmapProgress,
   filterDirectoryItems,
   toggleSavedItem,
+  analyzeSurveyAndRecommend,
+  generateStudyTimetable,
+  generateOtpCode,
+  validateEmail,
   type AptitudeAnswer,
 } from './unlost-logic';
 
@@ -85,3 +89,56 @@ test('toggleSavedItem adds and removes bookmarks cleanly', () => {
   assert.equal(resRemove.isSaved, false);
   assert.deepEqual(resRemove.updatedList, ['career-2', 'career-3']);
 });
+
+test('analyzeSurveyAndRecommend recommends engineering careers for Science PCM student', () => {
+  const analysis = analyzeSurveyAndRecommend({
+    name: 'Aarav Sharma',
+    academicStream: 'Science (PCM)',
+    favouriteSubjects: ['Mathematics', 'Physics', 'Computer Science'],
+    interests: ['Artificial Intelligence', 'Software Development'],
+    workingStyle: 'analytical',
+  });
+
+  assert.equal(analysis.recommendedCareers.length, 3);
+  assert.equal(analysis.recommendedCareers[0].id, 'software-engineer');
+  assert.ok(analysis.recommendedCareers[0].matchPercentage > 90);
+  assert.ok(analysis.recommendedCareers[0].institutes.includes('IIT Bombay'));
+});
+
+test('analyzeSurveyAndRecommend recommends medicine for Science PCB student', () => {
+  const analysis = analyzeSurveyAndRecommend({
+    name: 'Priya Patel',
+    academicStream: 'Science (PCB)',
+    favouriteSubjects: ['Biology', 'Chemistry'],
+    interests: ['Neuroscience', 'Clinical Research'],
+    workingStyle: 'scientific',
+  });
+
+  assert.equal(analysis.recommendedCareers.length, 3);
+  assert.equal(analysis.recommendedCareers[0].id, 'neurosurgeon');
+  assert.ok(analysis.recommendedCareers[0].entranceExams.includes('NEET UG'));
+});
+
+test('generateStudyTimetable adapts schedule to student hours and weekly targets', () => {
+  const timetable = generateStudyTimetable({
+    educationLevel: 'Class 12',
+    studyHoursPerDay: 5,
+    stream: 'Science (PCM)',
+  });
+
+  assert.ok(timetable.dailySchedule.length >= 3);
+  assert.ok(timetable.weeklyTargets.length >= 3);
+  assert.ok(timetable.revisionStrategy.includes('Spaced Repetition'));
+  assert.ok(timetable.mockTestCadence.includes('mock test'));
+});
+
+test('validateEmail and generateOtpCode perform rigorous checks', () => {
+  assert.equal(validateEmail('student@unlost.in'), true);
+  assert.equal(validateEmail('invalid-email'), false);
+  assert.equal(validateEmail(''), false);
+
+  const otp = generateOtpCode();
+  assert.equal(otp.length, 6);
+  assert.match(otp, /^\d{6}$/);
+});
+

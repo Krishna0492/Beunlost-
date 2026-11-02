@@ -118,7 +118,11 @@
           );
           window.UnlostApp.showToast('Login successful. Redirecting...');
           setTimeout(() => {
-            if (user.onboarded) {
+            const params = new URLSearchParams(window.location.search);
+            const redirect = params.get('redirect');
+            if (redirect) {
+              window.location.href = redirect;
+            } else if (user.onboarded) {
               window.location.href = './dashboard.html';
             } else {
               window.location.href = './onboarding.html';

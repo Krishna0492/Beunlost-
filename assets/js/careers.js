@@ -56,12 +56,51 @@ window.UnlostCareers = {
             </div>
           </div>
           <div style="display:flex; gap:0.5rem; border-top:1px solid var(--border-subtle); padding-top:1rem; margin-top:0.5rem;">
-            <a href="./career-details.html?id=${c.id}" class="btn btn-primary btn-sm" style="flex:1;">View Details</a>
+            <button onclick="window.UnlostCareers.handleViewProfile('${c.id}')" class="btn btn-primary btn-sm" style="flex:1;">View Career Profile</button>
             <a href="./roadmaps.html?career=${c.id}" class="btn btn-outline btn-sm" title="View Roadmap">Roadmap</a>
           </div>
         </div>
       `;
     }).join('');
+  },
+
+  handleViewProfile(careerId) {
+    const user = window.UnlostAuth ? window.UnlostAuth.getCurrentUser() : null;
+    const targetUrl = `./career-details.html?id=${encodeURIComponent(careerId)}`;
+
+    if (user) {
+      window.location.href = targetUrl;
+      return;
+    }
+
+    // Unauthenticated: Show Career Profile Gate Modal
+    let modal = document.getElementById('auth-gate-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'auth-gate-modal';
+      modal.className = 'modal-overlay';
+      modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; z-index:9999; padding:1.5rem;';
+      document.body.appendChild(modal);
+    }
+
+    const signInUrl = `./login.html?redirect=${encodeURIComponent(targetUrl)}`;
+    const registerUrl = `./register.html?redirect=${encodeURIComponent(targetUrl)}`;
+
+    modal.innerHTML = `
+      <div class="charcoal-card glass-card" style="max-width:480px; width:100%; text-align:center; padding:2.5rem 2rem; border:1px solid rgba(255,255,255,0.2); box-shadow:0 20px 40px rgba(0,0,0,0.8); animation: fadeIn 0.25s ease;">
+        <span class="tag tag-silver" style="margin-bottom:1rem; display:inline-block;">Protected Career Profile</span>
+        <h3 style="font-size:1.6rem; font-weight:800; color:#ffffff; line-height:1.2; margin-bottom:0.75rem;">YOUR NEXT STEP STARTS HERE.</h3>
+        <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:2rem;">
+          Sign in to explore the complete career profile, educational requirements, entrance examinations, institutes and personalised roadmap.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+          <a href="${signInUrl}" class="btn btn-primary" style="justify-content:center; padding:0.85rem; font-weight:700;">Sign In</a>
+          <a href="${registerUrl}" class="btn btn-outline" style="justify-content:center; padding:0.85rem; font-weight:700;">Create Account</a>
+          <button onclick="document.getElementById('auth-gate-modal').style.display='none'" class="btn btn-ghost btn-sm" style="margin-top:0.5rem; color:var(--text-dim);">Continue Browsing Explorer</button>
+        </div>
+      </div>
+    `;
+    modal.style.display = 'flex';
   },
 
   setupFilters() {

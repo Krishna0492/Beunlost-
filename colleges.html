@@ -52,18 +52,34 @@
       </div>
 
       <!-- Filter Controls -->
-      <div class="search-filter-bar">
-        <div class="search-input-wrapper">
+      <div class="search-filter-bar" style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center;">
+        <div class="search-input-wrapper" style="flex:1; min-width:260px;">
           <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" id="college-search" class="search-input" placeholder="Search by college name, course, or location...">
+          <input type="text" id="college-search" class="search-input" placeholder="Search by name, branch, course, or location...">
         </div>
 
-        <select id="college-type-filter" class="filter-select">
+        <select id="college-type-filter" class="filter-select" style="min-width:180px;">
           <option value="all">All Institution Types</option>
-          <option value="Public">Public / Autonomous</option>
-          <option value="Medical">Medical Institutes</option>
-          <option value="Design">Design Institutes</option>
-          <option value="Law">National Law Universities</option>
+          <option value="IIT">IITs (Indian Institutes of Technology)</option>
+          <option value="NIT">NITs (National Institutes of Technology)</option>
+          <option value="IIIT">IIITs (Information Technology)</option>
+          <option value="State Govt">Premier State Govt (DTU, COEP, JU)</option>
+          <option value="Private">Top Private / Deemed (BITS, VIT, Thapar)</option>
+          <option value="Medical">Medical (AIIMS)</option>
+          <option value="Design">Design (NID)</option>
+          <option value="Law">National Law Universities (NLSIU)</option>
+        </select>
+
+        <select id="college-branch-filter" class="filter-select" style="min-width:180px;">
+          <option value="all">All Disciplines / Branches</option>
+          <option value="Computer Science">Computer Science & Engineering</option>
+          <option value="Artificial Intelligence">AI & Data Science</option>
+          <option value="Electrical">Electrical / Electronics (ECE)</option>
+          <option value="Mechanical">Mechanical Engineering</option>
+          <option value="Civil">Civil / Structural</option>
+          <option value="Medicine">Medicine & Surgery (MBBS)</option>
+          <option value="Design">Design (B.Des)</option>
+          <option value="Law">Law (B.A. LL.B)</option>
         </select>
       </div>
 
@@ -78,8 +94,11 @@
   <footer class="site-footer">
     <div class="container">
       <div class="footer-bottom">
-        <div>© 2026 UNLOST. Not lost. Just finding my way.</div>
-        <div><a href="./dashboard.html" style="color:var(--silver-metallic); text-decoration:underline;">Student Dashboard</a></div>
+        <div>© 2025 UNLOST. Not lost. Just finding my way.</div>
+        <div>
+          <a href="mailto:beunlost.in@gmail.com" style="color:var(--silver-metallic); text-decoration:underline; margin-right:1.5rem;">beunlost.in@gmail.com</a>
+          <a href="./dashboard.html" style="color:var(--text-dim); text-decoration:underline;">Student Dashboard</a>
+        </div>
       </div>
     </div>
   </footer>
@@ -98,47 +117,87 @@
       const grid = document.getElementById('colleges-grid');
       const searchInput = document.getElementById('college-search');
       const typeSelect = document.getElementById('college-type-filter');
+      const branchSelect = document.getElementById('college-branch-filter');
       if (!grid) return;
 
       const render = () => {
         const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
         const type = typeSelect ? typeSelect.value : 'all';
+        const branch = branchSelect ? branchSelect.value : 'all';
 
         const filtered = colleges.filter(c => {
-          const matchQ = !q || c.name.toLowerCase().includes(q) || c.location.toLowerCase().includes(q) || (c.courses || []).some(course => course.toLowerCase().includes(q));
-          const matchType = type === 'all' || (c.institutionType && c.institutionType.toLowerCase().includes(type.toLowerCase())) || c.name.toLowerCase().includes(type.toLowerCase());
-          return matchQ && matchType;
+          const branches = (c.engineeringBranches || []).concat(c.courses || []);
+          const matchQ = !q || 
+            c.name.toLowerCase().includes(q) || 
+            c.location.toLowerCase().includes(q) || 
+            branches.some(b => b.toLowerCase().includes(q));
+
+          let matchType = true;
+          if (type !== 'all') {
+            const instType = (c.institutionType || '').toLowerCase();
+            const name = c.name.toLowerCase();
+            if (type === 'IIT') matchType = instType.includes('iit') || name.startsWith('iit ');
+            else if (type === 'NIT') matchType = instType.includes('nit') || name.startsWith('nit ');
+            else if (type === 'IIIT') matchType = instType.includes('iiit') || name.startsWith('iiit ');
+            else if (type === 'State Govt') matchType = instType.includes('state') || instType.includes('autonomous');
+            else if (type === 'Private') matchType = instType.includes('private') || instType.includes('deemed');
+            else if (type === 'Medical') matchType = instType.includes('medical');
+            else if (type === 'Design') matchType = instType.includes('design');
+            else if (type === 'Law') matchType = instType.includes('law');
+          }
+
+          let matchBranch = true;
+          if (branch !== 'all') {
+            matchBranch = branches.some(b => b.toLowerCase().includes(branch.toLowerCase()));
+          }
+
+          return matchQ && matchType && matchBranch;
         });
 
         if (filtered.length === 0) {
-          grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:3rem;">No colleges match your criteria.</p>`;
+          grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:3rem;">No colleges match your filter criteria.</p>`;
           return;
         }
 
         grid.innerHTML = filtered.map(c => {
           const isSaved = (window.UnlostApp && typeof window.UnlostApp.isSaved === 'function') ? window.UnlostApp.isSaved('colleges', c.id) : false;
+          const placement = c.placementStats;
           return `
             <div class="charcoal-card" style="display:flex; flex-direction:column; justify-content:space-between;">
               <div>
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
-                  <span class="tag tag-silver">${c.location.split(',')[1] || c.location}</span>
-                  <button onclick="toggleSaveCollege('${c.id}', this)" class="btn btn-ghost btn-icon">
+                  <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                    <span class="tag tag-silver">${c.institutionType || 'Autonomous'}</span>
+                    <span class="tag">${c.location.split(',')[1] || c.location}</span>
+                  </div>
+                  <button onclick="toggleSaveCollege('${c.id}', this)" class="btn btn-ghost btn-icon" title="Save to Shortlist">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isSaved ? 'white' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                   </button>
                 </div>
-                <h3 class="card-title">${c.name}</h3>
-                <p class="card-desc">${c.overview}</p>
+                <h3 class="card-title" style="font-size:1.15rem; margin-bottom:0.4rem;">${c.name}</h3>
+                <p class="card-desc" style="font-size:0.85rem; line-height:1.5; margin-bottom:0.75rem;">${c.overview}</p>
+
+                ${placement ? `
+                  <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:var(--radius-sm); padding:0.65rem 0.85rem; margin-bottom:0.75rem; font-size:0.8rem;">
+                    <div style="font-size:0.68rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.25rem;">Verified Career Track Record</div>
+                    <div style="color:var(--silver-metallic); font-weight:600; line-height:1.4;">
+                      ${placement.highlight || (placement.medianSalary ? `Median: ${placement.medianSalary} • Placement Rate: ${placement.placementRate}` : 'Consistently ranked among premier recruiters.')}
+                    </div>
+                  </div>
+                ` : ''}
+
                 <div style="margin-bottom:1rem;">
-                  <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.35rem;">Popular Courses</div>
+                  <div style="font-size:0.72rem; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.35rem;">Key Offerings</div>
                   <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
-                    ${(c.courses || []).slice(0, 3).map(co => `<span class="tag">${co}</span>`).join('')}
+                    ${((c.engineeringBranches && c.engineeringBranches.length > 0) ? c.engineeringBranches : c.courses).slice(0, 3).map(b => `<span class="tag" style="font-size:0.75rem;">${b}</span>`).join('')}
+                    ${((c.engineeringBranches || c.courses).length > 3) ? `<span class="tag" style="font-size:0.75rem;">+${(c.engineeringBranches || c.courses).length - 3} more</span>` : ''}
                   </div>
                 </div>
               </div>
 
               <div style="border-top:1px solid var(--border-subtle); padding-top:1rem; display:flex; gap:0.5rem;">
                 <a href="./college-details.html?id=${c.id}" class="btn btn-primary btn-sm" style="flex:1;">Full Overview</a>
-                <a href="${c.officialWebsite}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">Official Site</a>
+                <a href="${c.admissionPortal || c.officialWebsite}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">Portal ↗</a>
               </div>
             </div>
           `;
@@ -153,6 +212,7 @@
 
       if (searchInput) searchInput.addEventListener('input', render);
       if (typeSelect) typeSelect.addEventListener('change', render);
+      if (branchSelect) branchSelect.addEventListener('change', render);
       render();
     }
 
