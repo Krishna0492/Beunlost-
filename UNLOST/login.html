@@ -138,6 +138,14 @@
             rememberCheckbox.checked
           );
 
+          if (!user.emailVerified) {
+            showAlert('Your email address is not yet verified. Redirecting to verification screen...', false);
+            setTimeout(() => {
+              window.location.href = `./verify-email.html?email=${encodeURIComponent(user.email || '')}`;
+            }, 600);
+            return;
+          }
+
           if (window.UnlostApp && typeof window.UnlostApp.showToast === 'function') {
             window.UnlostApp.showToast('Login successful. Redirecting...');
           }
@@ -145,7 +153,7 @@
           setTimeout(() => {
             if (redirectParam) {
               window.location.href = decodeURIComponent(redirectParam);
-            } else if (user.role === 'admin' || user.email === 'k7286113@gmail.com') {
+            } else if (user.email === 'k7286113@gmail.com' && user.emailVerified) {
               window.location.href = './admin.html';
             } else if (user.onboarded) {
               window.location.href = './dashboard.html';
@@ -166,9 +174,18 @@
           googleBtn.disabled = true;
           googleBtn.textContent = 'Signing in with Google...';
           const user = await window.UnlostAuth.loginWithGoogle();
+          
+          if (!user.emailVerified) {
+            showAlert('Please verify your email address to continue.', false);
+            setTimeout(() => {
+              window.location.href = `./verify-email.html?email=${encodeURIComponent(user.email || '')}`;
+            }, 600);
+            return;
+          }
+
           if (redirectParam) {
             window.location.href = decodeURIComponent(redirectParam);
-          } else if (user.role === 'admin' || user.email === 'k7286113@gmail.com') {
+          } else if (user.email === 'k7286113@gmail.com' && user.emailVerified) {
             window.location.href = './admin.html';
           } else {
             window.location.href = './dashboard.html';

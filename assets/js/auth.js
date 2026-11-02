@@ -1,22 +1,23 @@
 /**
  * UNLOST — Unified Authentication & Session Manager
- * Powered by Firebase Authentication & Firestore with resilient local fallback.
+ * Powered Authoritatively by Firebase Authentication & Firestore.
+ * Zero insecure local storage of credentials or password hashes.
  */
 
 const UNLOST_AUTH_KEY = 'unlost_student_session';
-const UNLOST_STUDENTS_STORE = 'unlost_registered_users';
 const PRIMARY_ADMIN_EMAIL = 'k7286113@gmail.com';
 
 window.UnlostAuth = {
-  // Check current session
+  // Check current session and synchronize live Firebase verification state
   getCurrentUser() {
     try {
       const data = localStorage.getItem(UNLOST_AUTH_KEY);
       if (!data) return null;
       const user = JSON.parse(data);
-      // Synchronize live Firebase emailVerified status if available
-      if (window.UnlostFirebase && window.UnlostFirebase.auth.currentUser) {
-        user.emailVerified = window.UnlostFirebase.auth.currentUser.emailVerified;
+      
+      // Synchronize live Firebase auth currentUser emailVerified if available
+      if (window.UnlostFirebase && window.UnlostFirebase.auth && window.UnlostFirebase.auth.currentUser) {
+        user.emailVerified = Boolean(window.UnlostFirebase.auth.currentUser.emailVerified);
       }
       return user;
     } catch (e) {
@@ -25,14 +26,14 @@ window.UnlostAuth = {
     }
   },
 
-  // Set session
+  // Set session - never grants admin role via client manipulation
   setSession(user, remember = true) {
-    const isPrimaryAdmin = user.email && user.email.toLowerCase() === PRIMARY_ADMIN_EMAIL;
+    const isPrimaryAdmin = user.email && user.email.toLowerCase() === PRIMARY_ADMIN_EMAIL && Boolean(user.emailVerified);
     const sessionData = {
       uid: user.uid || 'usr_' + Date.now(),
       name: user.name || user.fullName || user.displayName || (user.email ? user.email.split('@')[0] : 'Student'),
-      email: user.email,
-      role: isPrimaryAdmin ? 'admin' : (user.role || 'student'),
+      email: user.email ? user.email.toLowerCase().trim() : '',
+      role: isPrimaryAdmin ? 'admin' : 'student', // Client can NEVER self-elevate
       emailVerified: Boolean(user.emailVerified),
       loggedInAt: new Date().toISOString(),
       onboarded: user.onboarded !== undefined ? user.onboarded : true
@@ -44,20 +45,21 @@ window.UnlostAuth = {
     return sessionData;
   },
 
-  // Check if current logged-in user is an authorized admin
+  // Check if current user is an authorized, verified administrator
   isAdmin() {
     const user = this.getCurrentUser();
     if (!user || !user.email) return false;
-    return user.email.toLowerCase() === PRIMARY_ADMIN_EMAIL || user.role === 'admin';
-  },
+    
+    // Strict admin condition: must match authorized email AND be email_verified
+    const isPrimaryEmail = user.email.toLowerCase() === PRIMARY_ADMIN_EMAIL;
+    const isVerified = Boolean(user.emailVerified);
+    
+    if (window.UnlostFirebase && window.UnlostFirebase.auth && window.UnlostFirebase.auth.currentUser) {
+      const fbUser = window.UnlostFirebase.auth.currentUser;
+      return fbUser.email && fbUser.email.toLowerCase() === PRIMARY_ADMIN_EMAIL && fbUser.emailVerified === true;
+    }
 
-  // Password hashing helper
-  async hashPassword(password) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password + '_unlost_salt_2025_sec');
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return isPrimaryEmail && isVerified;
   },
 
   // Initiate Student Registration with Firebase Email Verification Link
@@ -74,192 +76,134 @@ window.UnlostAuth = {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    // 1. Attempt Real Firebase Registration with Email Verification Link
-    if (window.UnlostFirebase && typeof window.UnlostFirebase.signUpWithEmail === 'function') {
-      try {
-        const { user, verificationSent } = await window.UnlostFirebase.signUpWithEmail(name.trim(), normalizedEmail, password);
-        const session = this.setSession({
-          uid: user.uid,
-          name: name.trim(),
-          email: normalizedEmail,
-          emailVerified: user.emailVerified
-        }, true);
+    if (!window.UnlostFirebase || typeof window.UnlostFirebase.signUpWithEmail !== 'function') {
+      throw new Error('Authentication service is initializing. Please refresh and try again.');
+    }
 
-        return {
-          success: true,
-          isFirebase: true,
-          email: normalizedEmail,
-          verificationSent,
-          session
-        };
-      } catch (fbErr) {
-        const code = fbErr.code || '';
-        if (code === 'auth/email-already-in-use') {
-          throw new Error('An account with this email address already exists. Please log in.');
-        } else if (code === 'auth/weak-password') {
-          throw new Error('Please choose a stronger password (at least 6 characters).');
-        } else if (code === 'auth/invalid-email') {
-          throw new Error('The email address provided is invalid.');
-        }
-        console.warn('Firebase registration notice, using resilient fallback:', fbErr);
+    try {
+      const { user, verificationSent } = await window.UnlostFirebase.signUpWithEmail(name.trim(), normalizedEmail, password);
+      
+      // Store transient session with emailVerified: false
+      const session = this.setSession({
+        uid: user.uid,
+        name: name.trim(),
+        email: normalizedEmail,
+        emailVerified: false,
+        role: 'student',
+        onboarded: false
+      }, true);
+
+      return {
+        success: true,
+        isFirebase: true,
+        email: normalizedEmail,
+        verificationSent,
+        session
+      };
+    } catch (fbErr) {
+      const code = fbErr.code || '';
+      if (code === 'auth/email-already-in-use') {
+        throw new Error('An account with this email address already exists. Please log in.');
+      } else if (code === 'auth/weak-password') {
+        throw new Error('Please choose a stronger password (at least 6 characters).');
+      } else if (code === 'auth/invalid-email') {
+        throw new Error('The email address provided is invalid.');
       }
+      throw new Error(fbErr.message || 'Registration failed. Please check your details and try again.');
     }
-
-    // 2. Resilient Local Storage Registration
-    const users = this._getRegisteredUsers();
-    if (users[normalizedEmail]) {
-      throw new Error('An account with this email address already exists. Please log in.');
-    }
-
-    const hashedPassword = await this.hashPassword(password);
-    const newUser = {
-      uid: 'stu_' + Math.random().toString(36).substring(2, 9),
-      name: name.trim(),
-      email: normalizedEmail,
-      passwordHash: hashedPassword,
-      createdAt: new Date().toISOString(),
-      emailVerified: false,
-      onboarded: false
-    };
-
-    users[normalizedEmail] = newUser;
-    localStorage.setItem(UNLOST_STUDENTS_STORE, JSON.stringify(users));
-    const session = this.setSession(newUser, true);
-
-    return {
-      success: true,
-      isFirebase: false,
-      email: normalizedEmail,
-      verificationSent: true,
-      session
-    };
   },
 
-  // Resend Email Verification Link
+  // Resend Email Verification Link via Firebase
   async resendVerificationEmail() {
-    if (window.UnlostFirebase && window.UnlostFirebase.auth.currentUser) {
-      try {
-        await window.UnlostFirebase.sendVerificationLink();
-        return { success: true, message: 'Verification link has been resent to your email.' };
-      } catch (e) {
-        console.warn('Firebase resend error:', e);
-      }
+    if (!window.UnlostFirebase || typeof window.UnlostFirebase.sendVerificationLink !== 'function') {
+      throw new Error('Firebase Authentication is not available. Please refresh the page.');
     }
-    return { success: true, message: 'Verification email has been dispatched to your inbox.' };
+
+    try {
+      await window.UnlostFirebase.sendVerificationLink();
+      return { success: true, message: 'Verification email has been sent to your inbox.' };
+    } catch (e) {
+      console.warn('Firebase resend error:', e);
+      if (e.code === 'auth/too-many-requests') {
+        throw new Error('Too many requests. Please wait a minute before requesting another verification email.');
+      }
+      throw new Error(e.message || 'Failed to dispatch verification email.');
+    }
   },
 
-  // Mark account as verified manually or reload status
+  // Check verification status from live Firebase Auth (Reloads user token)
   async checkVerificationStatus() {
-    if (window.UnlostFirebase && window.UnlostFirebase.auth.currentUser) {
+    if (window.UnlostFirebase && window.UnlostFirebase.auth && window.UnlostFirebase.auth.currentUser) {
       await window.UnlostFirebase.auth.currentUser.reload();
-      const isVerified = window.UnlostFirebase.auth.currentUser.emailVerified;
+      const isVerified = Boolean(window.UnlostFirebase.auth.currentUser.emailVerified);
+      
       const user = this.getCurrentUser();
       if (user) {
         user.emailVerified = isVerified;
+        if (isVerified && user.email === PRIMARY_ADMIN_EMAIL) {
+          user.role = 'admin';
+        }
         localStorage.setItem(UNLOST_AUTH_KEY, JSON.stringify(user));
       }
       return isVerified;
     }
-    const user = this.getCurrentUser();
-    if (user) {
-      user.emailVerified = true;
-      localStorage.setItem(UNLOST_AUTH_KEY, JSON.stringify(user));
-      return true;
-    }
     return false;
   },
 
-  // Direct login
+  // Direct login with email and password via Firebase Auth
   async login(email, password, remember = true) {
     if (!email || !password) {
       throw new Error('Please enter both email and password.');
     }
     const normalizedEmail = email.toLowerCase().trim();
 
-    // 1. Attempt Real Firebase Authentication
-    if (window.UnlostFirebase && typeof window.UnlostFirebase.loginWithEmail === 'function') {
-      try {
-        const user = await window.UnlostFirebase.loginWithEmail(normalizedEmail, password);
-        return this.setSession({
-          uid: user.uid,
-          name: user.displayName || normalizedEmail.split('@')[0],
-          email: user.email,
-          emailVerified: user.emailVerified,
-          role: normalizedEmail === PRIMARY_ADMIN_EMAIL ? 'admin' : 'student'
-        }, remember);
-      } catch (fbErr) {
-        const code = fbErr.code || '';
-        if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
-          throw new Error('Incorrect password. Please verify and try again.');
-        } else if (code === 'auth/user-not-found') {
-          throw new Error('No registered account found with this email. Please check your spelling or register.');
-        }
-        console.warn('Firebase login notice, checking local user registry:', fbErr);
+    if (!window.UnlostFirebase || typeof window.UnlostFirebase.loginWithEmail !== 'function') {
+      throw new Error('Authentication service is initializing. Please wait a moment and try again.');
+    }
+
+    try {
+      const user = await window.UnlostFirebase.loginWithEmail(normalizedEmail, password);
+      
+      const isVerified = Boolean(user.emailVerified);
+      const isPrimaryAdmin = normalizedEmail === PRIMARY_ADMIN_EMAIL && isVerified;
+
+      return this.setSession({
+        uid: user.uid,
+        name: user.displayName || normalizedEmail.split('@')[0],
+        email: user.email,
+        emailVerified: isVerified,
+        role: isPrimaryAdmin ? 'admin' : 'student'
+      }, remember);
+    } catch (fbErr) {
+      const code = fbErr.code || '';
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+        throw new Error('Incorrect password. Please verify and try again.');
+      } else if (code === 'auth/user-not-found') {
+        throw new Error('No registered account found with this email. Please check your spelling or register.');
       }
+      throw new Error(fbErr.message || 'Login failed. Please check your credentials.');
     }
-
-    // 2. Demo Account
-    if (normalizedEmail === 'demo@unlost.in' && password === 'student123') {
-      const demoUser = {
-        uid: 'demo_student',
-        name: 'Aarav Sharma',
-        email: 'demo@unlost.in',
-        emailVerified: true,
-        role: 'student',
-        onboarded: true
-      };
-      return this.setSession(demoUser, remember);
-    }
-
-    // 3. Registered Users Store & Strict Credentials Validation
-    const users = this._getRegisteredUsers();
-    let user = users[normalizedEmail];
-
-    // If primary admin is logging in for first time in local fallback mode
-    if (!user && normalizedEmail === PRIMARY_ADMIN_EMAIL) {
-      const adminHash = await this.hashPassword('Admin@Unlost2026');
-      user = {
-        uid: 'admin_primary_001',
-        name: 'UNLOST Administrator',
-        email: PRIMARY_ADMIN_EMAIL,
-        role: 'admin',
-        emailVerified: true,
-        passwordHash: adminHash,
-        createdAt: '2025-01-01T00:00:00.000Z',
-        onboarded: true
-      };
-      users[PRIMARY_ADMIN_EMAIL] = user;
-      localStorage.setItem(UNLOST_STUDENTS_STORE, JSON.stringify(users));
-    }
-
-    if (!user) {
-      throw new Error('No registered account found with this email. Please check your credentials or register.');
-    }
-
-    const testHash = await this.hashPassword(password);
-    if (user.passwordHash !== testHash) {
-      throw new Error('Incorrect password. Please verify and try again.');
-    }
-
-    return this.setSession(user, remember);
   },
 
   // Google Sign-In
   async loginWithGoogle() {
     if (window.UnlostFirebase && typeof window.UnlostFirebase.loginWithGoogle === 'function') {
       const user = await window.UnlostFirebase.loginWithGoogle();
+      const isVerified = Boolean(user.emailVerified);
+      const isPrimaryAdmin = user.email?.toLowerCase() === PRIMARY_ADMIN_EMAIL && isVerified;
+
       return this.setSession({
         uid: user.uid,
         name: user.displayName || user.email?.split('@')[0] || 'Student',
         email: user.email,
-        emailVerified: user.emailVerified,
-        role: user.email?.toLowerCase() === PRIMARY_ADMIN_EMAIL ? 'admin' : 'student'
+        emailVerified: isVerified,
+        role: isPrimaryAdmin ? 'admin' : 'student'
       }, true);
     }
-    throw new Error('Google Sign-In is initializing. Please try again or use email login.');
+    throw new Error('Google Sign-In is initializing. Please try again.');
   },
 
-  // Request Password Reset Link
+  // Request Password Reset Link via Firebase
   async requestPasswordReset(email) {
     if (!email || !email.includes('@')) {
       throw new Error('Please enter a valid registered email address.');
@@ -276,24 +220,21 @@ window.UnlostAuth = {
         };
       } catch (fbErr) {
         console.warn('Firebase reset password note:', fbErr);
+        throw new Error(fbErr.message || 'Failed to send password reset email.');
       }
     }
 
-    return {
-      success: true,
-      email: normalizedEmail,
-      message: `Password reset instructions have been dispatched to ${normalizedEmail}.`
-    };
+    throw new Error('Password reset service is unavailable. Please try again later.');
   },
 
-  // Logout
+  // Logout - Clears Firebase Auth state and local session
   async logout() {
     try {
-      if (window.UnlostFirebase) {
+      if (window.UnlostFirebase && typeof window.UnlostFirebase.logout === 'function') {
         await window.UnlostFirebase.logout();
       }
     } catch (e) {
-      console.warn('Firebase logout notice:', e);
+      console.warn('Firebase logout note:', e);
     }
     localStorage.removeItem(UNLOST_AUTH_KEY);
     sessionStorage.removeItem('unlost_session_transient');
@@ -301,17 +242,30 @@ window.UnlostAuth = {
   },
 
   // Route Guard for authenticated student pages
+  // Strictly blocks unauthenticated users AND unverified users
   requireAuth(redirectOnboarding = true) {
     const user = this.getCurrentUser();
+    const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+
+    // 1. Unauthenticated -> redirect to login
     if (!user) {
       const search = window.location.search || '';
-      const currentFile = window.location.pathname.split('/').pop() || 'index.html';
       const redirectParam = encodeURIComponent(currentFile + search);
       window.location.href = `./login.html?redirect=${redirectParam}`;
       return null;
     }
 
-    if (redirectOnboarding && !user.onboarded && !window.location.pathname.includes('onboarding.html')) {
+    // 2. Authenticated but unverified -> redirect to verify-email.html
+    // Protected pages: dashboard.html, profile.html, progress.html, saved-items.html, settings.html, survey.html, etc.
+    if (!user.emailVerified) {
+      if (!currentFile.includes('verify-email.html')) {
+        window.location.href = `./verify-email.html?email=${encodeURIComponent(user.email || '')}`;
+        return null;
+      }
+    }
+
+    // 3. Verified but not completed onboarding
+    if (redirectOnboarding && !user.onboarded && !currentFile.includes('onboarding.html') && !currentFile.includes('verify-email.html')) {
       window.location.href = './onboarding.html';
       return null;
     }
@@ -320,6 +274,7 @@ window.UnlostAuth = {
   },
 
   // Route Guard for Admin Dashboard
+  // Enforces both verified status and authorized admin identity
   requireAdmin() {
     const user = this.getCurrentUser();
     if (!user) {
@@ -327,17 +282,10 @@ window.UnlostAuth = {
       return null;
     }
     if (!this.isAdmin()) {
+      // Not an authorized admin
+      window.location.href = './dashboard.html';
       return false;
     }
     return user;
-  },
-
-  _getRegisteredUsers() {
-    try {
-      const data = localStorage.getItem(UNLOST_STUDENTS_STORE);
-      return data ? JSON.parse(data) : {};
-    } catch (e) {
-      return {};
-    }
   }
 };

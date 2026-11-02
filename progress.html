@@ -130,6 +130,10 @@
   <script src="./assets/js/app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      if (window.UnlostAuth) {
+        const user = window.UnlostAuth.requireAuth();
+        if (!user) return;
+      }
       const completedMilestones = JSON.parse(localStorage.getItem('unlost_completed_milestones') || '["sw-m1"]');
       const completedSkills = JSON.parse(localStorage.getItem('unlost_completed_skills') || '["sk-problem-solving"]');
       const bookmarks = window.UnlostApp.getBookmarks();

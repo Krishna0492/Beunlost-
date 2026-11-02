@@ -77,6 +77,10 @@
   <script src="./assets/js/app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      if (window.UnlostAuth) {
+        const user = window.UnlostAuth.requireAuth();
+        if (!user) return;
+      }
       let activeTab = 'all';
       const grid = document.getElementById('saved-items-grid');
       const tabs = document.querySelectorAll('#saved-tabs button');

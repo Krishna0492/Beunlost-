@@ -5,6 +5,10 @@
 
 window.UnlostDashboard = {
   init() {
+    if (window.UnlostAuth) {
+      const user = window.UnlostAuth.requireAuth();
+      if (!user) return;
+    }
     this.student = window.UnlostApp.getStudentProfile();
     this.bookmarks = window.UnlostApp.getBookmarks();
     this.renderHeader();

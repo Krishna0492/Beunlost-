@@ -320,6 +320,10 @@
   <script src="./assets/js/report-generator.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      if (window.UnlostAuth) {
+        const user = window.UnlostAuth.requireAuth();
+        if (!user) return;
+      }
       let currentStep = 1;
       const totalSteps = 5;
 

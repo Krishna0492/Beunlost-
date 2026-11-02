@@ -242,9 +242,24 @@
       // Verified Continue
       verifiedContinueBtn.addEventListener('click', async () => {
         verifiedContinueBtn.disabled = true;
-        verifiedContinueBtn.textContent = 'Checking status...';
-        await window.UnlostAuth.checkVerificationStatus();
-        window.location.href = './onboarding.html';
+        verifiedContinueBtn.textContent = 'Checking status with Firebase...';
+        try {
+          const isVerified = await window.UnlostAuth.checkVerificationStatus();
+          if (isVerified) {
+            showAlert('Success! Your email has been verified. Redirecting...', false);
+            setTimeout(() => {
+              window.location.href = './onboarding.html';
+            }, 600);
+          } else {
+            showAlert('Your email has not been verified yet. Please open the link sent to your inbox and try again.');
+            verifiedContinueBtn.disabled = false;
+            verifiedContinueBtn.textContent = "I've Verified My Email — Continue →";
+          }
+        } catch (e) {
+          showAlert(e.message || 'Verification check failed. Please try again.');
+          verifiedContinueBtn.disabled = false;
+          verifiedContinueBtn.textContent = "I've Verified My Email — Continue →";
+        }
       });
 
       // Google Sign-In
@@ -252,8 +267,12 @@
         try {
           googleBtn.disabled = true;
           googleBtn.textContent = 'Signing in with Google...';
-          await window.UnlostAuth.loginWithGoogle();
-          window.location.href = './dashboard.html';
+          const user = await window.UnlostAuth.loginWithGoogle();
+          if (user && user.emailVerified) {
+            window.location.href = './dashboard.html';
+          } else {
+            window.location.href = `./verify-email.html?email=${encodeURIComponent(user.email || '')}`;
+          }
         } catch (err) {
           showAlert(err.message || 'Google Sign-In failed.');
           googleBtn.disabled = false;

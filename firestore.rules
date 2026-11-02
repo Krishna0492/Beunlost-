@@ -16,14 +16,18 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.email == 'k7286113@gmail.com' ||
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        (request.auth.token.email == 'k7286113@gmail.com' && request.auth.token.email_verified == true) ||
+        (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && request.auth.token.email_verified == true)
       );
     }
 
@@ -36,43 +40,49 @@ service cloud.firestore {
     }
 
     // Users collection
+    // Role escalation prevention: non-admins can never assign role: 'admin' or alter their role/status
     match /users/{userId} {
       allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
       allow list: if isAdmin();
-      allow create: if isOwner(userId) && isValidId(userId);
-      allow update: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow create: if isOwner(userId) && isValidId(userId) && 
+        incoming().role == 'student';
+      allow update: if (isOwner(userId) && 
+        (!('role' in incoming()) || incoming().role == existing().role) &&
+        (!('status' in incoming()) || incoming().status == existing().status)
+      ) || isAdmin();
       allow delete: if isAdmin();
     }
 
-    // Student academic & preference profiles
+    // Student academic & preference profiles - read/update gated to verified users or admin
     match /studentProfiles/{userId} {
-      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow get: if isVerified() && (isOwner(userId) || isAdmin());
       allow list: if isAdmin();
-      allow create, update: if isOwner(userId) && isValidId(userId);
+      allow create: if isOwner(userId) && isValidId(userId);
+      allow update: if isVerified() && isOwner(userId) && isValidId(userId);
       allow delete: if isAdmin();
     }
 
-    // Career survey assessment submissions
+    // Career survey assessment submissions - gated to verified users or admin
     match /surveyResults/{resultId} {
-      allow get: if isSignedIn() && (existing().userId == request.auth.uid || isAdmin());
-      allow list: if isAdmin() || (isSignedIn() && existing().userId == request.auth.uid);
-      allow create: if isSignedIn() && incoming().userId == request.auth.uid && isValidId(resultId);
+      allow get: if isVerified() && (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isAdmin() || (isVerified() && existing().userId == request.auth.uid);
+      allow create: if isVerified() && incoming().userId == request.auth.uid && isValidId(resultId);
       allow update, delete: if isAdmin();
     }
 
     // Student interaction & platform activity audit logs
     match /studentActivity/{activityId} {
-      allow get: if isSignedIn() && (existing().userId == request.auth.uid || isAdmin());
-      allow list: if isAdmin() || (isSignedIn() && existing().userId == request.auth.uid);
+      allow get: if isVerified() && (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isAdmin() || (isVerified() && existing().userId == request.auth.uid);
       allow create: if isSignedIn() && incoming().userId == request.auth.uid && isValidId(activityId);
       allow update, delete: if isAdmin();
     }
 
     // Student privacy data erasure / deletion requests
     match /deletionRequests/{requestId} {
-      allow get: if isSignedIn() && (existing().userId == request.auth.uid || isAdmin());
+      allow get: if isVerified() && (existing().userId == request.auth.uid || isAdmin());
       allow list: if isAdmin();
-      allow create: if isSignedIn() && incoming().userId == request.auth.uid && isValidId(requestId);
+      allow create: if isVerified() && incoming().userId == request.auth.uid && isValidId(requestId);
       allow update, delete: if isAdmin();
     }
 
@@ -90,3 +100,4 @@ service cloud.firestore {
     }
   }
 }
+

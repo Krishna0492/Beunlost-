@@ -4,6 +4,10 @@
 
 window.UnlostProfile = {
   initProfilePage() {
+    if (window.UnlostAuth) {
+      const user = window.UnlostAuth.requireAuth();
+      if (!user) return;
+    }
     const profile = window.UnlostApp.getStudentProfile();
     this.populateProfileForm(profile);
     this.setupProfileListeners();
@@ -59,6 +63,10 @@ window.UnlostProfile = {
   },
 
   initSettingsPage() {
+    if (window.UnlostAuth) {
+      const user = window.UnlostAuth.requireAuth();
+      if (!user) return;
+    }
     const exportBtn = document.getElementById('export-data-btn');
     if (exportBtn) {
       exportBtn.addEventListener('click', () => {

@@ -139,23 +139,25 @@ window.UnlostFirebase = {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
       const user = userCredential.user;
 
-      let verificationSent = false;
+      // 1. Dispatch genuine Firebase email verification link
       try {
         await sendEmailVerification(user);
-        verificationSent = true;
-      } catch (verifErr) {
-        console.warn('Verification link dispatch deferred:', verifErr);
+      } catch (verifErr: unknown) {
+        console.error('sendEmailVerification failure:', verifErr);
+        const errMsg = verifErr instanceof Error ? verifErr.message : 'Failed to dispatch verification email.';
+        throw new Error(`Account created, but verification email could not be sent: ${errMsg}. Please log in to request a new link.`);
       }
 
       const now = new Date().toISOString();
       const userRef = doc(db, 'users', user.uid);
+      // SECURITY: Never assign admin role upon registration. Role is strictly 'student'.
       await setDoc(userRef, {
         uid: user.uid,
         email: user.email,
         fullName: name,
-        emailVerified: user.emailVerified,
-        role: email.toLowerCase() === PRIMARY_ADMIN_EMAIL ? 'admin' : 'student',
-        status: user.emailVerified ? 'active' : 'pending_verification',
+        emailVerified: false,
+        role: 'student',
+        status: 'pending_verification',
         createdAt: now,
         lastSignInAt: now,
         updatedAt: now
@@ -179,8 +181,8 @@ window.UnlostFirebase = {
         updatedAt: now
       });
 
-      await this.recordStudentActivity('REGISTERED_ACCOUNT', 'Account created with email verification link');
-      return { user, verificationSent };
+      await this.recordStudentActivity('REGISTERED_ACCOUNT', 'Account created with email verification link dispatched');
+      return { user, verificationSent: true };
     } catch (error) {
       console.error('Firebase signUp error:', error);
       throw error;
@@ -190,23 +192,31 @@ window.UnlostFirebase = {
   async loginWithEmail(email: string, pass: string) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-      const user = userCredential.user;
-      const now = new Date().toISOString();
+      let user = userCredential.user;
 
-      // Update last sign in time
+      // Force fresh reload of the user from Firebase Auth to get authoritative emailVerified property
+      await user.reload();
+      if (auth.currentUser) {
+        user = auth.currentUser;
+      }
+
+      const now = new Date().toISOString();
+      const isVerified = Boolean(user.emailVerified);
+
+      // Update last sign in time and sync emailVerified status to Firestore
       try {
         const userRef = doc(db, 'users', user.uid);
         await setDoc(userRef, {
           lastSignInAt: now,
-          emailVerified: user.emailVerified,
-          status: user.emailVerified ? 'active' : 'pending_verification',
+          emailVerified: isVerified,
+          status: isVerified ? 'active' : 'pending_verification',
           updatedAt: now
         }, { merge: true });
       } catch (e) {
         console.debug('Last sign in update notice:', e);
       }
 
-      await this.recordStudentActivity('LOGIN', 'Student logged into portal');
+      await this.recordStudentActivity('LOGIN', isVerified ? 'Student logged into portal' : 'Unverified student attempted sign in');
       return user;
     } catch (error) {
       console.error('Firebase login error:', error);
@@ -227,8 +237,8 @@ window.UnlostFirebase = {
         email: user.email,
         fullName: user.displayName || 'UNLOST Student',
         emailVerified: user.emailVerified,
-        role: user.email?.toLowerCase() === PRIMARY_ADMIN_EMAIL ? 'admin' : 'student',
-        status: 'active',
+        role: 'student', // Always 'student'. No client-side admin assignment.
+        status: user.emailVerified ? 'active' : 'pending_verification',
         lastSignInAt: now,
         updatedAt: now
       }, { merge: true });

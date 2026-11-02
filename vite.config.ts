@@ -17,6 +17,7 @@ export default defineConfig(() => {
           main: path.resolve(__dirname, 'index.html'),
           login: path.resolve(__dirname, 'login.html'),
           register: path.resolve(__dirname, 'register.html'),
+          verifyEmail: path.resolve(__dirname, 'verify-email.html'),
           forgotPassword: path.resolve(__dirname, 'forgot-password.html'),
           onboarding: path.resolve(__dirname, 'onboarding.html'),
           dashboard: path.resolve(__dirname, 'dashboard.html'),
