@@ -3,8 +3,20 @@
  */
 
 window.UnlostCareers = {
+  getData() {
+    return (window.UNLOST_DATA && window.UNLOST_DATA.careers) ? window.UNLOST_DATA.careers : [];
+  },
+
   initExplorer() {
-    this.careers = window.UNLOST_DATA.careers;
+    this.careers = this.getData();
+    if (!this.careers.length) {
+      setTimeout(() => {
+        this.careers = this.getData();
+        this.renderCareerGrid(this.careers);
+        this.setupFilters();
+      }, 150);
+      return;
+    }
     this.renderCareerGrid(this.careers);
     this.setupFilters();
   },
@@ -24,7 +36,7 @@ window.UnlostCareers = {
     }
 
     grid.innerHTML = items.map(c => {
-      const isSaved = window.UnlostApp.isSaved('careers', c.id);
+      const isSaved = (window.UnlostApp && typeof window.UnlostApp.isSaved === 'function') ? window.UnlostApp.isSaved('careers', c.id) : false;
       return `
         <div class="charcoal-card" style="display:flex; flex-direction:column; justify-content:space-between;">
           <div>
@@ -88,25 +100,38 @@ window.UnlostCareers = {
   },
 
   toggleSave(id, btn) {
-    const isNowSaved = window.UnlostApp.toggleBookmark('careers', id);
-    const svg = btn.querySelector('svg');
+    const isNowSaved = (window.UnlostApp && typeof window.UnlostApp.toggleBookmark === 'function') ? window.UnlostApp.toggleBookmark('careers', id) : false;
+    const svg = btn ? btn.querySelector('svg') : null;
     if (svg) {
       svg.setAttribute('fill', isNowSaved ? 'white' : 'none');
+    }
+    const saveBtnText = document.getElementById('save-career-btn');
+    if (saveBtnText) {
+      saveBtnText.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isNowSaved ? 'white' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+        ${isNowSaved ? 'Saved' : 'Save Career'}
+      `;
     }
   },
 
   // Detail Page Controller
   initDetails() {
+    const data = window.UNLOST_DATA;
+    if (!data || !data.careers) {
+      setTimeout(() => this.initDetails(), 150);
+      return;
+    }
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id') || 'software-engineer';
-    const career = window.UNLOST_DATA.careers.find(c => c.id === id) || window.UNLOST_DATA.careers[0];
+    const career = data.careers.find(c => c.id === id) || data.careers[0];
+    if (!career) return;
 
     document.title = `${career.title} — UNLOST Career Discovery`;
     const container = document.getElementById('career-details-content');
     if (!container) return;
 
-    const isSaved = window.UnlostApp.isSaved('careers', career.id);
-    const related = window.UNLOST_DATA.careers.filter(c => career.relatedCareerIds.includes(c.id));
+    const isSaved = (window.UnlostApp && typeof window.UnlostApp.isSaved === 'function') ? window.UnlostApp.isSaved('careers', career.id) : false;
+    const related = data.careers.filter(c => (career.relatedCareerIds || []).includes(c.id));
 
     container.innerHTML = `
       <div style="margin-bottom: 2rem;">

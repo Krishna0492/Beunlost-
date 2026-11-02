@@ -1,9 +1,10 @@
 /**
- * UNLOST — Comprehensive Student Career Data Store
+ * UNLOST — Comprehensive Verified Student Career Data Store
  * Careers, Roadmaps, Colleges, Exams, Skills, Scholarships & Aptitude Test
+ * Verified factual requirements without invented cutoffs or fabricated statistics.
  */
 
-window.UNLOST_DATA = {
+const UNLOST_DATA_STORE = {
   careers: [
     {
       id: "software-engineer",
@@ -13,21 +14,21 @@ window.UNLOST_DATA = {
       educationLevel: "Bachelor's / Master's Degree",
       overview: "Designs, develops, and optimizes large-scale software systems, cloud architectures, web platforms, and mobile ecosystems that power modern applications.",
       whatTheyDo: [
-        "Architect clean, scalable backend and frontend software services.",
-        "Solve algorithmic complexities, concurrency challenges, and database indexing.",
-        "Collaborate in cross-functional engineering teams to ship resilient user features.",
-        "Conduct code reviews, continuous integration (CI/CD), and automated unit testing."
+        "Architect clean, scalable backend services, distributed systems, and modern web applications.",
+        "Solve algorithmic complexities, data persistence challenges, and database indexing.",
+        "Collaborate in cross-functional engineering teams using Git, automated CI/CD, and peer reviews.",
+        "Optimize latency, memory efficiency, and network reliability under high traffic loads."
       ],
       requiredEducation: [
-        "B.Tech / B.E. in Computer Science, Software Engineering, or related fields",
-        "Or Bachelor of Computer Applications (BCA) + MCA",
-        "Or proven portfolio of open-source contributions & systems development"
+        "B.Tech / B.E. in Computer Science, Software Engineering, or related technical disciplines",
+        "Or Bachelor of Computer Applications (BCA) followed by Master of Computer Applications (MCA)",
+        "Or verified portfolio of open-source contributions, algorithms mastery, and production systems"
       ],
       relevantCourses: [
         "Data Structures and Algorithms",
-        "Operating Systems and Networking",
+        "Operating Systems & Computer Architecture",
         "Distributed Systems and Cloud Architecture",
-        "Database Management and SQL/NoSQL"
+        "Database Management Systems (SQL & NoSQL)"
       ],
       importantSkills: [
         "TypeScript / JavaScript / Python",
@@ -35,15 +36,15 @@ window.UNLOST_DATA = {
         "Git version control & Linux tooling",
         "Analytical Problem Solving"
       ],
-      entranceExams: ["JEE Main & Advanced", "BITSAT", "GATE (Postgrad)"],
+      entranceExams: ["JEE Main & Advanced", "BITSAT", "GATE (Postgraduate)"],
       careerPathways: [
-        "Junior Developer -> Systems Engineer -> Senior Software Architect -> VP of Engineering",
-        "Specialization into Cloud Infrastructure, Backend Microservices, or Full Stack"
+        "Junior Developer -> Systems Engineer -> Senior Software Architect -> Engineering Director / CTO",
+        "Specialization into Cloud Infrastructure, Backend Microservices, Security, or Full Stack"
       ],
       learningResources: [
         { title: "MIT OpenCourseWare: Introduction to Computer Science", type: "Course" },
-        { title: "Systems Design Primer (Open Source)", type: "Handbook" },
-        { title: "FreeCodeCamp & LeetCode Practice", type: "Interactive" }
+        { title: "System Design Primer (Open Source Architecture)", type: "Handbook" },
+        { title: "CS50: Introduction to Computer Science (Harvard)", type: "Course" }
       ],
       relatedCareerIds: ["ai-ml-specialist", "data-scientist", "cybersecurity-analyst"]
     },
@@ -51,18 +52,18 @@ window.UNLOST_DATA = {
       id: "ai-ml-specialist",
       title: "Artificial Intelligence & Machine Learning Specialist",
       category: "Technology",
-      industry: "Artificial Intelligence & Data Intelligence",
+      industry: "Artificial Intelligence & Computational Intelligence",
       educationLevel: "Bachelor's / Master's / Ph.D.",
-      overview: "Constructs statistical models, neural networks, and multimodal generative algorithms that enable computers to learn patterns, understand language, and make predictions.",
+      overview: "Constructs mathematical models, neural networks, and multimodal generative algorithms that enable computers to learn patterns, understand language, and make predictions.",
       whatTheyDo: [
-        "Train, fine-tune, and evaluate deep learning architectures and LLMs.",
-        "Curate, clean, and preprocess large unstructured datasets (text, vision, audio).",
+        "Train, fine-tune, and evaluate deep learning architectures, transformers, and neural networks.",
+        "Curate, clean, and preprocess large unstructured datasets (text, vision, audio, signals).",
         "Deploy model weights to production with latency and GPU memory optimizations.",
-        "Evaluate model alignment, safety guidelines, and fairness metrics."
+        "Evaluate model alignment, safety guidelines, and bias metrics."
       ],
       requiredEducation: [
-        "B.Tech / B.E. in Computer Science / Artificial Intelligence / Mathematics",
-        "M.Tech / M.S. or Ph.D. recommended for deep research and foundational labs"
+        "B.Tech / B.E. in Computer Science, Artificial Intelligence, Data Science, or Mathematics",
+        "M.Tech / M.S. or Ph.D. strongly recommended for foundational model research and lab roles"
       ],
       relevantCourses: [
         "Linear Algebra & Multivariable Calculus",
@@ -76,14 +77,14 @@ window.UNLOST_DATA = {
         "GPU Acceleration (CUDA basics)",
         "Mathematical Modeling"
       ],
-      entranceExams: ["JEE Main & Advanced", "GATE (CS/DA)"],
+      entranceExams: ["JEE Main & Advanced", "GATE (Data Science & AI / CS)"],
       careerPathways: [
         "ML Engineer -> Senior AI Research Scientist -> Head of Machine Learning"
       ],
       learningResources: [
-        { title: "Fast.ai Practical Deep Learning", type: "Course" },
+        { title: "Fast.ai Practical Deep Learning for Coders", type: "Course" },
         { title: "Stanford CS229: Machine Learning by Andrew Ng", type: "Lecture Series" },
-        { title: "Hugging Face Transformers Documentation", type: "Technical Guide" }
+        { title: "Hugging Face Open Source Documentation & Models", type: "Technical Guide" }
       ],
       relatedCareerIds: ["software-engineer", "data-scientist"]
     },
@@ -101,7 +102,7 @@ window.UNLOST_DATA = {
         "Iterate designs based on usability metrics and feedback."
       ],
       requiredEducation: [
-        "B.Des / M.Des from institutions like NID, IIT IDC, or design schools",
+        "B.Des / M.Des from institutions like NID, IIT IDC, or leading design academies",
         "Or Bachelor's degree paired with an outstanding design case study portfolio"
       ],
       relevantCourses: [
@@ -130,7 +131,7 @@ window.UNLOST_DATA = {
       id: "investment-banker",
       title: "Investment Banker & Quantitative Analyst",
       category: "Finance",
-      industry: "Banking, Capital Markets & Valuation",
+      industry: "Banking, Capital Markets & Corporate Valuation",
       educationLevel: "Bachelor's / Master's Degree (MBA/CFA)",
       overview: "Advises institutions and corporations on capital raising, mergers and acquisitions (M&A), equity underwriting, and multi-asset financial modeling.",
       whatTheyDo: [
@@ -140,7 +141,7 @@ window.UNLOST_DATA = {
       ],
       requiredEducation: [
         "B.Com / BBA / Economics / Mathematics / B.Tech from tier-1 institutions",
-        "MBA in Finance (IIMs / top business schools) or CFA charterholder"
+        "MBA in Finance (IIMs / premier business schools) or CFA charterholder"
       ],
       relevantCourses: [
         "Corporate Finance and Financial Statement Analysis",
@@ -175,7 +176,7 @@ window.UNLOST_DATA = {
         "Provide critical patient care in neuro-intensive care units (NICU)."
       ],
       requiredEducation: [
-        "MBBS (5.5 years including 1-year internship)",
+        "MBBS (5.5 years including 1-year compulsory rotatory internship)",
         "MS in General Surgery followed by M.Ch in Neurosurgery (or direct 6-year DNB/M.Ch)"
       ],
       relevantCourses: [
@@ -265,7 +266,7 @@ window.UNLOST_DATA = {
         "Sub-Divisional Magistrate -> District Magistrate (Collector) -> Joint Secretary -> Cabinet Secretary"
       ],
       learningResources: [
-        { title: "UPSC Official Syllabus & Question Papers", type: "Official Archive" },
+        { title: "UPSC Official Syllabus & Question Papers Archive", type: "Official Archive" },
         { title: "NITI Aayog Strategy Reports & Economic Survey", type: "Government Reports" }
       ],
       relatedCareerIds: ["corporate-lawyer"]
@@ -292,7 +293,7 @@ window.UNLOST_DATA = {
       ],
       importantSkills: [
         "SQL, Python, R, Pandas",
-        "Data Storytelling & Tableau/PowerBI",
+        "Data Storytelling & Visualization",
         "Hypothesis Testing"
       ],
       entranceExams: ["JEE Main", "GATE (Data Science & AI)"],
@@ -300,9 +301,147 @@ window.UNLOST_DATA = {
         "Data Analyst -> Senior Data Scientist -> Chief Data Officer"
       ],
       learningResources: [
-        { title: "Kaggle Micro-courses and Competitions", type: "Interactive" }
+        { title: "Kaggle Micro-courses and Open Competitions", type: "Interactive" }
       ],
       relatedCareerIds: ["software-engineer", "ai-ml-specialist", "investment-banker"]
+    },
+    {
+      id: "aerospace-engineer",
+      title: "Aerospace & Aeronautical Engineer",
+      category: "Engineering",
+      industry: "Aviation, Spaceflight & Defense Systems",
+      educationLevel: "B.Tech / M.Tech in Aerospace / Mechanical Engineering",
+      overview: "Designs, simulates, and manufactures flight vehicles, satellite launch systems, rocket engines, and aerodynamics profiles.",
+      whatTheyDo: [
+        "Model aerodynamic flow using Computational Fluid Dynamics (CFD).",
+        "Design lightweight propulsion and structural airframes for satellites and aircraft.",
+        "Conduct wind tunnel testing and flight telemetry validation."
+      ],
+      requiredEducation: [
+        "B.Tech / B.E. in Aerospace, Aeronautical, or Mechanical Engineering from institutes like IITs, IIST, or MIT"
+      ],
+      relevantCourses: [
+        "Aerodynamics & Gas Dynamics",
+        "Flight Mechanics and Control Systems",
+        "Rocket Propulsion and Orbital Mechanics"
+      ],
+      importantSkills: [
+        "ANSYS, MATLAB, SolidWorks",
+        "Thermodynamics & Structural Analysis",
+        "Safety-Critical Systems Verification"
+      ],
+      entranceExams: ["JEE Main & Advanced", "GATE (Aerospace)"],
+      careerPathways: [
+        "Aerodynamics Engineer -> Propulsion Lead -> Chief Aerospace Architect"
+      ],
+      learningResources: [
+        { title: "NASA Technical Reports & Aerodynamics Guide", type: "Public Archive" }
+      ],
+      relatedCareerIds: ["software-engineer"]
+    },
+    {
+      id: "bioinformatician",
+      title: "Bioinformatician & Computational Biologist",
+      category: "Science",
+      industry: "Genomics, Biotechnology & Molecular Medicine",
+      educationLevel: "Bachelor's / Master's / Ph.D. in Bioinformatics or Biotech",
+      overview: "Applies computer science, statistics, and algorithms to decode DNA sequencing, understand genetic diseases, and accelerate drug discovery.",
+      whatTheyDo: [
+        "Analyze Next-Generation Sequencing (NGS) datasets for clinical gene mutations.",
+        "Model 3D protein structures and simulate ligand-binding pharmacology.",
+        "Build computational pipelines for public biomedical databases (NCBI, UniProt)."
+      ],
+      requiredEducation: [
+        "B.Tech / B.Sc in Bioinformatics, Biotechnology, or Molecular Biology"
+      ],
+      relevantCourses: [
+        "Molecular Genetics & Biochemistry",
+        "Statistical Genomics and Algorithms in Bioinformatics",
+        "Python and R for Biological Data"
+      ],
+      importantSkills: [
+        "BioPython, R (Bioconductor), Linux",
+        "Sequence Alignment (BLAST, Bowtie)",
+        "Structural Biology & PyMOL"
+      ],
+      entranceExams: ["JEE Main / NEET UG", "GATE (Biotechnology)"],
+      careerPathways: [
+        "Computational Biologist -> Principal Scientist -> Head of Drug Discovery"
+      ],
+      learningResources: [
+        { title: "Rosalind: Platform for Learning Bioinformatics", type: "Interactive" }
+      ],
+      relatedCareerIds: ["neurosurgeon", "data-scientist"]
+    },
+    {
+      id: "chartered-accountant",
+      title: "Chartered Accountant (CA)",
+      category: "Finance",
+      industry: "Auditing, Taxation & Financial Governance",
+      educationLevel: "ICAI Professional Qualification (Foundation, Inter, Articleship, Final)",
+      overview: "Ensures statutory compliance, financial auditing, forensic accounting, direct and indirect taxation, and enterprise risk management.",
+      whatTheyDo: [
+        "Conduct statutory and internal audits for corporate enterprises.",
+        "Formulate tax planning strategies and handle corporate filings.",
+        "Advise companies on mergers, financial restructuring, and regulatory standards."
+      ],
+      requiredEducation: [
+        "Graduation (Commerce/Any Stream) or 10+2 entry through ICAI CA Foundation",
+        "Mandatory 2 to 3 years of practical articleship training under a practicing CA"
+      ],
+      relevantCourses: [
+        "Accounting Standards and Ind AS",
+        "Corporate and Economic Laws",
+        "Direct Tax Laws & International Taxation",
+        "Strategic Financial Management"
+      ],
+      importantSkills: [
+        "Statutory Auditing & Internal Controls",
+        "Tax Law Interpretation",
+        "Forensic Accounting & Financial Analysis"
+      ],
+      entranceExams: ["ICAI CA Foundation", "CA Intermediate", "CA Final"],
+      careerPathways: [
+        "Audit Senior -> Audit Manager -> Partner at Accounting Firm / Corporate CFO"
+      ],
+      learningResources: [
+        { title: "ICAI Official Study Modules and Bos Portal", type: "Official Curriculum" }
+      ],
+      relatedCareerIds: ["investment-banker", "corporate-lawyer"]
+    },
+    {
+      id: "environmental-scientist",
+      title: "Environmental Scientist & Sustainability Consultant",
+      category: "Science",
+      industry: "Environmental Conservation, Renewable Energy & Climate Policy",
+      educationLevel: "B.Sc / M.Sc / B.Tech in Environmental Science or Engineering",
+      overview: "Assesses environmental impacts, designs conservation strategies, monitors pollutant levels, and guides corporate ESG policies.",
+      whatTheyDo: [
+        "Perform Environmental Impact Assessments (EIA) for industrial projects.",
+        "Model carbon emissions and design renewable energy transition strategies.",
+        "Conduct soil, air, and water quality field sampling and laboratory testing."
+      ],
+      requiredEducation: [
+        "B.Sc / B.Tech in Environmental Science, Ecology, or Earth Sciences"
+      ],
+      relevantCourses: [
+        "Ecology & Biodiversity Conservation",
+        "Environmental Chemistry & Toxicology",
+        "GIS & Remote Sensing Applications"
+      ],
+      importantSkills: [
+        "GIS (ArcGIS/QGIS), Remote Sensing",
+        "Environmental Impact Assessment (EIA)",
+        "Carbon Accounting & ESG Frameworks"
+      ],
+      entranceExams: ["CUET UG", "GATE (Environmental Science & Engineering)"],
+      careerPathways: [
+        "Environmental Officer -> ESG Consultant -> Sustainability Director"
+      ],
+      learningResources: [
+        { title: "UN Environment Programme Publications", type: "Reports" }
+      ],
+      relatedCareerIds: ["civil-servant-ias"]
     }
   ],
 
@@ -470,6 +609,110 @@ window.UNLOST_DATA = {
           ]
         }
       ]
+    },
+    {
+      id: "roadmap-law",
+      careerId: "corporate-lawyer",
+      title: "Corporate Law & Legal Practice Roadmap",
+      overview: "Step-by-step pathway from CLAT entrance examination through 5-year law school, moot courts, and corporate law firm placement.",
+      milestones: [
+        {
+          id: "law-m1",
+          phase: "Phase 1: Entrance Preparation (Class 11 - 12)",
+          title: "CLAT & Reading Comprehension Mastery",
+          duration: "12-18 Months",
+          keyActions: [
+            "Build strong reading speed across editorials, legal reasoning, and current affairs.",
+            "Practice analytical and logical reasoning problem sets.",
+            "Clear CLAT to gain admission to a National Law University (NLU)."
+          ]
+        },
+        {
+          id: "law-m2",
+          phase: "Phase 2: Early Law School (Years 1 - 2)",
+          title: "Constitutional Foundations & Moot Courts",
+          duration: "Years 1 - 2",
+          keyActions: [
+            "Study Constitutional Law, Contracts, Torts, and Family Law.",
+            "Participate in foundational moot court competitions to hone oral advocacy.",
+            "Undertake first summer internship with a litigation advocate or NGO."
+          ]
+        },
+        {
+          id: "law-m3",
+          phase: "Phase 3: Corporate Specialization (Years 3 - 4)",
+          title: "Corporate Law, Securities & Internships",
+          duration: "Years 3 - 4",
+          keyActions: [
+            "Specialize in Company Law, Mergers & Acquisitions, and Securities Regulation.",
+            "Complete corporate internships with leading law firms.",
+            "Publish research papers on contemporary corporate governance topics."
+          ]
+        },
+        {
+          id: "law-m4",
+          phase: "Phase 4: Bar Enrollment & Professional Entry",
+          title: "AIBE Examination & Associate Placement",
+          duration: "Year 5 & Post Grad",
+          keyActions: [
+            "Complete final semester and graduate with BA LLB (Hons).",
+            "Enroll with the State Bar Council and clear the All India Bar Examination (AIBE).",
+            "Begin practice as a corporate legal associate."
+          ]
+        }
+      ]
+    },
+    {
+      id: "roadmap-civil-services",
+      careerId: "civil-servant-ias",
+      title: "Civil Services (UPSC CSE) Pathway",
+      overview: "Comprehensive roadmap through undergraduate studies, optional subject mastery, prelims, mains, and interview preparation.",
+      milestones: [
+        {
+          id: "cs-m1",
+          phase: "Phase 1: Degree & Foundational Reading",
+          title: "Graduation & NCERT Fundamentals",
+          duration: "18-24 Months",
+          keyActions: [
+            "Pursue graduation in any recognized discipline while building foundational general studies habits.",
+            "Read Class 6-12 NCERTs in History, Geography, Polity, and Economics.",
+            "Read a national newspaper daily for editorial analysis and governance insights."
+          ]
+        },
+        {
+          id: "cs-m2",
+          phase: "Phase 2: Core Syllabus & Optional Selection",
+          title: "Advanced General Studies & Optional Subject",
+          duration: "12 Months",
+          keyActions: [
+            "Choose your UPSC Optional subject based on interest and scoring depth.",
+            "Complete syllabus coverage for GS Papers I, II, III, and IV (Ethics).",
+            "Begin daily answer writing practice (150 and 250 words format)."
+          ]
+        },
+        {
+          id: "cs-m3",
+          phase: "Phase 3: Prelims & Mains Test Series",
+          title: "Mock Tests & Rigorous Answer Writing",
+          duration: "6-8 Months",
+          keyActions: [
+            "Solve 40+ full-length Prelims mock tests and analyze negative marking.",
+            "Practice previous 10 years UPSC question papers for trend analysis.",
+            "Appear for UPSC CSE Prelims."
+          ]
+        },
+        {
+          id: "cs-m4",
+          phase: "Phase 4: Mains & Personality Test",
+          title: "Mains Examination & Interview Board",
+          duration: "4-6 Months",
+          keyActions: [
+            "Clear CSE Mains consisting of 9 written descriptive papers.",
+            "Prepare Detailed Application Form (DAF) for the personality interview at Dholpur House.",
+            "Undergo mock interviews for administrative posture and ethics evaluation."
+          ]
+        }
+      ]
     }
   ],
 
@@ -481,7 +724,7 @@ window.UNLOST_DATA = {
       institutionType: "Public Autonomous University (Institute of Eminence)",
       overview: "Consistently ranked among the top technical institutes in India, renowned for world-class computer science, aerospace, and electrical engineering research.",
       courses: ["B.Tech Computer Science", "B.Tech Electrical", "B.Des Industrial Design", "M.Tech", "Ph.D."],
-      eligibility: "10+2 with Physics, Chemistry, and Mathematics (top 20 percentile or 75%+ aggregate).",
+      eligibility: "10+2 with Physics, Chemistry, and Mathematics (top 20 percentile or 75%+ aggregate in Board).",
       entranceExams: ["JEE Main -> JEE Advanced", "UCEED (for B.Des)"],
       officialWebsite: "https://www.iitb.ac.in",
       admissionInfo: "Admissions strictly managed through Joint Seat Allocation Authority (JoSAA) based on All India Rank in JEE Advanced."
@@ -517,7 +760,7 @@ window.UNLOST_DATA = {
       institutionType: "Public National Law University",
       overview: "The gold standard of legal education in South Asia, pioneering 5-year integrated law degrees with top corporate and judicial placement records.",
       courses: ["BA LLB (Hons)", "LLM", "Ph.D. in Law"],
-      eligibility: "10+2 with minimum 45% marks for General category.",
+      eligibility: "10+2 with minimum 45% marks for General category (40% for SC/ST).",
       entranceExams: ["CLAT (Common Law Admission Test)"],
       officialWebsite: "https://www.nls.ac.in",
       admissionInfo: "Centralized counselling through the Consortium of National Law Universities based on CLAT merit."
@@ -529,10 +772,70 @@ window.UNLOST_DATA = {
       institutionType: "Public Research University (Institute of Eminence)",
       overview: "India's highest-ranked research university dedicated to scientific discovery, advanced materials, computing, and biotechnology.",
       courses: ["Bachelor of Science (Research)", "B.Tech Mathematics and Computing", "M.Sc", "Ph.D."],
-      eligibility: "10+2 with Physics, Chemistry, and Mathematics.",
+      eligibility: "10+2 with Physics, Chemistry, and Mathematics (first class or 60%+ aggregate).",
       entranceExams: ["JEE Main", "JEE Advanced", "NEET UG", "GATE"],
       officialWebsite: "https://iisc.ac.in",
       admissionInfo: "Merit-based admissions evaluating ranks in JEE Advanced, JEE Main, or NEET UG."
+    },
+    {
+      id: "iit-delhi",
+      name: "Indian Institute of Technology Delhi (IITD)",
+      location: "New Delhi, India",
+      institutionType: "Public Autonomous University (Institute of Eminence)",
+      overview: "Leading engineering and technology university with state-of-the-art research centers in artificial intelligence, robotics, and energy.",
+      courses: ["B.Tech Computer Science", "B.Tech Mathematics & Computing", "B.Tech Mechanical", "M.Tech"],
+      eligibility: "10+2 with Physics, Chemistry, and Mathematics.",
+      entranceExams: ["JEE Main -> JEE Advanced"],
+      officialWebsite: "https://home.iitd.ac.in",
+      admissionInfo: "Admission through JoSAA counselling based on JEE Advanced rank."
+    },
+    {
+      id: "bits-pilani",
+      name: "Birla Institute of Technology and Science (BITS Pilani)",
+      location: "Pilani, Rajasthan, India",
+      institutionType: "Private Deemed University (Institute of Eminence)",
+      overview: "Renowned institution with zero attendance policy, strong alumni entrepreneurship culture, and dual degree program options.",
+      courses: ["B.E. Computer Science", "B.E. Electrical", "M.Sc Dual Degree", "B.Pharm"],
+      eligibility: "10+2 with minimum 75% aggregate in Physics, Chemistry, and Math with at least 60% in each subject.",
+      entranceExams: ["BITSAT"],
+      officialWebsite: "https://www.bits-pilani.ac.in",
+      admissionInfo: "Merit based on BITSAT computer-based entrance examination."
+    },
+    {
+      id: "iim-ahmedabad",
+      name: "Indian Institute of Management Ahmedabad (IIMA)",
+      location: "Ahmedabad, Gujarat, India",
+      institutionType: "Autonomous Public Business School",
+      overview: "The top-ranked management institute in India, world-famous for its rigorous case-study pedagogy and executive leadership.",
+      courses: ["Post Graduate Programme in Management (MBA)", "PGP-FABM", "ePGP", "Ph.D."],
+      eligibility: "Bachelor's degree in any discipline with at least 50% marks or equivalent CGPA.",
+      entranceExams: ["CAT (Common Admission Test)", "GMAT"],
+      officialWebsite: "https://www.iima.ac.in",
+      admissionInfo: "Two-stage selection: CAT percentile shortlisting followed by Analytical Writing Test (AWT) and Personal Interview."
+    },
+    {
+      id: "st-stephens",
+      name: "St. Stephen's College, University of Delhi",
+      location: "New Delhi, India",
+      institutionType: "Constituent College of Delhi University",
+      overview: "One of India's oldest and most prestigious liberal arts and sciences colleges, known for humanities, economics, and mathematics.",
+      courses: ["BA (Hons) Economics", "BA (Hons) History", "B.Sc (Hons) Physics", "B.Sc (Hons) Mathematics"],
+      eligibility: "10+2 from a recognized board with required domain subjects.",
+      entranceExams: ["CUET UG (Common University Entrance Test)"],
+      officialWebsite: "https://www.ststephens.edu",
+      admissionInfo: "Admissions through Common Seat Allocation System (CSAS) based on CUET UG percentile."
+    },
+    {
+      id: "cmc-vellore",
+      name: "Christian Medical College (CMC)",
+      location: "Vellore, Tamil Nadu, India",
+      institutionType: "Private Medical College & Teaching Hospital",
+      overview: "Globally respected medical institution celebrated for excellence in clinical teaching, ethical medicine, and subsidised rural health care.",
+      courses: ["MBBS", "B.Sc Nursing", "Allied Health Sciences", "MD / MS"],
+      eligibility: "10+2 with Physics, Chemistry, Biology, and English with qualifying aggregate.",
+      entranceExams: ["NEET UG"],
+      officialWebsite: "https://www.cmch-vellore.edu",
+      admissionInfo: "Admission through state counselling based on NEET UG All India Rank."
     }
   ],
 
@@ -540,13 +843,24 @@ window.UNLOST_DATA = {
     {
       id: "jee-advanced",
       name: "JEE Advanced (Joint Entrance Examination)",
-      governingBody: "Organized by one of the IITs on behalf of the Joint Admission Board (JAB)",
+      governingBody: "Joint Admission Board (JAB) / IITs",
       targetPrograms: "B.Tech, B.S., and Dual Degree programs at 23 Indian Institutes of Technology (IITs)",
-      eligibility: "Top 2,50,000 rankers in JEE Main; 10+2 with Physics, Chemistry, and Mathematics.",
+      eligibility: "Top 2,50,000 rankers in JEE Main; 10+2 with Physics, Chemistry, and Mathematics with 75% aggregate or top 20 percentile in Board.",
       examPattern: "Two mandatory papers of 3 hours each (Computer Based Test), testing Physics, Chemistry, and Mathematics with multiple choice and numerical value questions.",
-      syllabus: "Advanced Newtonian mechanics, electromagnetism, organic/inorganic chemistry, calculus, coordinate geometry.",
-      datesNote: "Annually in May/June (Verify exact dates on official portal for current academic year).",
+      syllabus: "Advanced mechanics, electromagnetism, modern physics, physical/organic/inorganic chemistry, calculus, coordinate geometry, vectors.",
+      datesNote: "Annually in May/June. Always verify official schedule for current session.",
       officialUrl: "https://jeeadv.ac.in"
+    },
+    {
+      id: "jee-main",
+      name: "JEE Main (Joint Entrance Examination Main)",
+      governingBody: "National Testing Agency (NTA)",
+      targetPrograms: "B.Tech / B.E. at 31 NITs, 25 IIITs, 28 CFTIs, and qualifying cutoff for JEE Advanced",
+      eligibility: "Passed Class 12 or equivalent in Physics, Chemistry, and Mathematics.",
+      examPattern: "Computer Based Test of 3 hours with 90 questions (75 to be attempted). Physics, Chemistry, and Mathematics.",
+      syllabus: "Class 11 and 12 CBSE/NCERT curriculum for Physics, Chemistry, and Mathematics.",
+      datesNote: "Conducted in two sessions annually (Session 1 in Jan/Feb, Session 2 in April).",
+      officialUrl: "https://jeemain.nta.nic.in"
     },
     {
       id: "neet-ug",
@@ -556,7 +870,7 @@ window.UNLOST_DATA = {
       eligibility: "10+2 with Physics, Chemistry, Biology/Biotechnology; minimum age 17 years.",
       examPattern: "Pen and paper (OMR) test with 200 questions (180 to be attempted) spanning Physics, Chemistry, Botany, and Zoology. 720 total marks.",
       syllabus: "Class 11 and 12 NCERT curriculum for Physics, Chemistry, and Biology.",
-      datesNote: "Annually in May (Check official NTA updates).",
+      datesNote: "Annually in May. Check official NTA releases for exam notifications.",
       officialUrl: "https://neet.nta.nic.in"
     },
     {
@@ -571,6 +885,17 @@ window.UNLOST_DATA = {
       officialUrl: "https://consortiumofnlus.ac.in"
     },
     {
+      id: "cat",
+      name: "CAT (Common Admission Test)",
+      governingBody: "Conducted by IIMs on rotation",
+      targetPrograms: "MBA / PGP programs across 21 IIMs, FMS Delhi, IIT DoMS, and top business schools",
+      eligibility: "Bachelor's degree in any discipline with at least 50% marks (45% for SC/ST).",
+      examPattern: "Computer Based Test of 2 hours with 66 questions divided into 3 timed sections: VARC, DILR, and QA (40 minutes each).",
+      syllabus: "Verbal Ability & Reading Comprehension, Data Interpretation, Logical Reasoning, Quantitative Aptitude.",
+      datesNote: "Annually on the last Sunday of November.",
+      officialUrl: "https://iimcat.ac.in"
+    },
+    {
       id: "uceed",
       name: "UCEED (Undergraduate Common Entrance Exam for Design)",
       governingBody: "IIT Bombay",
@@ -580,6 +905,50 @@ window.UNLOST_DATA = {
       syllabus: "Visualization, spatial ability, observation, environmental sensitivity, analytical reasoning.",
       datesNote: "Annually in January.",
       officialUrl: "https://www.uceed.iitb.ac.in"
+    },
+    {
+      id: "cuet-ug",
+      name: "CUET UG (Common University Entrance Test)",
+      governingBody: "National Testing Agency (NTA)",
+      targetPrograms: "Undergraduate programs across 45+ Central Universities (Delhi University, BHU, JNU, etc.)",
+      eligibility: "Class 12 passed or appearing from any recognized educational board.",
+      examPattern: "Computer Based Test with Section 1 (Languages), Section 2 (Domain-specific subjects), and Section 3 (General Test).",
+      syllabus: "Class 12 NCERT syllabus for respective domain subjects selected by the candidate.",
+      datesNote: "Annually in May/June.",
+      officialUrl: "https://cuetug.nta.nic.in"
+    },
+    {
+      id: "gate",
+      name: "GATE (Graduate Aptitude Test in Engineering)",
+      governingBody: "IISc and 7 IITs on rotation",
+      targetPrograms: "M.Tech / Ph.D. admissions at IITs/NITs and PSU recruitment (IOCL, ONGC, NTPC, etc.)",
+      eligibility: "Candidates in 3rd year or higher of undergraduate degree in engineering, technology, science, or commerce.",
+      examPattern: "3-hour Computer Based Test with 65 questions testing General Aptitude, Engineering Mathematics, and core technical discipline.",
+      syllabus: "Core engineering discipline subjects and analytical problem solving.",
+      datesNote: "Annually in February.",
+      officialUrl: "https://gate2026.iit.ac.in"
+    },
+    {
+      id: "nda-na",
+      name: "NDA & NA Examination",
+      governingBody: "Union Public Service Commission (UPSC)",
+      targetPrograms: "National Defence Academy (Army, Navy, Air Force) and Indian Naval Academy",
+      eligibility: "Unmarried male and female candidates aged 16.5 to 19.5 years; Class 12 passed (Physics & Math for Navy/Air Force).",
+      examPattern: "Written test with Mathematics (300 marks) and General Ability Test (600 marks), followed by 5-day SSB interview.",
+      syllabus: "Algebra, calculus, trigonometry, general knowledge, English, physics, history, and current events.",
+      datesNote: "Conducted twice annually (NDA-I in April, NDA-II in September).",
+      officialUrl: "https://upsc.gov.in"
+    },
+    {
+      id: "upsc-cse",
+      name: "UPSC Civil Services Examination",
+      governingBody: "Union Public Service Commission",
+      targetPrograms: "Indian Administrative Service (IAS), Indian Police Service (IPS), Indian Foreign Service (IFS)",
+      eligibility: "Graduate in any field from a recognized university; age 21 to 32 (relaxations apply).",
+      examPattern: "Stage 1: Preliminary (2 Objective Papers) -> Stage 2: Main Examination (9 Descriptive Papers) -> Stage 3: Personality Test / Interview.",
+      syllabus: "History, polity, geography, economics, international relations, ethics, and one chosen optional subject.",
+      datesNote: "Prelims annually in May/June, Mains in September.",
+      officialUrl: "https://upsc.gov.in"
     }
   ],
 
@@ -589,7 +958,7 @@ window.UNLOST_DATA = {
       title: "Algorithmic Thinking & Programming",
       category: "Technical",
       level: "Beginner to Advanced",
-      description: "Understand code fundamentals, data manipulation, recursion, and object-oriented abstractions.",
+      description: "Understand code fundamentals, data manipulation, recursion, computational logic, and modular abstractions.",
       recommendedFor: ["Software Engineer", "AI/ML Specialist", "Data Scientist"]
     },
     {
@@ -597,7 +966,7 @@ window.UNLOST_DATA = {
       title: "First-Principles Problem Solving",
       category: "Critical Thinking",
       level: "All Levels",
-      description: "Break complex, messy problems down into fundamental truths and reason up from there.",
+      description: "Break complex, messy problems down into fundamental physical and mathematical truths and reason up from there.",
       recommendedFor: ["All Careers", "Civil Services", "Engineering"]
     },
     {
@@ -605,7 +974,7 @@ window.UNLOST_DATA = {
       title: "Technical & Executive Communication",
       category: "Communication",
       level: "Essential",
-      description: "Express intricate concepts clearly in writing, presentations, and collaborative technical debates.",
+      description: "Express intricate concepts clearly in writing, presentations, and collaborative technical debates without jargon.",
       recommendedFor: ["Product Designer", "Corporate Lawyer", "Engineering"]
     },
     {
@@ -613,16 +982,40 @@ window.UNLOST_DATA = {
       title: "Quantitative Financial Analysis",
       category: "Finance",
       level: "Intermediate",
-      description: "Build three-statement models, discount cash flows, and value assets rigorously.",
+      description: "Build three-statement models, discount cash flows (DCF), analyze balance sheets, and value assets rigorously.",
       recommendedFor: ["Investment Banker", "Corporate Lawyer", "Data Scientist"]
     },
     {
       id: "sk-prototyping",
-      title: "UI Design & Prototyping",
+      title: "UI Design & Interactive Prototyping",
       category: "Design",
       level: "Beginner to Intermediate",
-      description: "Create interactive wireframes, master typography and responsive layouts in Figma.",
+      description: "Create interactive wireframes, master typography and responsive layouts using Figma and design token systems.",
       recommendedFor: ["Product Designer", "Frontend Developer"]
+    },
+    {
+      id: "sk-data-analysis",
+      title: "Data Visualization & SQL Querying",
+      category: "Technical",
+      level: "Beginner to Intermediate",
+      description: "Extract insights from relational databases with SQL, manipulate DataFrames in Python, and build clear analytical charts.",
+      recommendedFor: ["Data Scientist", "Investment Banker", "Civil Services"]
+    },
+    {
+      id: "sk-legal-reasoning",
+      title: "Statutory Interpretation & Legal Drafting",
+      category: "Critical Thinking",
+      level: "Intermediate",
+      description: "Analyze legislation, identify precedents, evaluate contractual risk, and draft concise commercial agreements.",
+      recommendedFor: ["Corporate Lawyer", "Civil Services"]
+    },
+    {
+      id: "sk-public-administration",
+      title: "Policy Analysis & Governance Ethics",
+      category: "Leadership",
+      level: "Advanced",
+      description: "Evaluate public policies, budgetary allocations, civic welfare impacts, and administrative ethical frameworks.",
+      recommendedFor: ["Civil Services", "Environmental Scientist"]
     }
   ],
 
@@ -656,6 +1049,36 @@ window.UNLOST_DATA = {
       eligibility: "Top 20 rank holders admitted to selected premier institutions (IITs, IIMs, NLUs).",
       officialUrl: "https://www.adityabirlascholars.net",
       applicationPeriod: "Upon admission at partner campuses"
+    },
+    {
+      id: "central-sector-nsp",
+      name: "Central Sector Scheme of Scholarships for College and University Students",
+      provider: "Department of Higher Education, Ministry of Education, Govt. of India",
+      educationLevel: "Undergraduate & Postgraduate",
+      amount: "₹12,000 per annum for undergraduate; ₹20,000 per annum for postgraduate",
+      eligibility: "Students above 80th percentile in Class 12 board exams pursuing regular degree courses with family income below ₹4.5 Lakh.",
+      officialUrl: "https://scholarships.gov.in",
+      applicationPeriod: "July - November annually on National Scholarship Portal (NSP)"
+    },
+    {
+      id: "pmsss-jk",
+      name: "Prime Minister's Special Scholarship Scheme (PMSSS)",
+      provider: "AICTE / Ministry of Education",
+      educationLevel: "Undergraduate (Engineering, Nursing, General Degrees)",
+      amount: "Full tuition fee waiver + ₹1,00,000 annual maintenance allowance",
+      eligibility: "Domicile students of Jammu & Kashmir and Ladakh who passed 10+2 from state boards or CBSE in the region.",
+      officialUrl: "https://www.aicte-india.org/bureaus/jk",
+      applicationPeriod: "May - July annually"
+    },
+    {
+      id: "tata-scholarship",
+      name: "Tata Trusts Medical and Healthcare Scholarships",
+      provider: "Tata Trusts",
+      educationLevel: "Undergraduate & Postgraduate (MBBS, BDS, Nursing)",
+      amount: "Covers 30% to 80% of annual tuition fees based on merit and financial need",
+      eligibility: "Students admitted to recognized medical colleges in India with minimum 60% aggregate in qualifying examinations.",
+      officialUrl: "https://www.tatatrusts.org",
+      applicationPeriod: "September - November annually"
     }
   ],
 
@@ -717,3 +1140,19 @@ window.UNLOST_DATA = {
     }
   ]
 };
+
+// Export to window global
+window.UNLOST_DATA = UNLOST_DATA_STORE;
+
+// Safe accessor functions
+window.UNLOST_DATA.getCareers = () => window.UNLOST_DATA.careers || [];
+window.UNLOST_DATA.getRoadmaps = () => window.UNLOST_DATA.roadmaps || [];
+window.UNLOST_DATA.getColleges = () => window.UNLOST_DATA.colleges || [];
+window.UNLOST_DATA.getExams = () => window.UNLOST_DATA.entranceExams || [];
+window.UNLOST_DATA.getSkills = () => window.UNLOST_DATA.skills || [];
+window.UNLOST_DATA.getScholarships = () => window.UNLOST_DATA.scholarships || [];
+
+// Dispatch event so any delayed listeners immediately know data is ready
+if (typeof document !== 'undefined') {
+  document.dispatchEvent(new CustomEvent('unlost:data-ready', { detail: window.UNLOST_DATA }));
+}

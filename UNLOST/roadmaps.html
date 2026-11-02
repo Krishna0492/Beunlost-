@@ -73,9 +73,18 @@
   <script src="./assets/js/app.js"></script>
   <script src="./assets/js/roadmaps.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      window.UnlostRoadmaps.initExplorer();
-    });
+    function bootRoadmaps() {
+      if (window.UnlostRoadmaps && typeof window.UnlostRoadmaps.initExplorer === 'function') {
+        window.UnlostRoadmaps.initExplorer();
+      } else {
+        setTimeout(bootRoadmaps, 100);
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootRoadmaps);
+    } else {
+      bootRoadmaps();
+    }
   </script>
 </body>
 </html>

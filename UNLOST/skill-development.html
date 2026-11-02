@@ -89,15 +89,21 @@
   <script src="./assets/js/auth.js"></script>
   <script src="./assets/js/app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const skills = window.UNLOST_DATA.skills;
+    function initSkills() {
+      const data = window.UNLOST_DATA;
+      if (!data || !data.skills) {
+        setTimeout(initSkills, 100);
+        return;
+      }
+      const skills = data.skills;
       const grid = document.getElementById('skills-grid');
       const searchInput = document.getElementById('skill-search');
       const catSelect = document.getElementById('skill-cat-filter');
+      if (!grid) return;
 
       const render = () => {
-        const q = (searchInput.value || '').toLowerCase().trim();
-        const cat = catSelect.value;
+        const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+        const cat = catSelect ? catSelect.value : 'all';
         const completedSkills = JSON.parse(localStorage.getItem('unlost_completed_skills') || '["sk-problem-solving"]');
 
         const filtered = skills.filter(s => {
@@ -113,7 +119,7 @@
 
         grid.innerHTML = filtered.map(s => {
           const isDone = completedSkills.includes(s.id);
-          const isSaved = window.UnlostApp.isSaved('skills', s.id);
+          const isSaved = (window.UnlostApp && typeof window.UnlostApp.isSaved === 'function') ? window.UnlostApp.isSaved('skills', s.id) : false;
 
           return `
             <div class="charcoal-card" style="display:flex; flex-direction:column; justify-content:space-between;">
@@ -130,7 +136,7 @@
                 <p class="card-desc">${s.description}</p>
                 <div style="font-size:0.78rem; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.4rem;">Relevant Fields</div>
                 <div style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-bottom:1rem;">
-                  ${s.recommendedFor.map(r => `<span class="tag">${r}</span>`).join('')}
+                  ${(s.recommendedFor || []).map(r => `<span class="tag">${r}</span>`).join('')}
                 </div>
               </div>
 
@@ -147,8 +153,8 @@
       };
 
       window.toggleSaveSkill = (id, btn) => {
-        const isNowSaved = window.UnlostApp.toggleBookmark('skills', id);
-        const svg = btn.querySelector('svg');
+        const isNowSaved = (window.UnlostApp && typeof window.UnlostApp.toggleBookmark === 'function') ? window.UnlostApp.toggleBookmark('skills', id) : false;
+        const svg = btn ? btn.querySelector('svg') : null;
         if (svg) svg.setAttribute('fill', isNowSaved ? 'white' : 'none');
       };
 
@@ -156,19 +162,25 @@
         let completed = JSON.parse(localStorage.getItem('unlost_completed_skills') || '[]');
         if (isChecked) {
           if (!completed.includes(id)) completed.push(id);
-          window.UnlostApp.showToast('Skill marked as mastered!');
+          if (window.UnlostApp && typeof window.UnlostApp.showToast === 'function') window.UnlostApp.showToast('Skill marked as mastered!');
         } else {
           completed = completed.filter(sid => sid !== id);
-          window.UnlostApp.showToast('Skill updated');
+          if (window.UnlostApp && typeof window.UnlostApp.showToast === 'function') window.UnlostApp.showToast('Skill updated');
         }
         localStorage.setItem('unlost_completed_skills', JSON.stringify(completed));
         render();
       };
 
-      searchInput.addEventListener('input', render);
-      catSelect.addEventListener('change', render);
+      if (searchInput) searchInput.addEventListener('input', render);
+      if (catSelect) catSelect.addEventListener('change', render);
       render();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSkills);
+    } else {
+      initSkills();
+    }
   </script>
 </body>
 </html>

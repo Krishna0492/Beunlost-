@@ -99,9 +99,18 @@
   <script src="./assets/js/app.js"></script>
   <script src="./assets/js/careers.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      window.UnlostCareers.initExplorer();
-    });
+    function bootCareers() {
+      if (window.UnlostCareers && typeof window.UnlostCareers.initExplorer === 'function') {
+        window.UnlostCareers.initExplorer();
+      } else {
+        setTimeout(bootCareers, 100);
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootCareers);
+    } else {
+      bootCareers();
+    }
   </script>
 </body>
 </html>

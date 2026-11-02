@@ -72,17 +72,23 @@
   <script src="./assets/js/auth.js"></script>
   <script src="./assets/js/app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const exams = window.UNLOST_DATA.entranceExams;
+    function initExams() {
+      const data = window.UNLOST_DATA;
+      if (!data || !data.entranceExams) {
+        setTimeout(initExams, 100);
+        return;
+      }
+      const exams = data.entranceExams;
       const grid = document.getElementById('exams-grid');
+      if (!grid) return;
 
       grid.innerHTML = exams.map(e => {
-        const isSaved = window.UnlostApp.isSaved('exams', e.id);
+        const isSaved = (window.UnlostApp && typeof window.UnlostApp.isSaved === 'function') ? window.UnlostApp.isSaved('exams', e.id) : false;
         return `
           <div class="charcoal-card" style="display:flex; flex-direction:column; justify-content:space-between;">
             <div>
               <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
-                <span class="tag tag-silver">${e.governingBody.split('(')[0].trim()}</span>
+                <span class="tag tag-silver">${(e.governingBody || '').split('(')[0].trim()}</span>
                 <button onclick="toggleSaveExam('${e.id}', this)" class="btn btn-ghost btn-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isSaved ? 'white' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
                 </button>
@@ -103,11 +109,17 @@
       }).join('');
 
       window.toggleSaveExam = (id, btn) => {
-        const isNowSaved = window.UnlostApp.toggleBookmark('exams', id);
-        const svg = btn.querySelector('svg');
+        const isNowSaved = (window.UnlostApp && typeof window.UnlostApp.toggleBookmark === 'function') ? window.UnlostApp.toggleBookmark('exams', id) : false;
+        const svg = btn ? btn.querySelector('svg') : null;
         if (svg) svg.setAttribute('fill', isNowSaved ? 'white' : 'none');
       };
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initExams);
+    } else {
+      initExams();
+    }
   </script>
 </body>
 </html>

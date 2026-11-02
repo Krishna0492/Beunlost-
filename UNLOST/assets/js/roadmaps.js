@@ -3,8 +3,19 @@
  */
 
 window.UnlostRoadmaps = {
+  getData() {
+    return (window.UNLOST_DATA && window.UNLOST_DATA.roadmaps) ? window.UNLOST_DATA.roadmaps : [];
+  },
+
   initExplorer() {
-    this.roadmaps = window.UNLOST_DATA.roadmaps;
+    this.roadmaps = this.getData();
+    if (!this.roadmaps.length) {
+      setTimeout(() => {
+        this.roadmaps = this.getData();
+        this.renderRoadmapGrid();
+      }, 150);
+      return;
+    }
     this.renderRoadmapGrid();
   },
 
@@ -12,19 +23,23 @@ window.UnlostRoadmaps = {
     const grid = document.getElementById('roadmaps-grid');
     if (!grid) return;
 
+    if (!this.roadmaps || !this.roadmaps.length) {
+      this.roadmaps = this.getData();
+    }
+
     const completedMilestones = JSON.parse(localStorage.getItem('unlost_completed_milestones') || '["sw-m1"]');
 
     grid.innerHTML = this.roadmaps.map(rm => {
-      const total = rm.milestones.length;
-      const completed = rm.milestones.filter(m => completedMilestones.includes(m.id)).length;
+      const total = rm.milestones ? rm.milestones.length : 1;
+      const completed = rm.milestones ? rm.milestones.filter(m => completedMilestones.includes(m.id)).length : 0;
       const percent = Math.round((completed / total) * 100);
-      const isSaved = window.UnlostApp.isSaved('roadmaps', rm.id);
+      const isSaved = (window.UnlostApp && typeof window.UnlostApp.isSaved === 'function') ? window.UnlostApp.isSaved('roadmaps', rm.id) : false;
 
       return `
         <div class="charcoal-card" style="display:flex; flex-direction:column; justify-content:space-between;">
           <div>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
-              <span class="tag tag-silver">${rm.milestones.length} Sequential Milestones</span>
+              <span class="tag tag-silver">${rm.milestones ? rm.milestones.length : 0} Sequential Milestones</span>
               <button onclick="window.UnlostRoadmaps.toggleSave('${rm.id}', this)" class="btn btn-ghost btn-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="${isSaved ? 'white' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
               </button>
@@ -53,16 +68,22 @@ window.UnlostRoadmaps = {
   },
 
   toggleSave(id, btn) {
-    const isNowSaved = window.UnlostApp.toggleBookmark('roadmaps', id);
-    const svg = btn.querySelector('svg');
+    const isNowSaved = (window.UnlostApp && typeof window.UnlostApp.toggleBookmark === 'function') ? window.UnlostApp.toggleBookmark('roadmaps', id) : false;
+    const svg = btn ? btn.querySelector('svg') : null;
     if (svg) svg.setAttribute('fill', isNowSaved ? 'white' : 'none');
   },
 
   // Roadmap Details Controller
   initDetails() {
+    const data = window.UNLOST_DATA;
+    if (!data || !data.roadmaps) {
+      setTimeout(() => this.initDetails(), 150);
+      return;
+    }
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id') || 'roadmap-software';
-    const rm = window.UNLOST_DATA.roadmaps.find(r => r.id === id) || window.UNLOST_DATA.roadmaps[0];
+    const rm = data.roadmaps.find(r => r.id === id) || data.roadmaps[0];
+    if (!rm) return;
 
     document.title = `${rm.title} — UNLOST Milestones`;
     const container = document.getElementById('roadmap-details-content');

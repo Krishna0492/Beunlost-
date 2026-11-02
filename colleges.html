@@ -88,19 +88,25 @@
   <script src="./assets/js/auth.js"></script>
   <script src="./assets/js/app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const colleges = window.UNLOST_DATA.colleges;
+    function initColleges() {
+      const data = window.UNLOST_DATA;
+      if (!data || !data.colleges) {
+        setTimeout(initColleges, 100);
+        return;
+      }
+      const colleges = data.colleges;
       const grid = document.getElementById('colleges-grid');
       const searchInput = document.getElementById('college-search');
       const typeSelect = document.getElementById('college-type-filter');
+      if (!grid) return;
 
       const render = () => {
-        const q = (searchInput.value || '').toLowerCase().trim();
-        const type = typeSelect.value;
+        const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+        const type = typeSelect ? typeSelect.value : 'all';
 
         const filtered = colleges.filter(c => {
-          const matchQ = !q || c.name.toLowerCase().includes(q) || c.location.toLowerCase().includes(q) || c.courses.some(course => course.toLowerCase().includes(q));
-          const matchType = type === 'all' || c.institutionType.toLowerCase().includes(type.toLowerCase()) || c.name.toLowerCase().includes(type.toLowerCase());
+          const matchQ = !q || c.name.toLowerCase().includes(q) || c.location.toLowerCase().includes(q) || (c.courses || []).some(course => course.toLowerCase().includes(q));
+          const matchType = type === 'all' || (c.institutionType && c.institutionType.toLowerCase().includes(type.toLowerCase())) || c.name.toLowerCase().includes(type.toLowerCase());
           return matchQ && matchType;
         });
 
@@ -110,7 +116,7 @@
         }
 
         grid.innerHTML = filtered.map(c => {
-          const isSaved = window.UnlostApp.isSaved('colleges', c.id);
+          const isSaved = (window.UnlostApp && typeof window.UnlostApp.isSaved === 'function') ? window.UnlostApp.isSaved('colleges', c.id) : false;
           return `
             <div class="charcoal-card" style="display:flex; flex-direction:column; justify-content:space-between;">
               <div>
@@ -125,7 +131,7 @@
                 <div style="margin-bottom:1rem;">
                   <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.35rem;">Popular Courses</div>
                   <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
-                    ${c.courses.slice(0, 3).map(co => `<span class="tag">${co}</span>`).join('')}
+                    ${(c.courses || []).slice(0, 3).map(co => `<span class="tag">${co}</span>`).join('')}
                   </div>
                 </div>
               </div>
@@ -140,15 +146,21 @@
       };
 
       window.toggleSaveCollege = (id, btn) => {
-        const isNowSaved = window.UnlostApp.toggleBookmark('colleges', id);
-        const svg = btn.querySelector('svg');
+        const isNowSaved = (window.UnlostApp && typeof window.UnlostApp.toggleBookmark === 'function') ? window.UnlostApp.toggleBookmark('colleges', id) : false;
+        const svg = btn ? btn.querySelector('svg') : null;
         if (svg) svg.setAttribute('fill', isNowSaved ? 'white' : 'none');
       };
 
-      searchInput.addEventListener('input', render);
-      typeSelect.addEventListener('change', render);
+      if (searchInput) searchInput.addEventListener('input', render);
+      if (typeSelect) typeSelect.addEventListener('change', render);
       render();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initColleges);
+    } else {
+      initColleges();
+    }
   </script>
 </body>
 </html>

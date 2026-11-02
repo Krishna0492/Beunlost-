@@ -80,17 +80,28 @@
   <script src="./assets/js/auth.js"></script>
   <script src="./assets/js/app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const scholarships = window.UNLOST_DATA.scholarships;
+    function initScholarships() {
+      const data = window.UNLOST_DATA;
+      if (!data || !data.scholarships) {
+        setTimeout(initScholarships, 100);
+        return;
+      }
+      const scholarships = data.scholarships;
       const grid = document.getElementById('scholarships-grid');
       const searchInput = document.getElementById('scholarship-search');
+      if (!grid) return;
 
       const render = () => {
-        const q = (searchInput.value || '').toLowerCase().trim();
-        const filtered = scholarships.filter(s => !q || s.name.toLowerCase().includes(q) || s.provider.toLowerCase().includes(q) || s.amount.toLowerCase().includes(q));
+        const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+        const filtered = scholarships.filter(s => !q || s.name.toLowerCase().includes(q) || (s.provider || '').toLowerCase().includes(q) || (s.amount || '').toLowerCase().includes(q));
+
+        if (filtered.length === 0) {
+          grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:3rem;">No scholarships match your search.</p>`;
+          return;
+        }
 
         grid.innerHTML = filtered.map(s => {
-          const isSaved = window.UnlostApp.isSaved('scholarships', s.id);
+          const isSaved = (window.UnlostApp && typeof window.UnlostApp.isSaved === 'function') ? window.UnlostApp.isSaved('scholarships', s.id) : false;
           return `
             <div class="charcoal-card" style="display:flex; flex-direction:column; justify-content:space-between;">
               <div>
@@ -119,14 +130,20 @@
       };
 
       window.toggleSaveScholarship = (id, btn) => {
-        const isNowSaved = window.UnlostApp.toggleBookmark('scholarships', id);
-        const svg = btn.querySelector('svg');
+        const isNowSaved = (window.UnlostApp && typeof window.UnlostApp.toggleBookmark === 'function') ? window.UnlostApp.toggleBookmark('scholarships', id) : false;
+        const svg = btn ? btn.querySelector('svg') : null;
         if (svg) svg.setAttribute('fill', isNowSaved ? 'white' : 'none');
       };
 
-      searchInput.addEventListener('input', render);
+      if (searchInput) searchInput.addEventListener('input', render);
       render();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initScholarships);
+    } else {
+      initScholarships();
+    }
   </script>
 </body>
 </html>
