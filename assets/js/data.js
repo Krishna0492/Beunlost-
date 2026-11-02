@@ -164,40 +164,82 @@ const UNLOST_DATA_STORE = {
       relatedCareerIds: ["data-scientist", "corporate-lawyer"]
     },
     {
-      id: "neurosurgeon",
-      title: "Physician & Clinical Neurosurgeon",
+      id: "general-physician",
+      title: "General Physician & Internal Medicine Specialist",
       category: "Medicine",
-      industry: "Healthcare & Surgical Medicine",
-      educationLevel: "MBBS + MS/DNB + M.Ch Neurosurgery",
-      overview: "Diagnoses and treats conditions affecting the nervous system, brain, and spinal column through delicate microsurgical procedures.",
+      industry: "Primary Healthcare & Clinical Medicine",
+      educationLevel: "MBBS + MD / DNB (General / Internal Medicine)",
+      overview: "Diagnoses systemic illnesses, manages complex chronic medical disorders (cardiovascular, metabolic, respiratory), coordinates preventive health, and delivers evidence-based clinical therapeutics.",
       whatTheyDo: [
-        "Perform intracranial neurosurgeries and spine stabilization operations.",
-        "Interpret MRI, CT scans, and neurophysiological diagnostic readouts.",
-        "Provide critical patient care in neuro-intensive care units (NICU)."
+        "Conduct comprehensive clinical examinations, differential diagnoses, and outpatient triage.",
+        "Formulate evidence-based pharmacological treatment plans, antibiotic stewardship, and lifestyle management.",
+        "Manage complex multi-morbidity in adult patients across in-patient hospital wards and intensive care units.",
+        "Counsel patients and families on chronic disease prevention, vaccination, and long-term prognosis."
       ],
       requiredEducation: [
-        "MBBS (5.5 years including 1-year compulsory rotatory internship)",
-        "MS in General Surgery followed by M.Ch in Neurosurgery (or direct 6-year DNB/M.Ch)"
+        "MBBS (Bachelor of Medicine and Bachelor of Surgery, 5.5 years including 1-year compulsory rotatory medical internship)",
+        "Postgraduate MD (Doctor of Medicine) in General Medicine or DNB in Internal Medicine (3 years)"
       ],
       relevantCourses: [
-        "Human Anatomy & Neuroanatomy",
-        "Pathology, Pharmacology, and Surgical Techniques",
-        "Clinical Neurology & Neuroradiology"
+        "Clinical Medicine, Systemic Pathology & Diagnostics",
+        "Pharmacology, Therapeutics & Toxicology",
+        "Epidemiology, Preventive & Social Medicine (PSM)",
+        "Critical Care & Emergency Resuscitation"
       ],
       importantSkills: [
-        "Microsurgical Dexterity & Endurance",
-        "Emergency Decision Making Under Pressure",
-        "Patient Empathy and Medical Ethics"
+        "Clinical Diagnostics & Stethoscope Auscultation",
+        "Emergency Patient Stabilization & ICU Care",
+        "Compassionate Communication & Bedside Manner",
+        "Pharmacological Therapeutics Assessment"
       ],
-      entranceExams: ["NEET UG", "NEET PG / INI-CET", "NEET SS"],
+      entranceExams: ["NEET UG", "NEET PG / INI-CET"],
       careerPathways: [
-        "Resident Surgeon -> Associate Neurosurgeon -> Chief of Neurosurgery"
+        "Junior Resident -> Senior Resident -> Consultant Physician -> Head of Internal Medicine / Medical Superintendent"
       ],
       learningResources: [
-        { title: "Gray's Anatomy Student References", type: "Textbook" },
-        { title: "New England Journal of Medicine Case Studies", type: "Journals" }
+        { title: "Harrison's Principles of Internal Medicine", type: "Gold Standard Textbook" },
+        { title: "The Lancet & BMJ Clinical Case Reviews", type: "Peer-Reviewed Journals" }
       ],
-      relatedCareerIds: ["bioinformatician"]
+      relatedCareerIds: ["neurosurgeon", "bioinformatician"]
+    },
+    {
+      id: "neurosurgeon",
+      title: "Clinical Neurosurgeon",
+      category: "Medicine",
+      industry: "Neurosurgery, Cranial & Spinal Operative Medicine",
+      educationLevel: "MBBS + MS General Surgery + M.Ch Neurosurgery (or 6-Year DNB)",
+      overview: "Specializes in the surgical prevention, diagnosis, evaluation, and operative treatment of disorders affecting the brain, spinal cord, cerebrovascular system, and peripheral nervous system.",
+      whatTheyDo: [
+        "Perform delicate microsurgical craniotomies, aneurysm clippings, tumor resections, and spinal instrumentation under operating microscopes.",
+        "Interpret high-resolution neuro-imaging: brain MRI, CT angiography, and intraoperative functional neuro-mapping.",
+        "Provide critical neuro-intensive resuscitation and continuous intracranial pressure (ICP) monitoring.",
+        "Lead multidisciplinary neuro-oncology, neuro-vascular, and spine trauma surgical boards."
+      ],
+      requiredEducation: [
+        "MBBS (5.5 years including 1-year rotatory internship from NMC-recognized medical college)",
+        "MS in General Surgery (3 years) followed by NEET-SS qualifying for M.Ch in Neurosurgery (3 years)",
+        "Or direct 6-year post-MBBS DNB / M.Ch in Neurosurgery at apex research centers (NIMHANS, AIIMS, PGIMER)"
+      ],
+      relevantCourses: [
+        "Gross Neuroanatomy, Neurophysiology & Neuropathology",
+        "Operative Microsurgical Techniques & Neuronavigation",
+        "Neuro-traumatology, Critical Care & Spinal Biomechanics"
+      ],
+      importantSkills: [
+        "Sub-millimeter Microsurgical Precision & Steady Hand Endurance",
+        "High-Stakes Decision Making Under Critical Hemorrhage",
+        "Advanced Neuro-imaging Interpretation (DTI, FMRI)",
+        "Patient & Family Counseling for Critical Surgical Procedures"
+      ],
+      entranceExams: ["NEET UG", "NEET PG / INI-CET", "NEET SS (Super Specialty)"],
+      careerPathways: [
+        "Neurosurgical Resident -> Junior Consultant Neurosurgeon -> Senior Consultant -> Director of Neurosurgery & Skull Base Research"
+      ],
+      learningResources: [
+        { title: "Youmans and Winn Neurological Surgery", type: "Definitive Reference" },
+        { title: "Journal of Neurosurgery (AANS)", type: "Peer-Reviewed Journal" }
+      ],
+      relatedCareerIds: ["general-physician", "bioinformatician"]
     },
     {
       id: "corporate-lawyer",
@@ -562,50 +604,122 @@ const UNLOST_DATA_STORE = {
       ]
     },
     {
-      id: "roadmap-medicine",
-      careerId: "neurosurgeon",
-      title: "Medical & Neurosurgical Pathway",
-      overview: "Rigorous clinical pathway through MBBS, qualifying exams, surgical residency, and neurosurgical sub-specialization.",
+      id: "roadmap-physician",
+      careerId: "general-physician",
+      title: "General Physician & Internal Medicine Pathway",
+      overview: "Rigorous clinical pathway through Class 12 PCB, NEET UG, MBBS undergraduate training, NEET PG, and MD in Internal Medicine.",
       milestones: [
         {
-          id: "med-m1",
-          phase: "Phase 1: Pre-Medical School",
-          title: "Class 12 Science (PCB) & NEET UG Preparation",
+          id: "phy-m1",
+          phase: "Phase 1: Pre-Medical Foundations (Class 11 - 12)",
+          title: "Senior Secondary PCB & NEET UG Preparation",
           duration: "2 Years",
           keyActions: [
-            "Master Physics, Chemistry, and Biology (NCERT curriculum focus).",
-            "Clear NEET UG with top percentile to secure admission to a government medical college."
+            "Master Class 11 and 12 Physics, Chemistry, and Biology (NCERT thorough memorization & conceptual clarity).",
+            "Solve 15,000+ objective practice questions and take 40+ full-syllabus NEET UG mock tests.",
+            "Score in the 99th+ percentile in NEET UG to secure admission to a government medical college."
           ]
         },
         {
-          id: "med-m2",
-          phase: "Phase 2: MBBS Degree",
-          title: "Undergraduate Medical Training & Compulsory Rotatory Internship",
+          id: "phy-m2",
+          phase: "Phase 2: MBBS Degree & Rotatory Internship",
+          title: "Undergraduate Clinical Training (5.5 Years)",
           duration: "5.5 Years",
           keyActions: [
-            "Study Pre-clinical (Anatomy, Physiology), Para-clinical (Pathology, Pharma), and Clinical subjects.",
-            "Complete 1-year rotatory hospital internship across emergency, surgery, and medicine wards.",
-            "Clear qualifying post-graduate exam (NEET PG / INI-CET)."
+            "Complete 4.5 years of medical curriculum: Anatomy, Physiology, Biochemistry, Pathology, Microbiology, Pharmacology, and Clinical Medicine.",
+            "Complete 12 months of mandatory rotatory internship in in-patient wards, emergency casualty, and primary healthcare centers.",
+            "Obtain State Medical Council registration and practice license."
           ]
         },
         {
-          id: "med-m3",
-          phase: "Phase 3: General Surgery Residency",
-          title: "MS / DNB in General Surgery",
-          duration: "3 Years",
+          id: "phy-m3",
+          phase: "Phase 3: Post-Graduate Medical Entrance",
+          title: "NEET PG / INI-CET Examination",
+          duration: "6-12 Months",
           keyActions: [
-            "Perform hands-on minor and assist in major surgical operations.",
-            "Acquire deep knowledge of trauma care, wound management, and sterile techniques."
+            "Prepare for 19 MBBS subjects for NEET PG or INI-CET (for AIIMS, JIPMER, PGI).",
+            "Secure high rank to match into MD General Medicine / Internal Medicine."
           ]
         },
         {
-          id: "med-m4",
-          phase: "Phase 4: Neurosurgery Super-Specialization",
-          title: "M.Ch in Neurosurgery",
+          id: "phy-m4",
+          phase: "Phase 4: MD Internal Medicine Residency",
+          title: "Junior Residency & Advanced In-Patient Therapeutics",
           duration: "3 Years",
           keyActions: [
-            "Train in microsurgery, craniotomy, spinal cord decompression, and vascular clipping.",
-            "Publish original research in peer-reviewed clinical neurosurgical journals."
+            "Manage acute emergency admissions, intensive care unit (ICU) patients, and multi-system pathology.",
+            "Conduct clinical thesis research and present papers at national internal medicine conferences.",
+            "Pass theory and clinical practical board examinations for MD General Medicine."
+          ]
+        },
+        {
+          id: "phy-m5",
+          phase: "Phase 5: Senior Residency & Clinical Practice",
+          title: "Consultant Physician Practice",
+          duration: "1-3 Years",
+          keyActions: [
+            "Serve as Senior Resident in a teaching tertiary care hospital.",
+            "Establish independent outpatient consultant practice or advance to sub-specialties (Cardiology, Nephrology, Endocrinology)."
+          ]
+        }
+      ]
+    },
+    {
+      id: "roadmap-neurosurgeon",
+      careerId: "neurosurgeon",
+      title: "Neurosurgical Super-Specialization Pathway",
+      overview: "Demanding 12-to-15 year surgical journey through MBBS, general surgical residency, and advanced neurosurgical microsurgery fellowship.",
+      milestones: [
+        {
+          id: "ns-m1",
+          phase: "Phase 1: Pre-Medical Foundations (Class 11 - 12)",
+          title: "Class 12 PCB & NEET UG Qualification",
+          duration: "2 Years",
+          keyActions: [
+            "Thorough mastery of NCERT Physics, Chemistry, and Biology.",
+            "Clear NEET UG with top rank to secure MBBS admission at an apex medical college."
+          ]
+        },
+        {
+          id: "ns-m2",
+          phase: "Phase 2: MBBS Degree & Surgical Foundations",
+          title: "Medical School & Mandatory Internship",
+          duration: "5.5 Years",
+          keyActions: [
+            "Complete 5.5-year MBBS curriculum with high distinction in Anatomy and Surgery.",
+            "Complete 1-year rotatory internship with extended elective posting in Neurosurgery and Trauma Surgery."
+          ]
+        },
+        {
+          id: "ns-m3",
+          phase: "Phase 3: Surgical Residency (MS General Surgery)",
+          title: "Master of Surgery (MS) in General Surgery",
+          duration: "3 Years",
+          keyActions: [
+            "Master operative sterile technique, laparoscopy, trauma management, and basic vascular suturing.",
+            "Complete 3-year residency and write MS surgical dissertation.",
+            "Clear exit surgical examination to receive MS (Surgery) degree."
+          ]
+        },
+        {
+          id: "ns-m4",
+          phase: "Phase 4: NEET-SS & M.Ch in Neurosurgery",
+          title: "Magister Chirurgiae (M.Ch) Neurosurgery Super-Specialty",
+          duration: "3 Years",
+          keyActions: [
+            "Crack NEET-SS (Super Specialty) or INI-SS entrance examination.",
+            "Train under operating microscopes: craniotomy for brain tumors, aneurysm clips, skull-base surgeries, and spine instrumentation.",
+            "Publish neurosurgical case series in indexed international journals."
+          ]
+        },
+        {
+          id: "ns-m5",
+          phase: "Phase 5: Sub-Specialization & Consultant Neurosurgeon",
+          title: "Skull Base / Pediatric / Cerebrovascular Fellowship",
+          duration: "1-2 Years Post M.Ch",
+          keyActions: [
+            "Undertake advanced fellowship in minimally invasive neuro-endoscopy or endovascular neurosurgery.",
+            "Practice as Consultant Neurosurgeon at a tertiary academic medical institute or dedicated neuro-center."
           ]
         }
       ]

@@ -9,6 +9,44 @@ window.UnlostApp = {
   init() {
     this.initMobileNav();
     this.updateNavAuthState();
+    this.initScrollAnimations();
+  },
+
+  // Scroll reveal animation observer
+  initScrollAnimations() {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-revealed');
+          entry.target.classList.add('revealed');
+          
+          // Animate numeric counters if present
+          const counterEl = entry.target.querySelector('[data-count]');
+          if (counterEl && !counterEl.dataset.animated) {
+            counterEl.dataset.animated = 'true';
+            const target = parseInt(counterEl.dataset.count, 10);
+            const duration = 1200;
+            const startTime = performance.now();
+            const step = (now) => {
+              const progress = Math.min((now - startTime) / duration, 1);
+              const easeOut = 1 - Math.pow(1 - progress, 3);
+              counterEl.textContent = Math.floor(easeOut * target).toLocaleString();
+              if (progress < 1) {
+                requestAnimationFrame(step);
+              } else {
+                counterEl.textContent = target.toLocaleString() + (counterEl.dataset.suffix || '');
+              }
+            };
+            requestAnimationFrame(step);
+          }
+
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal-on-scroll, .scroll-reveal, .charcoal-card, .metric-card').forEach(el => observer.observe(el));
   },
 
   // Toggle mobile navigation menu

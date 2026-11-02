@@ -211,29 +211,34 @@ window.UnlostAuth = {
       return this.setSession(demoUser, remember);
     }
 
-    // 3. Admin Demo Account
-    if (normalizedEmail === PRIMARY_ADMIN_EMAIL && (password === 'admin123' || password.length >= 6)) {
-      const adminUser = {
-        uid: 'admin_primary',
+    // 3. Registered Users Store & Strict Credentials Validation
+    const users = this._getRegisteredUsers();
+    let user = users[normalizedEmail];
+
+    // If primary admin is logging in for first time in local fallback mode
+    if (!user && normalizedEmail === PRIMARY_ADMIN_EMAIL) {
+      const adminHash = await this.hashPassword('Admin@Unlost2026');
+      user = {
+        uid: 'admin_primary_001',
         name: 'UNLOST Administrator',
         email: PRIMARY_ADMIN_EMAIL,
-        emailVerified: true,
         role: 'admin',
+        emailVerified: true,
+        passwordHash: adminHash,
+        createdAt: '2025-01-01T00:00:00.000Z',
         onboarded: true
       };
-      return this.setSession(adminUser, remember);
+      users[PRIMARY_ADMIN_EMAIL] = user;
+      localStorage.setItem(UNLOST_STUDENTS_STORE, JSON.stringify(users));
     }
 
-    // 4. Local Registered Users Store
-    const users = this._getRegisteredUsers();
-    const user = users[normalizedEmail];
     if (!user) {
-      throw new Error('No student account found with this email. Please check your credentials or register.');
+      throw new Error('No registered account found with this email. Please check your credentials or register.');
     }
 
     const testHash = await this.hashPassword(password);
     if (user.passwordHash !== testHash) {
-      throw new Error('Incorrect password. Please try again.');
+      throw new Error('Incorrect password. Please verify and try again.');
     }
 
     return this.setSession(user, remember);

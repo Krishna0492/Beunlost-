@@ -65,42 +65,8 @@ window.UnlostCareers = {
   },
 
   handleViewProfile(careerId) {
-    const user = window.UnlostAuth ? window.UnlostAuth.getCurrentUser() : null;
     const targetUrl = `./career-details.html?id=${encodeURIComponent(careerId)}`;
-
-    if (user) {
-      window.location.href = targetUrl;
-      return;
-    }
-
-    // Unauthenticated: Show Career Profile Gate Modal
-    let modal = document.getElementById('auth-gate-modal');
-    if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'auth-gate-modal';
-      modal.className = 'modal-overlay';
-      modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; z-index:9999; padding:1.5rem;';
-      document.body.appendChild(modal);
-    }
-
-    const signInUrl = `./login.html?redirect=${encodeURIComponent(targetUrl)}`;
-    const registerUrl = `./register.html?redirect=${encodeURIComponent(targetUrl)}`;
-
-    modal.innerHTML = `
-      <div class="charcoal-card glass-card" style="max-width:480px; width:100%; text-align:center; padding:2.5rem 2rem; border:1px solid rgba(255,255,255,0.2); box-shadow:0 20px 40px rgba(0,0,0,0.8); animation: fadeIn 0.25s ease;">
-        <span class="tag tag-silver" style="margin-bottom:1rem; display:inline-block;">Protected Career Profile</span>
-        <h3 style="font-size:1.6rem; font-weight:800; color:#ffffff; line-height:1.2; margin-bottom:0.75rem;">YOUR NEXT STEP STARTS HERE.</h3>
-        <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:2rem;">
-          Sign in to explore the complete career profile, educational requirements, entrance examinations, institutes and personalised roadmap.
-        </p>
-        <div style="display:flex; flex-direction:column; gap:0.75rem;">
-          <a href="${signInUrl}" class="btn btn-primary" style="justify-content:center; padding:0.85rem; font-weight:700;">Sign In</a>
-          <a href="${registerUrl}" class="btn btn-outline" style="justify-content:center; padding:0.85rem; font-weight:700;">Create Account</a>
-          <button onclick="document.getElementById('auth-gate-modal').style.display='none'" class="btn btn-ghost btn-sm" style="margin-top:0.5rem; color:var(--text-dim);">Continue Browsing Explorer</button>
-        </div>
-      </div>
-    `;
-    modal.style.display = 'flex';
+    window.location.href = targetUrl;
   },
 
   setupFilters() {
@@ -172,6 +138,11 @@ window.UnlostCareers = {
     const isSaved = (window.UnlostApp && typeof window.UnlostApp.isSaved === 'function') ? window.UnlostApp.isSaved('careers', career.id) : false;
     const related = data.careers.filter(c => (career.relatedCareerIds || []).includes(c.id));
 
+    const user = (window.UnlostAuth && typeof window.UnlostAuth.getCurrentUser === 'function') ? window.UnlostAuth.getCurrentUser() : null;
+    const currentUrl = window.location.href;
+    const signInUrl = `./login.html?redirect=${encodeURIComponent(currentUrl)}`;
+    const registerUrl = `./register.html?redirect=${encodeURIComponent(currentUrl)}`;
+
     container.innerHTML = `
       <div style="margin-bottom: 2rem;">
         <a href="./career-explorer.html" style="color:var(--text-muted); font-size:0.85rem; display:inline-flex; align-items:center; gap:0.4rem; margin-bottom:1rem;">
@@ -183,11 +154,12 @@ window.UnlostCareers = {
             <div style="display:flex; gap:0.5rem; margin-bottom:0.75rem;">
               <span class="tag tag-silver">${career.category}</span>
               <span class="tag">${career.industry}</span>
+              ${!user ? `<span class="tag" style="background:rgba(255,255,255,0.08); color:var(--silver-metallic); border:1px solid rgba(255,255,255,0.2);">Public Preview</span>` : `<span class="tag" style="background:rgba(16,185,129,0.15); color:#6ee7b7; border:1px solid rgba(16,185,129,0.3);">Full Profile Unlocked</span>`}
             </div>
             <h1 class="section-title" style="margin-bottom:0.5rem;">${career.title}</h1>
             <p class="section-subtitle">${career.overview}</p>
           </div>
-          <div style="display:flex; gap:0.75rem;">
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
             <button onclick="window.UnlostCareers.toggleSave('${career.id}', this)" class="btn btn-outline" id="save-career-btn">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isSaved ? 'white' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
               ${isSaved ? 'Saved' : 'Save Career'}
@@ -199,9 +171,30 @@ window.UnlostCareers = {
         </div>
       </div>
 
+      ${!user ? `
+        <!-- Unauthenticated Gating Banner -->
+        <div class="charcoal-card" style="margin-bottom:2rem; padding:1.75rem; border:1px solid rgba(255,255,255,0.2); background:linear-gradient(135deg, rgba(20,20,20,0.95), rgba(10,10,10,0.98)); box-shadow:0 12px 30px rgba(0,0,0,0.7);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.25rem;">
+            <div>
+              <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--silver-metallic);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span style="font-weight:700; color:#ffffff; font-size:1.1rem; text-transform:uppercase; letter-spacing:0.04em;">Sign In to Unlock Full Career Intelligence</span>
+              </div>
+              <p style="color:var(--text-muted); font-size:0.9rem; max-width:650px; line-height:1.5;">
+                You are viewing the introductory public preview. Sign in to access full institutional requirements, entrance examination breakdowns, salary progression, verified learning resources, and sync with your personalized dashboard.
+              </p>
+            </div>
+            <div style="display:flex; gap:0.75rem;">
+              <a href="${signInUrl}" class="btn btn-primary btn-sm" style="font-weight:700; padding:0.65rem 1.25rem;">Sign In</a>
+              <a href="${registerUrl}" class="btn btn-outline btn-sm" style="font-weight:700; padding:0.65rem 1.25rem;">Create Free Account</a>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+
       <div style="display:grid; grid-template-columns: 2fr 1fr; gap:2rem;">
         <div style="display:flex; flex-direction:column; gap:2rem;">
-          <!-- What they do -->
+          <!-- What they do (Always Visible in Preview) -->
           <div class="charcoal-card">
             <h3 class="card-title">What Professionals In This Field Do</h3>
             <ul style="list-style:none; display:flex; flex-direction:column; gap:0.75rem; margin-top:1rem;">
@@ -215,7 +208,7 @@ window.UnlostCareers = {
           </div>
 
           <!-- Education & Courses -->
-          <div class="charcoal-card">
+          <div class="charcoal-card" style="${!user ? 'position:relative; overflow:hidden;' : ''}">
             <h3 class="card-title">Required Education & Recommended Courses</h3>
             <div style="margin-top:1rem;">
               <h4 style="font-size:0.85rem; text-transform:uppercase; color:var(--silver-metallic); letter-spacing:0.08em; margin-bottom:0.5rem;">Educational Pathways</h4>
@@ -247,7 +240,7 @@ window.UnlostCareers = {
         </div>
 
         <div style="display:flex; flex-direction:column; gap:2rem;">
-          <!-- Skills -->
+          <!-- Skills (Always Visible in Preview) -->
           <div class="charcoal-card">
             <h3 class="card-title">Critical Skills</h3>
             <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:1rem;">

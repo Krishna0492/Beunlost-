@@ -94,5 +94,23 @@ window.UnlostProfile = {
         }
       });
     }
+
+    const deletionBtn = document.getElementById('request-deletion-btn');
+    if (deletionBtn) {
+      deletionBtn.addEventListener('click', async () => {
+        const reason = prompt('Please specify your reason for requesting complete account and data erasure (e.g. Completed admissions / No longer need platform):');
+        if (reason === null) return;
+        
+        try {
+          if (window.UnlostFirebase && typeof window.UnlostFirebase.submitDeletionRequest === 'function') {
+            await window.UnlostFirebase.submitDeletionRequest(reason);
+          }
+          window.UnlostApp.showToast('Data erasure request submitted to administrator.');
+          alert('Your request for data erasure has been logged. Under UNLOST privacy policy, your account records and survey responses will be processed for erasure.');
+        } catch (err) {
+          alert('Could not submit deletion request: ' + (err.message || 'Please ensure you are signed in.'));
+        }
+      });
+    }
   }
 };

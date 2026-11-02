@@ -164,40 +164,82 @@ const UNLOST_DATA_STORE = {
       relatedCareerIds: ["data-scientist", "corporate-lawyer"]
     },
     {
-      id: "neurosurgeon",
-      title: "Physician & Clinical Neurosurgeon",
+      id: "general-physician",
+      title: "General Physician & Internal Medicine Specialist",
       category: "Medicine",
-      industry: "Healthcare & Surgical Medicine",
-      educationLevel: "MBBS + MS/DNB + M.Ch Neurosurgery",
-      overview: "Diagnoses and treats conditions affecting the nervous system, brain, and spinal column through delicate microsurgical procedures.",
+      industry: "Primary Healthcare & Clinical Medicine",
+      educationLevel: "MBBS + MD / DNB (General / Internal Medicine)",
+      overview: "Diagnoses systemic illnesses, manages complex chronic medical disorders (cardiovascular, metabolic, respiratory), coordinates preventive health, and delivers evidence-based clinical therapeutics.",
       whatTheyDo: [
-        "Perform intracranial neurosurgeries and spine stabilization operations.",
-        "Interpret MRI, CT scans, and neurophysiological diagnostic readouts.",
-        "Provide critical patient care in neuro-intensive care units (NICU)."
+        "Conduct comprehensive clinical examinations, differential diagnoses, and outpatient triage.",
+        "Formulate evidence-based pharmacological treatment plans, antibiotic stewardship, and lifestyle management.",
+        "Manage complex multi-morbidity in adult patients across in-patient hospital wards and intensive care units.",
+        "Counsel patients and families on chronic disease prevention, vaccination, and long-term prognosis."
       ],
       requiredEducation: [
-        "MBBS (5.5 years including 1-year compulsory rotatory internship)",
-        "MS in General Surgery followed by M.Ch in Neurosurgery (or direct 6-year DNB/M.Ch)"
+        "MBBS (Bachelor of Medicine and Bachelor of Surgery, 5.5 years including 1-year compulsory rotatory medical internship)",
+        "Postgraduate MD (Doctor of Medicine) in General Medicine or DNB in Internal Medicine (3 years)"
       ],
       relevantCourses: [
-        "Human Anatomy & Neuroanatomy",
-        "Pathology, Pharmacology, and Surgical Techniques",
-        "Clinical Neurology & Neuroradiology"
+        "Clinical Medicine, Systemic Pathology & Diagnostics",
+        "Pharmacology, Therapeutics & Toxicology",
+        "Epidemiology, Preventive & Social Medicine (PSM)",
+        "Critical Care & Emergency Resuscitation"
       ],
       importantSkills: [
-        "Microsurgical Dexterity & Endurance",
-        "Emergency Decision Making Under Pressure",
-        "Patient Empathy and Medical Ethics"
+        "Clinical Diagnostics & Stethoscope Auscultation",
+        "Emergency Patient Stabilization & ICU Care",
+        "Compassionate Communication & Bedside Manner",
+        "Pharmacological Therapeutics Assessment"
       ],
-      entranceExams: ["NEET UG", "NEET PG / INI-CET", "NEET SS"],
+      entranceExams: ["NEET UG", "NEET PG / INI-CET"],
       careerPathways: [
-        "Resident Surgeon -> Associate Neurosurgeon -> Chief of Neurosurgery"
+        "Junior Resident -> Senior Resident -> Consultant Physician -> Head of Internal Medicine / Medical Superintendent"
       ],
       learningResources: [
-        { title: "Gray's Anatomy Student References", type: "Textbook" },
-        { title: "New England Journal of Medicine Case Studies", type: "Journals" }
+        { title: "Harrison's Principles of Internal Medicine", type: "Gold Standard Textbook" },
+        { title: "The Lancet & BMJ Clinical Case Reviews", type: "Peer-Reviewed Journals" }
       ],
-      relatedCareerIds: ["bioinformatician"]
+      relatedCareerIds: ["neurosurgeon", "bioinformatician"]
+    },
+    {
+      id: "neurosurgeon",
+      title: "Clinical Neurosurgeon",
+      category: "Medicine",
+      industry: "Neurosurgery, Cranial & Spinal Operative Medicine",
+      educationLevel: "MBBS + MS General Surgery + M.Ch Neurosurgery (or 6-Year DNB)",
+      overview: "Specializes in the surgical prevention, diagnosis, evaluation, and operative treatment of disorders affecting the brain, spinal cord, cerebrovascular system, and peripheral nervous system.",
+      whatTheyDo: [
+        "Perform delicate microsurgical craniotomies, aneurysm clippings, tumor resections, and spinal instrumentation under operating microscopes.",
+        "Interpret high-resolution neuro-imaging: brain MRI, CT angiography, and intraoperative functional neuro-mapping.",
+        "Provide critical neuro-intensive resuscitation and continuous intracranial pressure (ICP) monitoring.",
+        "Lead multidisciplinary neuro-oncology, neuro-vascular, and spine trauma surgical boards."
+      ],
+      requiredEducation: [
+        "MBBS (5.5 years including 1-year rotatory internship from NMC-recognized medical college)",
+        "MS in General Surgery (3 years) followed by NEET-SS qualifying for M.Ch in Neurosurgery (3 years)",
+        "Or direct 6-year post-MBBS DNB / M.Ch in Neurosurgery at apex research centers (NIMHANS, AIIMS, PGIMER)"
+      ],
+      relevantCourses: [
+        "Gross Neuroanatomy, Neurophysiology & Neuropathology",
+        "Operative Microsurgical Techniques & Neuronavigation",
+        "Neuro-traumatology, Critical Care & Spinal Biomechanics"
+      ],
+      importantSkills: [
+        "Sub-millimeter Microsurgical Precision & Steady Hand Endurance",
+        "High-Stakes Decision Making Under Critical Hemorrhage",
+        "Advanced Neuro-imaging Interpretation (DTI, FMRI)",
+        "Patient & Family Counseling for Critical Surgical Procedures"
+      ],
+      entranceExams: ["NEET UG", "NEET PG / INI-CET", "NEET SS (Super Specialty)"],
+      careerPathways: [
+        "Neurosurgical Resident -> Junior Consultant Neurosurgeon -> Senior Consultant -> Director of Neurosurgery & Skull Base Research"
+      ],
+      learningResources: [
+        { title: "Youmans and Winn Neurological Surgery", type: "Definitive Reference" },
+        { title: "Journal of Neurosurgery (AANS)", type: "Peer-Reviewed Journal" }
+      ],
+      relatedCareerIds: ["general-physician", "bioinformatician"]
     },
     {
       id: "corporate-lawyer",
@@ -562,50 +604,122 @@ const UNLOST_DATA_STORE = {
       ]
     },
     {
-      id: "roadmap-medicine",
-      careerId: "neurosurgeon",
-      title: "Medical & Neurosurgical Pathway",
-      overview: "Rigorous clinical pathway through MBBS, qualifying exams, surgical residency, and neurosurgical sub-specialization.",
+      id: "roadmap-physician",
+      careerId: "general-physician",
+      title: "General Physician & Internal Medicine Pathway",
+      overview: "Rigorous clinical pathway through Class 12 PCB, NEET UG, MBBS undergraduate training, NEET PG, and MD in Internal Medicine.",
       milestones: [
         {
-          id: "med-m1",
-          phase: "Phase 1: Pre-Medical School",
-          title: "Class 12 Science (PCB) & NEET UG Preparation",
+          id: "phy-m1",
+          phase: "Phase 1: Pre-Medical Foundations (Class 11 - 12)",
+          title: "Senior Secondary PCB & NEET UG Preparation",
           duration: "2 Years",
           keyActions: [
-            "Master Physics, Chemistry, and Biology (NCERT curriculum focus).",
-            "Clear NEET UG with top percentile to secure admission to a government medical college."
+            "Master Class 11 and 12 Physics, Chemistry, and Biology (NCERT thorough memorization & conceptual clarity).",
+            "Solve 15,000+ objective practice questions and take 40+ full-syllabus NEET UG mock tests.",
+            "Score in the 99th+ percentile in NEET UG to secure admission to a government medical college."
           ]
         },
         {
-          id: "med-m2",
-          phase: "Phase 2: MBBS Degree",
-          title: "Undergraduate Medical Training & Compulsory Rotatory Internship",
+          id: "phy-m2",
+          phase: "Phase 2: MBBS Degree & Rotatory Internship",
+          title: "Undergraduate Clinical Training (5.5 Years)",
           duration: "5.5 Years",
           keyActions: [
-            "Study Pre-clinical (Anatomy, Physiology), Para-clinical (Pathology, Pharma), and Clinical subjects.",
-            "Complete 1-year rotatory hospital internship across emergency, surgery, and medicine wards.",
-            "Clear qualifying post-graduate exam (NEET PG / INI-CET)."
+            "Complete 4.5 years of medical curriculum: Anatomy, Physiology, Biochemistry, Pathology, Microbiology, Pharmacology, and Clinical Medicine.",
+            "Complete 12 months of mandatory rotatory internship in in-patient wards, emergency casualty, and primary healthcare centers.",
+            "Obtain State Medical Council registration and practice license."
           ]
         },
         {
-          id: "med-m3",
-          phase: "Phase 3: General Surgery Residency",
-          title: "MS / DNB in General Surgery",
-          duration: "3 Years",
+          id: "phy-m3",
+          phase: "Phase 3: Post-Graduate Medical Entrance",
+          title: "NEET PG / INI-CET Examination",
+          duration: "6-12 Months",
           keyActions: [
-            "Perform hands-on minor and assist in major surgical operations.",
-            "Acquire deep knowledge of trauma care, wound management, and sterile techniques."
+            "Prepare for 19 MBBS subjects for NEET PG or INI-CET (for AIIMS, JIPMER, PGI).",
+            "Secure high rank to match into MD General Medicine / Internal Medicine."
           ]
         },
         {
-          id: "med-m4",
-          phase: "Phase 4: Neurosurgery Super-Specialization",
-          title: "M.Ch in Neurosurgery",
+          id: "phy-m4",
+          phase: "Phase 4: MD Internal Medicine Residency",
+          title: "Junior Residency & Advanced In-Patient Therapeutics",
           duration: "3 Years",
           keyActions: [
-            "Train in microsurgery, craniotomy, spinal cord decompression, and vascular clipping.",
-            "Publish original research in peer-reviewed clinical neurosurgical journals."
+            "Manage acute emergency admissions, intensive care unit (ICU) patients, and multi-system pathology.",
+            "Conduct clinical thesis research and present papers at national internal medicine conferences.",
+            "Pass theory and clinical practical board examinations for MD General Medicine."
+          ]
+        },
+        {
+          id: "phy-m5",
+          phase: "Phase 5: Senior Residency & Clinical Practice",
+          title: "Consultant Physician Practice",
+          duration: "1-3 Years",
+          keyActions: [
+            "Serve as Senior Resident in a teaching tertiary care hospital.",
+            "Establish independent outpatient consultant practice or advance to sub-specialties (Cardiology, Nephrology, Endocrinology)."
+          ]
+        }
+      ]
+    },
+    {
+      id: "roadmap-neurosurgeon",
+      careerId: "neurosurgeon",
+      title: "Neurosurgical Super-Specialization Pathway",
+      overview: "Demanding 12-to-15 year surgical journey through MBBS, general surgical residency, and advanced neurosurgical microsurgery fellowship.",
+      milestones: [
+        {
+          id: "ns-m1",
+          phase: "Phase 1: Pre-Medical Foundations (Class 11 - 12)",
+          title: "Class 12 PCB & NEET UG Qualification",
+          duration: "2 Years",
+          keyActions: [
+            "Thorough mastery of NCERT Physics, Chemistry, and Biology.",
+            "Clear NEET UG with top rank to secure MBBS admission at an apex medical college."
+          ]
+        },
+        {
+          id: "ns-m2",
+          phase: "Phase 2: MBBS Degree & Surgical Foundations",
+          title: "Medical School & Mandatory Internship",
+          duration: "5.5 Years",
+          keyActions: [
+            "Complete 5.5-year MBBS curriculum with high distinction in Anatomy and Surgery.",
+            "Complete 1-year rotatory internship with extended elective posting in Neurosurgery and Trauma Surgery."
+          ]
+        },
+        {
+          id: "ns-m3",
+          phase: "Phase 3: Surgical Residency (MS General Surgery)",
+          title: "Master of Surgery (MS) in General Surgery",
+          duration: "3 Years",
+          keyActions: [
+            "Master operative sterile technique, laparoscopy, trauma management, and basic vascular suturing.",
+            "Complete 3-year residency and write MS surgical dissertation.",
+            "Clear exit surgical examination to receive MS (Surgery) degree."
+          ]
+        },
+        {
+          id: "ns-m4",
+          phase: "Phase 4: NEET-SS & M.Ch in Neurosurgery",
+          title: "Magister Chirurgiae (M.Ch) Neurosurgery Super-Specialty",
+          duration: "3 Years",
+          keyActions: [
+            "Crack NEET-SS (Super Specialty) or INI-SS entrance examination.",
+            "Train under operating microscopes: craniotomy for brain tumors, aneurysm clips, skull-base surgeries, and spine instrumentation.",
+            "Publish neurosurgical case series in indexed international journals."
+          ]
+        },
+        {
+          id: "ns-m5",
+          phase: "Phase 5: Sub-Specialization & Consultant Neurosurgeon",
+          title: "Skull Base / Pediatric / Cerebrovascular Fellowship",
+          duration: "1-2 Years Post M.Ch",
+          keyActions: [
+            "Undertake advanced fellowship in minimally invasive neuro-endoscopy or endovascular neurosurgery.",
+            "Practice as Consultant Neurosurgeon at a tertiary academic medical institute or dedicated neuro-center."
           ]
         }
       ]
@@ -720,122 +834,398 @@ const UNLOST_DATA_STORE = {
     {
       id: "iit-bombay",
       name: "Indian Institute of Technology Bombay (IITB)",
-      location: "Mumbai, Maharashtra, India",
-      institutionType: "Public Autonomous University (Institute of Eminence)",
-      overview: "Consistently ranked among the top technical institutes in India, renowned for world-class computer science, aerospace, and electrical engineering research.",
-      courses: ["B.Tech Computer Science", "B.Tech Electrical", "B.Des Industrial Design", "M.Tech", "Ph.D."],
-      eligibility: "10+2 with Physics, Chemistry, and Mathematics (top 20 percentile or 75%+ aggregate in Board).",
-      entranceExams: ["JEE Main -> JEE Advanced", "UCEED (for B.Des)"],
+      location: "Powai, Mumbai, Maharashtra, India",
+      institutionType: "IIT (Institute of National Importance & Eminence)",
+      overview: "Premier technical institute renowned globally for computer science, microelectronics, aerospace engineering, and pioneering startup ecosystems.",
+      courses: ["B.Tech", "Dual Degree (B.Tech + M.Tech)", "B.Des Industrial Design", "M.Tech", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Artificial Intelligence & Data Science", "Electrical Engineering", "Mechanical Engineering", "Aerospace Engineering", "Chemical Engineering", "Civil Engineering", "Metallurgical Engineering"],
+      eligibility: "Class 12 with Physics, Chemistry, and Mathematics. Must secure minimum 75% aggregate in 12th board (65% for SC/ST) or be in the top 20 percentile of qualifying board.",
+      entranceExams: ["JEE Main (Qualifying) -> JEE Advanced", "UCEED (for B.Des)"],
       officialWebsite: "https://www.iitb.ac.in",
-      admissionInfo: "Admissions strictly managed through Joint Seat Allocation Authority (JoSAA) based on All India Rank in JEE Advanced."
+      admissionPortal: "https://josaa.nic.in",
+      applicationProcedure: "Qualify JEE Main -> Secure rank in JEE Advanced -> Register and participate in Joint Seat Allocation Authority (JoSAA) web counseling rounds.",
+      feeInfo: "Approx. ₹1,15,000 to ₹1,30,000 per semester for General/OBC (Full tuition fee remission for SC/ST/PwD and economically disadvantaged students per Ministry guidelines).",
+      scholarshipsInfo: "Merit-cum-Means (MCM) Scholarship, Institute Free Studentship, Inspire Scholarship (DST), and alumni-endowed emergency aid.",
+      placementStats: { highlight: "Over 350 companies participate annually; highest domestic offers exceed ₹1 Cr; robust global research & engineering recruitment.", source: "IIT Bombay Placement Cell Annual Report", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
     },
     {
-      id: "aiims-delhi",
-      name: "All India Institute of Medical Sciences (AIIMS New Delhi)",
-      location: "New Delhi, India",
-      institutionType: "Autonomous Public Medical Institute",
-      overview: "The premier medical research and healthcare institution of India, offering unmatched clinical exposure and subsidised high-quality medical education.",
-      courses: ["MBBS", "B.Sc Nursing", "MD / MS", "M.Ch / DM"],
-      eligibility: "10+2 with Physics, Chemistry, Biology, and English with minimum 60% aggregate.",
-      entranceExams: ["NEET UG (for MBBS)", "INI-CET (for MD/MS)"],
-      officialWebsite: "https://www.aiims.edu",
-      admissionInfo: "Admission through Medical Counselling Committee (MCC) based on NEET UG All India Rank."
+      id: "iit-delhi",
+      name: "Indian Institute of Technology Delhi (IITD)",
+      location: "Hauz Khas, New Delhi, India",
+      institutionType: "IIT (Institute of National Importance & Eminence)",
+      overview: "World-class university at the heart of the national capital, excelling in computing, computational mathematics, robotics, and nanotechnology.",
+      courses: ["B.Tech", "Dual Degree", "B.Des", "M.Tech", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Mathematics & Computing", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Chemical Engineering", "Biochemical Engineering & Biotechnology", "Textile Technology", "Energy Engineering"],
+      eligibility: "10+2 with PCM; minimum 75% aggregate marks in 12th board or top 20 percentile in respective board.",
+      entranceExams: ["JEE Main -> JEE Advanced", "UCEED (B.Des)"],
+      officialWebsite: "https://home.iitd.ac.in",
+      admissionPortal: "https://josaa.nic.in",
+      applicationProcedure: "Admissions strictly allocated via JoSAA centralized counseling based on All India Rank in JEE Advanced.",
+      feeInfo: "Tuition fee ₹1,00,000 per semester for General category; 100% waiver for parental income below ₹1 Lakh; two-thirds waiver for income between ₹1-5 Lakhs.",
+      scholarshipsInfo: "Institute Merit-cum-Means, Donor-sponsored scholarships, National Fellowship schemes.",
+      placementStats: { highlight: "1,050+ unique job offers secured; core engineering, algorithmic trading, software development, and deep tech roles.", source: "Office of Career Services (OCS) IIT Delhi", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
     },
     {
-      id: "nid-ahmedabad",
-      name: "National Institute of Design (NID)",
-      location: "Ahmedabad, Gujarat, India",
-      institutionType: "Autonomous Institution of National Importance",
-      overview: "Pioneering design institution in India offering world-renowned programs in industrial design, communication design, textile, and IT integrated design.",
-      courses: ["B.Des Product Design", "B.Des Graphic Design", "B.Des Animation", "M.Des"],
-      eligibility: "10+2 in any stream (Science, Commerce, Arts) from a recognized board.",
-      entranceExams: ["NID DAT (Design Aptitude Test - Prelims and Mains)"],
-      officialWebsite: "https://www.nid.edu",
-      admissionInfo: "Two-stage admission test: DAT Prelims followed by DAT Mains studio test and personal interviews."
+      id: "iit-madras",
+      name: "Indian Institute of Technology Madras (IITM)",
+      location: "Chennai, Tamil Nadu, India",
+      institutionType: "IIT (NIRF Overall Rank #1 & Institute of Eminence)",
+      overview: "Ranked #1 overall by NIRF for multiple consecutive years, renowned for IITM Research Park, quantum computing, naval architecture, and deep-tech innovation.",
+      courses: ["B.Tech", "Dual Degree", "BS in Medical Sciences & Engineering", "M.Tech", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Data Science & Artificial Intelligence", "Electrical Engineering", "Mechanical Engineering", "Aerospace Engineering", "Naval Architecture & Ocean Engineering", "Chemical Engineering", "Civil Engineering"],
+      eligibility: "10+2 with PCM, minimum 75% aggregate or top 20 percentile of qualifying state/central board.",
+      entranceExams: ["JEE Main -> JEE Advanced"],
+      officialWebsite: "https://www.iitm.ac.in",
+      admissionPortal: "https://josaa.nic.in",
+      applicationProcedure: "Centralized seat allocation through JoSAA based on JEE Advanced All India Rank.",
+      feeInfo: "Approx. ₹1,12,000 per semester (General category); full tuition waiver for SC/ST/PwD students.",
+      scholarshipsInfo: "Institute Free Studentship, MCM Scholarship, Girish Reddy Scholarship, Aditya Birla Scholarship.",
+      placementStats: { highlight: "1,200+ offers across 250+ recruiting entities including top global research labs and Fortune 500 tech leaders.", source: "IIT Madras Career Pathway Centre", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
     },
     {
-      id: "nlsiu-bangalore",
-      name: "National Law School of India University (NLSIU)",
-      location: "Bengaluru, Karnataka, India",
-      institutionType: "Public National Law University",
-      overview: "The gold standard of legal education in South Asia, pioneering 5-year integrated law degrees with top corporate and judicial placement records.",
-      courses: ["BA LLB (Hons)", "LLM", "Ph.D. in Law"],
-      eligibility: "10+2 with minimum 45% marks for General category (40% for SC/ST).",
-      entranceExams: ["CLAT (Common Law Admission Test)"],
-      officialWebsite: "https://www.nls.ac.in",
-      admissionInfo: "Centralized counselling through the Consortium of National Law Universities based on CLAT merit."
+      id: "iit-kanpur",
+      name: "Indian Institute of Technology Kanpur (IITK)",
+      location: "Kalyanpur, Kanpur, Uttar Pradesh, India",
+      institutionType: "IIT (Institute of National Importance)",
+      overview: "Pioneer of computer science education in India with its legendary flight laboratory, wind tunnels, cybersecurity C3i center, and theoretical physics research.",
+      courses: ["B.Tech", "BS (4-Year Pure Sciences)", "Dual Degree", "M.Tech", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Electrical Engineering", "Mechanical Engineering", "Aerospace Engineering", "Chemical Engineering", "Civil Engineering", "Materials Science & Engineering", "Earth Sciences"],
+      eligibility: "Class 12 with PCM from recognized board, adhering to JoSAA 75% / top 20 percentile criterion.",
+      entranceExams: ["JEE Main -> JEE Advanced"],
+      officialWebsite: "https://www.iitk.ac.in",
+      admissionPortal: "https://josaa.nic.in",
+      applicationProcedure: "JoSAA centralized counseling seat allocation based solely on JEE Advanced rank.",
+      feeInfo: "Approx. ₹1,18,000 per semester for General/OBC; graded concessions based on verified parental income.",
+      scholarshipsInfo: "Donor Merit Scholarship, MCM Scholarship (free basic mess + ₹1,000 monthly stipend for eligible students).",
+      placementStats: { highlight: "985+ job offers in Phase 1; dominant recruiting in software, quantitative analysis, core engineering, and R&D.", source: "Students Placement Office (SPO) IIT Kanpur", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "iit-kharagpur",
+      name: "Indian Institute of Technology Kharagpur (IIT KGP)",
+      location: "Kharagpur, West Bengal, India",
+      institutionType: "IIT (The First IIT, Established 1951)",
+      overview: "The largest and oldest IIT campus in India spanning 2,100 acres, offering interdisciplinary programs across artificial intelligence, micro-specializations, and law.",
+      courses: ["B.Tech (Hons)", "Integrated M.Tech", "B.Arch", "M.Sc", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Electronics & Electrical Communication", "Electrical Engineering", "Mechanical Engineering", "Aerospace Engineering", "Chemical Engineering", "Civil Engineering", "Ocean Engineering & Naval Architecture", "Industrial & Systems Engineering", "Mining Engineering"],
+      eligibility: "10+2 with PCM, 75% aggregate or top 20 percentile in Board.",
+      entranceExams: ["JEE Main -> JEE Advanced", "AAT (Architecture Aptitude Test for B.Arch)"],
+      officialWebsite: "https://www.iitkgp.ac.in",
+      admissionPortal: "https://josaa.nic.in",
+      applicationProcedure: "JoSAA counseling allotment based on JEE Advanced All India Rank.",
+      feeInfo: "Approx. ₹1,25,000 per semester for General category; standardized income-based subsidies.",
+      scholarshipsInfo: "Pandit Ishwar Chandra Vidyasagar Scholarship, Inspire Fellowship, MCM Scheme.",
+      placementStats: { highlight: "1,600+ offers received; prominent participation from semiconductor, cloud computing, and finance industries.", source: "Career Development Centre (CDC) IIT Kharagpur", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "iit-roorkee",
+      name: "Indian Institute of Technology Roorkee (IITR)",
+      location: "Roorkee, Uttarakhand, India",
+      institutionType: "IIT (Heritage Technical Institution, Estd 1847)",
+      overview: "Oldest technical institution in Asia, celebrated for cutting-edge civil, earthquake engineering, renewable energy, and competitive programming culture.",
+      courses: ["B.Tech", "Integrated M.Tech", "B.Arch", "M.Tech", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Data Science & Artificial Intelligence", "Electronics & Communication", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Chemical Engineering", "Biotechnology", "Production & Industrial Engineering"],
+      eligibility: "10+2 with PCM, 75% aggregate or top 20 percentile in 12th Board examinations.",
+      entranceExams: ["JEE Main -> JEE Advanced"],
+      officialWebsite: "https://www.iitr.ac.in",
+      admissionPortal: "https://josaa.nic.in",
+      applicationProcedure: "JoSAA centralized choice filling and seat allocation based on JEE Advanced rank.",
+      feeInfo: "Approx. ₹1,14,000 per semester for General students; government fee waiver policies apply.",
+      scholarshipsInfo: "James Thomason Scholarship for top rankers, MCM Institute Scholarships.",
+      placementStats: { highlight: "Over 800 offers in initial days; strong hiring from systems software, quantitative finance, and civil infrastructure.", source: "Placement and Internship Cell IIT Roorkee", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "iit-hyderabad",
+      name: "Indian Institute of Technology Hyderabad (IITH)",
+      location: "Kandi, Sangareddy, Telangana, India",
+      institutionType: "IIT (Second Generation IIT, Estd 2008)",
+      overview: "Rapidly rising premier IIT famous for launching India’s first B.Tech in Artificial Intelligence, fractal academics, and close Japanese university partnerships.",
+      courses: ["B.Tech", "B.Des", "M.Tech", "Ph.D."],
+      engineeringBranches: ["Artificial Intelligence", "Computer Science & Engineering", "Electrical Engineering", "Biomedical Engineering", "Mechanical & Aerospace Engineering", "Chemical Engineering", "Civil Engineering", "Materials Science & Metallurgical Engineering"],
+      eligibility: "10+2 with PCM, 75% in Board or top 20 percentile.",
+      entranceExams: ["JEE Main -> JEE Advanced", "UCEED (B.Des)"],
+      officialWebsite: "https://www.iith.ac.in",
+      admissionPortal: "https://josaa.nic.in",
+      applicationProcedure: "JoSAA online seat allocation rounds based on JEE Advanced rank.",
+      feeInfo: "Approx. ₹1,15,000 per semester; full fee remission for SC/ST and lowest income brackets.",
+      scholarshipsInfo: "Government of India Post-Matric Scholarships, Institute MCM, Japanese Monbukagakusho fellowships.",
+      placementStats: { highlight: "Over 500 job offers; exceptional placement ratios in AI/ML, autonomous systems, and semiconductor design.", source: "Office of Career Services IIT Hyderabad", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "bits-pilani",
+      name: "Birla Institute of Technology and Science (BITS Pilani)",
+      location: "Pilani (Rajasthan), Goa Campus, Hyderabad Campus, India",
+      institutionType: "Private Deemed University (Institute of Eminence)",
+      overview: "World-renowned institution recognized for its merit-only admissions, zero attendance policy, robust Practice School (PS-I & PS-II) industry internships, and dual degree programs.",
+      courses: ["B.E. (Hons)", "M.Sc (Hons) Dual Degree", "B.Pharm", "M.E.", "Ph.D."],
+      engineeringBranches: ["Computer Science", "Electronics & Communication", "Electrical & Electronics", "Mechanical Engineering", "Chemical Engineering", "Civil Engineering", "Manufacturing Engineering", "Electronics & Instrumentation"],
+      eligibility: "10+2 from a recognized board with minimum 75% aggregate in Physics, Chemistry, and Mathematics, and at least 60% in each individual subject.",
+      entranceExams: ["BITSAT (BITS Admission Test)"],
+      officialWebsite: "https://www.bits-pilani.ac.in",
+      admissionPortal: "https://www.bitsadmission.com",
+      applicationProcedure: "Register for BITSAT -> Appear in computer-based entrance test (Session 1 & Session 2) -> Submit branch preferences based on normalized score.",
+      feeInfo: "Approx. ₹2,75,000 per semester (Tuition fee). Hostel and student mess charges billed separately.",
+      scholarshipsInfo: "Generous Merit and Merit-cum-Means (MCM) scholarships covering 15% to 100% of tuition for over 30% of enrolled students.",
+      placementStats: { highlight: "Over 90% placement rate across campuses; top recruiting in software, FinTech, analytics, and mechanical core.", source: "BITS Central Placement Division Report", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "nit-trichy",
+      name: "National Institute of Technology Tiruchirappalli (NITT)",
+      location: "Tiruchirappalli, Tamil Nadu, India",
+      institutionType: "NIT (Consistently Ranked #1 NIT by NIRF)",
+      overview: "India’s highest-ranked National Institute of Technology, acclaimed for exceptional mechanical, electrical, and computer science engineering training.",
+      courses: ["B.Tech", "B.Arch", "M.Tech", "MCA", "MBA", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Electronics & Communication", "Electrical & Electronics", "Mechanical Engineering", "Civil Engineering", "Chemical Engineering", "Metallurgical & Materials Engineering", "Production Engineering", "Instrumentation & Control"],
+      eligibility: "10+2 with PCM; 75% aggregate in Board or top 20 percentile.",
+      entranceExams: ["JEE Main"],
+      officialWebsite: "https://www.nitt.edu",
+      admissionPortal: "https://josaa.nic.in",
+      applicationProcedure: "Admissions strictly managed via JoSAA and CSAB special rounds based on JEE Main All India Rank.",
+      feeInfo: "Tuition fee approx. ₹62,500 per semester for General/OBC; 100% fee waiver for family income below ₹1 Lakh; partial for ₹1-5 Lakhs.",
+      scholarshipsInfo: "Post-Matric Scholarships, Central Sector Schemes, Institute Merit-cum-Means.",
+      placementStats: { highlight: "90%+ placement across departments; 220+ core and tech enterprises recruit during campus drive.", source: "NITT Training and Placement Cell", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "nit-surathkal",
+      name: "National Institute of Technology Karnataka (NITK Surathkal)",
+      location: "Mangaluru, Karnataka, India",
+      institutionType: "NIT (Institute of National Importance)",
+      overview: "Picturesque coastal campus featuring its own private beach and deepwater research facilities; renowned for computer science, IT, and marine structures.",
+      courses: ["B.Tech", "M.Tech", "MCA", "MBA", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Artificial Intelligence", "Information Technology", "Electronics & Communication", "Electrical & Electronics", "Mechanical Engineering", "Civil Engineering", "Chemical Engineering", "Mining Engineering", "Metallurgical & Materials"],
+      eligibility: "10+2 with PCM; minimum 75% aggregate in 12th Board examinations.",
+      entranceExams: ["JEE Main"],
+      officialWebsite: "https://www.nitk.ac.in",
+      admissionPortal: "https://josaa.nic.in",
+      applicationProcedure: "Centralized counseling via JoSAA / CSAB based on JEE Main All India Rank (Home State and Other State quotas).",
+      feeInfo: "Tuition fee ₹62,500 per semester for General category; government income-based subsidies strictly honored.",
+      scholarshipsInfo: "Central and State Government Merit-cum-Means scholarships; alumni welfare endowment funds.",
+      placementStats: { highlight: "Consistent 92%+ placement for circuit branches; highest offers above ₹50 LPA; heavy presence of tech MNCs.", source: "NITK Career Development Centre", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "nit-warangal",
+      name: "National Institute of Technology Warangal (NITW)",
+      location: "Warangal, Telangana, India",
+      institutionType: "NIT (The First Regional Engineering College in India)",
+      overview: "The pioneer of the REC/NIT system in India (estd 1959 by Jawaharlal Nehru), recognized for outstanding alumni, electrical power systems, and computer engineering.",
+      courses: ["B.Tech", "Integrated M.Sc", "M.Tech", "MCA", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Electronics & Communication", "Electrical & Electronics", "Mechanical Engineering", "Civil Engineering", "Chemical Engineering", "Biotechnology", "Metallurgical & Materials"],
+      eligibility: "10+2 with PCM, 75% aggregate or top 20 percentile in 12th Board.",
+      entranceExams: ["JEE Main"],
+      officialWebsite: "https://www.nitw.ac.in",
+      admissionPortal: "https://josaa.nic.in",
+      applicationProcedure: "JoSAA / CSAB counseling seat allotment based on JEE Main rank.",
+      feeInfo: "Tuition fee ₹62,500 per semester; full waiver for SC/ST and parental income under ₹1 Lakh.",
+      scholarshipsInfo: "National Scholarship Portal (NSP) schemes, NITW Alumni Association financial assistance.",
+      placementStats: { highlight: "1,100+ offers; strong recruitment across software giants, analytics consulting, and public sector units (PSUs).", source: "NIT Warangal Centre for Career Planning", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "iiit-hyderabad",
+      name: "International Institute of Information Technology Hyderabad (IIITH)",
+      location: "Gachibowli, Hyderabad, Telangana, India",
+      institutionType: "Autonomous / Not-for-Profit Public-Private Partnership",
+      overview: "India's undisputed powerhouse in competitive programming, computer vision, natural language processing (LTRC), and robotics; consistently outranks top IITs in open source and research output.",
+      courses: ["B.Tech (CSE, ECE)", "Dual Degree B.Tech + MS by Research (5 Years)", "M.Tech", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Electronics & Communication Engineering", "Computer Science + Computational Natural Sciences (CND)", "Computer Science + Human Sciences (CHD)"],
+      eligibility: "Class 12 with Physics, Chemistry, and Mathematics from any recognized board.",
+      entranceExams: ["JEE Main (High Cutoff Percentile, typically 99.8%+)", "UGEE (Undergraduate Entrance Exam for Dual Degree)", "Olympiad / SPEC Mode"],
+      officialWebsite: "https://www.iiit.ac.in",
+      admissionPortal: "https://ugadmissions.iiit.ac.in",
+      applicationProcedure: "Independent institutional application: register separately at IIIT Hyderabad portal with JEE Main percentile or appear for UGEE test + interview.",
+      feeInfo: "Approx. ₹2,00,000 per semester (Tuition fee). Hostel and food charges separate.",
+      scholarshipsInfo: "Need-based Financial Assistance (NFA) covering up to 100% of tuition fees through institute corpus and alumni sponsorships.",
+      placementStats: { highlight: "100% placement track record; median domestic salary routinely exceeds ₹30 LPA; major presence in Google, Meta, Microsoft, Apple, and elite research labs.", source: "IIIT Hyderabad Placement Office", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "iiit-bangalore",
+      name: "International Institute of Information Technology Bangalore (IIITB)",
+      location: "Electronic City, Bengaluru, Karnataka, India",
+      institutionType: "Deemed University (Non-Profit Public-Private Partnership)",
+      overview: "Located in the heart of India's Silicon Valley, famous for integrated 5-year M.Tech and 4-year B.Tech programs in computer science and data engineering.",
+      courses: ["B.Tech", "Integrated M.Tech (iM.Tech 5-Year)", "M.Tech", "M.Sc Digital Society", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Electronics & Communication Engineering", "Data Science & Artificial Intelligence"],
+      eligibility: "10+2 with PCM with first class aggregate.",
+      entranceExams: ["JEE Main (All India Rank)"],
+      officialWebsite: "https://www.iiitb.ac.in",
+      admissionPortal: "https://www.iiitb.ac.in/admissions",
+      applicationProcedure: "Direct application on IIIT Bangalore official portal using JEE Main All India Common Rank List (CRL). No JoSAA counseling required.",
+      feeInfo: "Approx. ₹2,25,000 to ₹2,50,000 per semester.",
+      scholarshipsInfo: "Utkarsha Scholarship (100% tuition waiver for top 25 JEE Main rankers who join), Dean’s Merit List scholarships.",
+      placementStats: { highlight: "Average salary approx. ₹25+ LPA for iM.Tech/B.Tech graduates; 100% placement in Electronic City tech giants and global unicorns.", source: "IIIT Bangalore Career Guidance Cell", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "dtu-delhi",
+      name: "Delhi Technological University (DTU - Formerly DCE)",
+      location: "Rohini, New Delhi, India",
+      institutionType: "State Government Technical University",
+      overview: "Formerly Delhi College of Engineering (estd 1941), possessing legendary alumni legacy, peer culture, and high volume campus recruitment across software and core manufacturing.",
+      courses: ["B.Tech", "M.Tech", "MBA", "Ph.D."],
+      engineeringBranches: ["Computer Engineering", "Information Technology", "Software Engineering", "Mathematics & Computing", "Electronics & Communication", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Biotechnology", "Automobile Engineering"],
+      eligibility: "10+2 with PCM, minimum 60% aggregate in Physics, Chemistry, and Mathematics.",
+      entranceExams: ["JEE Main"],
+      officialWebsite: "https://www.dtu.ac.in",
+      admissionPortal: "https://jacdelhi.admissions.nic.in",
+      applicationProcedure: "Joint Admission Counseling (JAC Delhi) portal based on JEE Main All India Rank (85% Delhi Region Quota, 15% Outside Delhi Quota).",
+      feeInfo: "Approx. ₹2,10,000 to ₹2,25,000 annually.",
+      scholarshipsInfo: "Delhi Govt Merit-cum-Means Financial Assistance Scheme (100% fee waiver for NFSA/Priority card holders).",
+      placementStats: { highlight: "Over 1,800 offers generated; highest domestic compensation top tier; massive recruitment from Apple, Google, Amazon, Microsoft, and PSU firms.", source: "DTU Training and Placement Department", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "coep-pune",
+      name: "COEP Technological University (Formerly College of Engineering Pune)",
+      location: "Shivajinagar, Pune, Maharashtra, India",
+      institutionType: "State Public Unitary Technological University (Estd 1854)",
+      overview: "Third oldest engineering institution in Asia, alma mater of Sir M. Visvesvaraya; known for student clubs (satellite team, robotics, formula student) and strong Maharashtra industrial connect.",
+      courses: ["B.Tech", "M.Tech", "Ph.D."],
+      engineeringBranches: ["Computer Engineering", "Artificial Intelligence & Robotics", "Electronics & Telecommunication", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Metallurgy & Material Science", "Manufacturing Engineering", "Instrumentation & Control"],
+      eligibility: "10+2 with PCM; passed MHT-CET or JEE Main with valid non-zero score.",
+      entranceExams: ["MHT-CET (State Quota)", "JEE Main (All India Quota)"],
+      officialWebsite: "https://www.coeptech.ac.in",
+      admissionPortal: "https://cetcell.mahacet.org",
+      applicationProcedure: "State Common Entrance Test Cell Maharashtra Centralized Admission Process (CAP) rounds.",
+      feeInfo: "Approx. ₹95,000 per year (Subsidized public fee structure).",
+      scholarshipsInfo: "Government of Maharashtra EBC Scholarship (50% tuition waiver for economic criteria), Rajarshi Chhatrapati Shahu Maharaj Shikshan Shulkh Shishyavrutti Yojna.",
+      placementStats: { highlight: "85%+ placement rate across classical and computer branches; top recruiting from automotive, IT services, and defense engineering.", source: "COEP Training and Placement Cell", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "jadavpur-engineering",
+      name: "Jadavpur University Faculty of Engineering & Technology (JU FET)",
+      location: "Kolkata, West Bengal, India",
+      institutionType: "State Autonomous Research University (NIRF Top 10)",
+      overview: "Celebrated for having the most economical fee structure in the country (less than ₹10,000 for full 4 years of engineering) coupled with unmatched academic prestige and research.",
+      courses: ["B.E.", "B.Tech", "M.E.", "M.Tech", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "Information Technology", "Electronics & Telecommunication", "Electrical Engineering", "Mechanical Engineering", "Chemical Engineering", "Civil Engineering", "Instrumentation & Electronics", "Power Engineering", "Production Engineering"],
+      eligibility: "10+2 with PCM with minimum 60% in Physics, Chemistry, Math and 30% in English.",
+      entranceExams: ["WBJEE (West Bengal Joint Entrance Examination)"],
+      officialWebsite: "https://www.jaduniv.edu.in",
+      admissionPortal: "https://wbjeeb.nic.in",
+      applicationProcedure: "WBJEE centralized e-counseling based on General Merit Rank (GMR).",
+      feeInfo: "Incredible value: Tuition fee is approx. ₹2,400 to ₹3,000 per year for classical engineering branches; ₹30,000 per year for Information Technology.",
+      scholarshipsInfo: "Swami Vivekananda Merit-cum-Means Scholarship (SVMCM), Kanyashree Prakalpa (K3), National Scholarship Portal schemes.",
+      placementStats: { highlight: "Near 100% placement in IT and circuit branches; over 85% in mechanical/chemical; extraordinary Return on Investment (ROI) nationwide.", source: "Jadavpur University Placement Office", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "vit-vellore",
+      name: "Vellore Institute of Technology (VIT)",
+      location: "Vellore, Tamil Nadu, India",
+      institutionType: "Deemed Private University (Institute of Eminence)",
+      overview: "Large-scale private technological university with ABET-accredited programs, fully flexible credit system (FFCS), and extensive global university credit transfers.",
+      courses: ["B.Tech", "Integrated M.Tech", "M.Tech", "MCA", "Ph.D."],
+      engineeringBranches: ["Computer Science & Engineering", "CSE with AI & Machine Learning", "CSE with Data Science", "Information Security", "Electronics & Communication", "Electrical & Electronics", "Mechanical Engineering", "Biotechnology", "Civil Engineering"],
+      eligibility: "10+2 with Physics, Chemistry, and Mathematics/Biology with minimum 60% aggregate (50% for SC/ST and North Eastern states).",
+      entranceExams: ["VITEEE (VIT Engineering Entrance Examination)"],
+      officialWebsite: "https://vit.ac.in",
+      admissionPortal: "https://viteee.vit.ac.in",
+      applicationProcedure: "Register and appear for VITEEE computer-based test -> Participate in rank-based online counseling across 5 fee categories.",
+      feeInfo: "Category 1 Tuition approx. ₹1,98,000 per year; Category 2-5 progressively higher depending on entrance rank.",
+      scholarshipsInfo: "GV School Development Programme (GVSDP): 100% tuition waiver for state board/CBSE board rankers and top 50 VITEEE rankers.",
+      placementStats: { highlight: "Limca Book of Records for maximum campus recruitments; 900+ visiting companies; super dream offers exceeding ₹10 LPA for over 3,000 students.", source: "VIT Career Development Centre", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
+    },
+    {
+      id: "thapar-patiala",
+      name: "Thapar Institute of Engineering and Technology (TIET)",
+      location: "Patiala, Punjab, India",
+      institutionType: "Private Deemed University (Established 1956)",
+      overview: "Respected heritage institution with academic collaboration with Trinity College Dublin; renowned for engineering curriculum, modern campus infrastructure, and alumni network.",
+      courses: ["B.E.", "B.Tech", "M.E.", "M.Tech", "Ph.D."],
+      engineeringBranches: ["Computer Engineering", "Computer Science & Business Systems", "Electronics & Communication", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Biotechnology", "Mechatronics"],
+      eligibility: "10+2 with PCM with at least 70% aggregate marks (65% for SC/ST).",
+      entranceExams: ["JEE Main (Mode 1 - 50% seats)", "Class 12 Board Percentage (Mode 2 - 50% seats)"],
+      officialWebsite: "https://www.thapar.edu",
+      admissionPortal: "https://admissions.thapar.edu",
+      applicationProcedure: "Direct application on Thapar University admissions portal; evaluated on JEE Main score or Class 12 PCM percentage.",
+      feeInfo: "Approx. ₹2,15,000 to ₹2,45,000 per semester depending on the engineering branch.",
+      scholarshipsInfo: "Merit scholarships covering full tuition for candidates with high JEE Main ranks or 95%+ marks in Class 12.",
+      placementStats: { highlight: "350+ recruiters; 1,800+ total offers; prominent hiring from Zomato, DE Shaw, JP Morgan, Cisco, and Maruti Suzuki.", source: "TIET Centre for Industrial Liaison & Placement", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
     },
     {
       id: "iisc-bangalore",
       name: "Indian Institute of Science (IISc)",
       location: "Bengaluru, Karnataka, India",
       institutionType: "Public Research University (Institute of Eminence)",
-      overview: "India's highest-ranked research university dedicated to scientific discovery, advanced materials, computing, and biotechnology.",
-      courses: ["Bachelor of Science (Research)", "B.Tech Mathematics and Computing", "M.Sc", "Ph.D."],
-      eligibility: "10+2 with Physics, Chemistry, and Mathematics (first class or 60%+ aggregate).",
-      entranceExams: ["JEE Main", "JEE Advanced", "NEET UG", "GATE"],
+      overview: "India's highest-ranked university globally for scientific research and doctoral studies; offers cutting-edge B.Tech in Mathematics and Computing and Bachelor of Science (Research).",
+      courses: ["B.Tech Mathematics and Computing", "Bachelor of Science (Research)", "M.Tech", "Integrated Ph.D."],
+      engineeringBranches: ["Mathematics & Computing", "Computational Data Science", "Electrical Communication", "Mechanical Engineering", "Aerospace Engineering", "Materials Engineering"],
+      eligibility: "10+2 with Physics, Chemistry, and Mathematics with first-class marks (minimum 60%).",
+      entranceExams: ["JEE Advanced (for B.Tech)", "JEE Main / JEE Adv / NEET UG (for BS Research)"],
       officialWebsite: "https://iisc.ac.in",
-      admissionInfo: "Merit-based admissions evaluating ranks in JEE Advanced, JEE Main, or NEET UG."
+      admissionPortal: "https://admissions.iisc.ac.in",
+      applicationProcedure: "Direct application to IISc online portal with valid score in JEE Advanced or JEE Main.",
+      feeInfo: "Highly subsidized: Approx. ₹30,000 to ₹35,000 per semester.",
+      scholarshipsInfo: "All students receive standard national or institutional fellowship/stipend based on merit.",
+      placementStats: { highlight: "Preeminent destination for deep tech research scientists, quantitative finance teams, and doctoral fellowship placement at MIT, Stanford, and Cambridge.", source: "IISc Office of Career Counselling and Placement", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
     },
     {
-      id: "iit-delhi",
-      name: "Indian Institute of Technology Delhi (IITD)",
-      location: "New Delhi, India",
-      institutionType: "Public Autonomous University (Institute of Eminence)",
-      overview: "Leading engineering and technology university with state-of-the-art research centers in artificial intelligence, robotics, and energy.",
-      courses: ["B.Tech Computer Science", "B.Tech Mathematics & Computing", "B.Tech Mechanical", "M.Tech"],
-      eligibility: "10+2 with Physics, Chemistry, and Mathematics.",
-      entranceExams: ["JEE Main -> JEE Advanced"],
-      officialWebsite: "https://home.iitd.ac.in",
-      admissionInfo: "Admission through JoSAA counselling based on JEE Advanced rank."
+      id: "aiims-delhi",
+      name: "All India Institute of Medical Sciences (AIIMS New Delhi)",
+      location: "Ansari Nagar, New Delhi, India",
+      institutionType: "Autonomous Public Medical Institute of National Importance",
+      overview: "The premier medical research and healthcare institution of India, offering unmatched clinical exposure, advanced surgical theaters, and subsidized world-class medical education.",
+      courses: ["MBBS", "B.Sc Nursing", "MD / MS", "M.Ch / DM", "Ph.D."],
+      engineeringBranches: ["Not Applicable (Medical College)"],
+      eligibility: "10+2 with Physics, Chemistry, Biology, and English with minimum 60% aggregate (50% for SC/ST).",
+      entranceExams: ["NEET UG (for MBBS)", "INI-CET (for MD/MS)"],
+      officialWebsite: "https://www.aiims.edu",
+      admissionPortal: "https://mcc.nic.in",
+      applicationProcedure: "Medical Counselling Committee (MCC) All India Quota 100% counseling based on NEET UG All India Rank.",
+      feeInfo: "Approx. ₹1,628 for the ENTIRE 5.5-year MBBS course including tuition, hostel, and registration fees.",
+      scholarshipsInfo: "Subsidized government education; external DST/DBT research stipends.",
+      placementStats: { highlight: "Graduates secure residency positions in premier national and international teaching hospitals (USMLE, PLAB, INI-CET).", source: "AIIMS Academic Section", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
     },
     {
-      id: "bits-pilani",
-      name: "Birla Institute of Technology and Science (BITS Pilani)",
-      location: "Pilani, Rajasthan, India",
-      institutionType: "Private Deemed University (Institute of Eminence)",
-      overview: "Renowned institution with zero attendance policy, strong alumni entrepreneurship culture, and dual degree program options.",
-      courses: ["B.E. Computer Science", "B.E. Electrical", "M.Sc Dual Degree", "B.Pharm"],
-      eligibility: "10+2 with minimum 75% aggregate in Physics, Chemistry, and Math with at least 60% in each subject.",
-      entranceExams: ["BITSAT"],
-      officialWebsite: "https://www.bits-pilani.ac.in",
-      admissionInfo: "Merit based on BITSAT computer-based entrance examination."
+      id: "nid-ahmedabad",
+      name: "National Institute of Design (NID)",
+      location: "Paldi, Ahmedabad, Gujarat, India",
+      institutionType: "Autonomous Institution of National Importance",
+      overview: "Pioneering design institution in India offering world-renowned programs in industrial design, communication design, textile design, and digital interaction systems.",
+      courses: ["B.Des Product Design", "B.Des Graphic Design", "B.Des Animation Film", "B.Des Film & Video", "M.Des"],
+      engineeringBranches: ["Design & Human Interaction (Industrial / Digital)"],
+      eligibility: "10+2 in any stream (Science, Commerce, Arts) from a recognized board.",
+      entranceExams: ["NID DAT (Design Aptitude Test - Prelims and Mains)"],
+      officialWebsite: "https://www.nid.edu",
+      admissionPortal: "https://admissions.nid.edu",
+      applicationProcedure: "Two-stage admission test: DAT Prelims (written/drawing) -> DAT Mains (Studio Test and Interview).",
+      feeInfo: "Approx. ₹1,80,000 to ₹2,10,000 per semester.",
+      scholarshipsInfo: "Financial Aid Scheme for underprivileged students; Ford Foundation and industry design endowments.",
+      placementStats: { highlight: "Top design studios, consumer tech firms, and automotive brands recruit for UI/UX, product styling, and brand identity.", source: "NID Industry Interface Cell", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
     },
     {
-      id: "iim-ahmedabad",
-      name: "Indian Institute of Management Ahmedabad (IIMA)",
-      location: "Ahmedabad, Gujarat, India",
-      institutionType: "Autonomous Public Business School",
-      overview: "The top-ranked management institute in India, world-famous for its rigorous case-study pedagogy and executive leadership.",
-      courses: ["Post Graduate Programme in Management (MBA)", "PGP-FABM", "ePGP", "Ph.D."],
-      eligibility: "Bachelor's degree in any discipline with at least 50% marks or equivalent CGPA.",
-      entranceExams: ["CAT (Common Admission Test)", "GMAT"],
-      officialWebsite: "https://www.iima.ac.in",
-      admissionInfo: "Two-stage selection: CAT percentile shortlisting followed by Analytical Writing Test (AWT) and Personal Interview."
-    },
-    {
-      id: "st-stephens",
-      name: "St. Stephen's College, University of Delhi",
-      location: "New Delhi, India",
-      institutionType: "Constituent College of Delhi University",
-      overview: "One of India's oldest and most prestigious liberal arts and sciences colleges, known for humanities, economics, and mathematics.",
-      courses: ["BA (Hons) Economics", "BA (Hons) History", "B.Sc (Hons) Physics", "B.Sc (Hons) Mathematics"],
-      eligibility: "10+2 from a recognized board with required domain subjects.",
-      entranceExams: ["CUET UG (Common University Entrance Test)"],
-      officialWebsite: "https://www.ststephens.edu",
-      admissionInfo: "Admissions through Common Seat Allocation System (CSAS) based on CUET UG percentile."
-    },
-    {
-      id: "cmc-vellore",
-      name: "Christian Medical College (CMC)",
-      location: "Vellore, Tamil Nadu, India",
-      institutionType: "Private Medical College & Teaching Hospital",
-      overview: "Globally respected medical institution celebrated for excellence in clinical teaching, ethical medicine, and subsidised rural health care.",
-      courses: ["MBBS", "B.Sc Nursing", "Allied Health Sciences", "MD / MS"],
-      eligibility: "10+2 with Physics, Chemistry, Biology, and English with qualifying aggregate.",
-      entranceExams: ["NEET UG"],
-      officialWebsite: "https://www.cmch-vellore.edu",
-      admissionInfo: "Admission through state counselling based on NEET UG All India Rank."
+      id: "nlsiu-bangalore",
+      name: "National Law School of India University (NLSIU)",
+      location: "Nagarbhavi, Bengaluru, Karnataka, India",
+      institutionType: "Public National Law University (NIRF Law Rank #1)",
+      overview: "The gold standard of legal education in South Asia, pioneering 5-year integrated law degrees with stellar corporate law firm and judicial clerkship placement records.",
+      courses: ["BA LLB (Hons)", "LLM", "Ph.D. in Law"],
+      engineeringBranches: ["Not Applicable (National Law University)"],
+      eligibility: "10+2 with minimum 45% marks for General category (40% for SC/ST).",
+      entranceExams: ["CLAT (Common Law Admission Test)"],
+      officialWebsite: "https://www.nls.ac.in",
+      admissionPortal: "https://consortiumofnlus.ac.in",
+      applicationProcedure: "Centralized counseling through the Consortium of National Law Universities based on CLAT merit list.",
+      feeInfo: "Approx. ₹3,20,000 per year (Tuition and facilities).",
+      scholarshipsInfo: "Need-based and Merit-cum-Means financial assistance provided by university endowment and legal alumni.",
+      placementStats: { highlight: "100% placement for students opting for corporate law; premier domestic firms (Cyril Amarchand, Shardul Amarchand, Trilegal, Khaitan) and international Magic Circle firms recruit annually.", source: "NLSIU Recruitment Coordination Committee", year: "2023-2024" },
+      lastVerified: "2024-2025 Academic Cycle"
     }
   ],
 
