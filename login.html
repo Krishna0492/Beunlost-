@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — UNLOST Student Platform</title>
+  <meta name="description" content="Sign in to your personalized UNLOST student workspace.">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body style="display:flex; flex-direction:column; min-height:100vh; justify-content:center; background-color:var(--bg-pitch);">
+
+  <div style="padding: 2rem 1.5rem; width: 100%; max-width: 440px; margin: auto;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <a href="./index.html" class="unlost-logo" style="font-size: 2rem;">
+        <span class="un">UN</span><span class="lost">LOST</span>
+      </a>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">
+        Sign in to your student workspace
+      </p>
+    </div>
+
+    <div class="charcoal-card" style="padding: 2.25rem 2rem; box-shadow: 0 12px 36px rgba(0,0,0,0.6);">
+      <div id="auth-alert" style="display:none; padding:0.75rem 1rem; border-radius:var(--radius-md); font-size:0.85rem; margin-bottom:1.25rem;"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Student Email Address</label>
+          <input type="email" id="login-email" class="form-input" placeholder="e.g. aarav@student.in" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+            <label class="form-label" for="login-password" style="margin-bottom:0;">Password</label>
+            <a href="./forgot-password.html" style="font-size:0.78rem; color:var(--silver-metallic); text-decoration:underline;">Forgot Password?</a>
+          </div>
+          <div class="password-input-wrap">
+            <input type="password" id="login-password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="password-toggle-btn" id="toggle-password" aria-label="Toggle password visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+          <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:var(--text-muted); cursor:pointer;">
+            <input type="checkbox" id="remember-me" style="accent-color:var(--silver-metallic); width:15px; height:15px;">
+            <span>Remember me</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="login-submit-btn" style="width:100%; padding:0.8rem;">
+          Sign In to UNLOST
+        </button>
+
+        <div style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle); text-align: center;">
+          <button type="button" id="demo-fill-btn" class="btn btn-outline btn-sm" style="width: 100%; font-size: 0.8rem;">
+            Fill Demo Account (demo@unlost.in)
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div style="text-align: center; margin-top: 1.5rem;">
+      <p style="color: var(--text-muted); font-size: 0.88rem;">
+        New student? <a href="./register.html" style="color: #ffffff; font-weight: 600; text-decoration: underline;">Create an account</a>
+      </p>
+      <div style="margin-top: 1.25rem;">
+        <a href="./index.html" style="color: var(--text-dim); font-size: 0.8rem;">← Back to Homepage</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="./assets/js/data.js"></script>
+  <script src="./assets/js/auth.js"></script>
+  <script src="./assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // If already logged in, redirect to dashboard
+      const currentUser = window.UnlostAuth.getCurrentUser();
+      if (currentUser) {
+        window.location.href = './dashboard.html';
+        return;
+      }
+
+      const form = document.getElementById('login-form');
+      const emailInput = document.getElementById('login-email');
+      const passInput = document.getElementById('login-password');
+      const rememberCheckbox = document.getElementById('remember-me');
+      const alertBox = document.getElementById('auth-alert');
+      const submitBtn = document.getElementById('login-submit-btn');
+
+      // Password toggle
+      document.getElementById('toggle-password').addEventListener('click', () => {
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';
+      });
+
+      // Demo auto fill
+      document.getElementById('demo-fill-btn').addEventListener('click', () => {
+        emailInput.value = 'demo@unlost.in';
+        passInput.value = 'student123';
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertBox.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying credentials...';
+
+        try {
+          const user = await window.UnlostAuth.login(
+            emailInput.value,
+            passInput.value,
+            rememberCheckbox.checked
+          );
+          window.UnlostApp.showToast('Login successful. Redirecting...');
+          setTimeout(() => {
+            if (user.onboarded) {
+              window.location.href = './dashboard.html';
+            } else {
+              window.location.href = './onboarding.html';
+            }
+          }, 400);
+        } catch (err) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          alertBox.style.border = '1px solid #ef4444';
+          alertBox.style.color = '#fca5a5';
+          alertBox.textContent = err.message;
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In to UNLOST';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

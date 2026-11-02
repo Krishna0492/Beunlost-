@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colleges Directory — UNLOST</title>
+  <meta name="description" content="Find the place that takes you forward. Verified university details, courses, eligibility and entrance requirements.">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="site-nav">
+    <div class="nav-container">
+      <div class="nav-left">
+        <a href="./index.html" class="unlost-logo">
+          <span class="un">UN</span><span class="lost">LOST</span>
+        </a>
+        <nav>
+          <ul class="nav-links">
+            <li><a href="./index.html" class="nav-link">Home</a></li>
+            <li><a href="./career-explorer.html" class="nav-link">Explore Careers</a></li>
+            <li><a href="./roadmaps.html" class="nav-link">Roadmaps</a></li>
+            <li><a href="./skill-development.html" class="nav-link">Skills</a></li>
+            <li><a href="./colleges.html" class="nav-link active">Colleges</a></li>
+            <li><a href="./entrance-exams.html" class="nav-link">Exams</a></li>
+            <li><a href="./scholarships.html" class="nav-link">Scholarships</a></li>
+            <li><a href="./about.html" class="nav-link">About</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="nav-actions">
+        <a href="./login.html" class="btn btn-ghost btn-sm">Login</a>
+        <a href="./register.html" class="btn btn-primary btn-sm">Get Started</a>
+        <button class="menu-toggle" aria-label="Toggle Navigation">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 4rem 0 6rem;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Institutions</span>
+        <h1 class="section-title">FIND THE RIGHT PLACE FOR YOUR NEXT CHAPTER.</h1>
+        <p class="section-subtitle">Objective university overview, genuine degree programs, and required entrance examinations. No commercial rankings or sponsored placements.</p>
+      </div>
+
+      <!-- Filter Controls -->
+      <div class="search-filter-bar">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="college-search" class="search-input" placeholder="Search by college name, course, or location...">
+        </div>
+
+        <select id="college-type-filter" class="filter-select">
+          <option value="all">All Institution Types</option>
+          <option value="Public">Public / Autonomous</option>
+          <option value="Medical">Medical Institutes</option>
+          <option value="Design">Design Institutes</option>
+          <option value="Law">National Law Universities</option>
+        </select>
+      </div>
+
+      <!-- Colleges Grid -->
+      <div id="colleges-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.75rem;">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 UNLOST. Not lost. Just finding my way.</div>
+        <div><a href="./dashboard.html" style="color:var(--silver-metallic); text-decoration:underline;">Student Dashboard</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./assets/js/data.js"></script>
+  <script src="./assets/js/auth.js"></script>
+  <script src="./assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const colleges = window.UNLOST_DATA.colleges;
+      const grid = document.getElementById('colleges-grid');
+      const searchInput = document.getElementById('college-search');
+      const typeSelect = document.getElementById('college-type-filter');
+
+      const render = () => {
+        const q = (searchInput.value || '').toLowerCase().trim();
+        const type = typeSelect.value;
+
+        const filtered = colleges.filter(c => {
+          const matchQ = !q || c.name.toLowerCase().includes(q) || c.location.toLowerCase().includes(q) || c.courses.some(course => course.toLowerCase().includes(q));
+          const matchType = type === 'all' || c.institutionType.toLowerCase().includes(type.toLowerCase()) || c.name.toLowerCase().includes(type.toLowerCase());
+          return matchQ && matchType;
+        });
+
+        if (filtered.length === 0) {
+          grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted); padding:3rem;">No colleges match your criteria.</p>`;
+          return;
+        }
+
+        grid.innerHTML = filtered.map(c => {
+          const isSaved = window.UnlostApp.isSaved('colleges', c.id);
+          return `
+            <div class="charcoal-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+                  <span class="tag tag-silver">${c.location.split(',')[1] || c.location}</span>
+                  <button onclick="toggleSaveCollege('${c.id}', this)" class="btn btn-ghost btn-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="${isSaved ? 'white' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                  </button>
+                </div>
+                <h3 class="card-title">${c.name}</h3>
+                <p class="card-desc">${c.overview}</p>
+                <div style="margin-bottom:1rem;">
+                  <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-dim); margin-bottom:0.35rem;">Popular Courses</div>
+                  <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
+                    ${c.courses.slice(0, 3).map(co => `<span class="tag">${co}</span>`).join('')}
+                  </div>
+                </div>
+              </div>
+
+              <div style="border-top:1px solid var(--border-subtle); padding-top:1rem; display:flex; gap:0.5rem;">
+                <a href="./college-details.html?id=${c.id}" class="btn btn-primary btn-sm" style="flex:1;">Full Overview</a>
+                <a href="${c.officialWebsite}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm">Official Site</a>
+              </div>
+            </div>
+          `;
+        }).join('');
+      };
+
+      window.toggleSaveCollege = (id, btn) => {
+        const isNowSaved = window.UnlostApp.toggleBookmark('colleges', id);
+        const svg = btn.querySelector('svg');
+        if (svg) svg.setAttribute('fill', isNowSaved ? 'white' : 'none');
+      };
+
+      searchInput.addEventListener('input', render);
+      typeSelect.addEventListener('change', render);
+      render();
+    });
+  </script>
+</body>
+</html>

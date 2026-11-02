@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress Tracker — UNLOST</title>
+  <meta name="description" content="Every small step counts. Track completed milestones, learned skills, and weekly targets.">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="site-nav">
+    <div class="nav-container">
+      <div class="nav-left">
+        <a href="./index.html" class="unlost-logo">
+          <span class="un">UN</span><span class="lost">LOST</span>
+        </a>
+        <nav>
+          <ul class="nav-links">
+            <li><a href="./dashboard.html" class="nav-link">Dashboard</a></li>
+            <li><a href="./career-explorer.html" class="nav-link">Explore Careers</a></li>
+            <li><a href="./roadmaps.html" class="nav-link">Roadmaps</a></li>
+            <li><a href="./progress.html" class="nav-link active">My Progress</a></li>
+            <li><a href="./saved-items.html" class="nav-link">Saved Items</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="nav-actions">
+        <a href="./dashboard.html" class="btn btn-outline btn-sm">Workspace</a>
+        <button onclick="window.UnlostAuth.logout()" class="btn btn-ghost btn-sm">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 4rem 0 6rem;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Personal Momentum</span>
+        <h1 class="section-title">EVERY SMALL STEP COUNTS.</h1>
+        <p class="section-subtitle">A live record of your verified roadmap milestones, mastered skills, and weekly targets.</p>
+      </div>
+
+      <!-- Stat Cards -->
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem; margin-bottom: 2.5rem;">
+        <div class="charcoal-card" style="padding:1.5rem;">
+          <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em;">Roadmap Milestones</div>
+          <div id="stat-milestones-count" style="font-size:2.2rem; font-weight:800; color:#ffffff; margin:0.35rem 0;">1</div>
+          <span class="tag tag-silver">Active Track</span>
+        </div>
+
+        <div class="charcoal-card" style="padding:1.5rem;">
+          <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em;">Skills Mastered</div>
+          <div id="stat-skills-count" style="font-size:2.2rem; font-weight:800; color:#ffffff; margin:0.35rem 0;">1</div>
+          <span class="tag tag-success">Verified</span>
+        </div>
+
+        <div class="charcoal-card" style="padding:1.5rem;">
+          <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em;">Saved Resources</div>
+          <div id="stat-bookmarks-count" style="font-size:2.2rem; font-weight:800; color:#ffffff; margin:0.35rem 0;">6</div>
+          <span class="tag tag-silver">Shortlist</span>
+        </div>
+
+        <div class="charcoal-card" style="padding:1.5rem;">
+          <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em;">Weekly Goal Hours</div>
+          <div id="stat-hours" style="font-size:2.2rem; font-weight:800; color:#ffffff; margin:0.35rem 0;">12h</div>
+          <span class="tag tag-silver">Planned</span>
+        </div>
+      </div>
+
+      <!-- Main Columns -->
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:2rem;">
+        <!-- Completed Milestones -->
+        <div class="charcoal-card">
+          <h2 class="card-title">Completed Roadmap Milestones</h2>
+          <div id="completed-milestones-list" style="margin-top:1rem; display:flex; flex-direction:column; gap:0.75rem;">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Mastered Skills & Goals -->
+        <div style="display:flex; flex-direction:column; gap:2rem;">
+          <div class="charcoal-card">
+            <h2 class="card-title">Mastered Competencies</h2>
+            <div id="mastered-skills-list" style="margin-top:1rem; display:flex; flex-direction:column; gap:0.75rem;">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+
+          <div class="charcoal-card">
+            <h2 class="card-title">Personal Achievements</h2>
+            <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1rem;">
+              <div style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:var(--bg-pitch); border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+                <span style="font-size:1.25rem;">🎯</span>
+                <div>
+                  <div style="color:#ffffff; font-weight:600; font-size:0.9rem;">Direction Discovered</div>
+                  <div style="color:var(--text-muted); font-size:0.78rem;">Completed initial student profile & onboarding</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem; background:var(--bg-pitch); border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+                <span style="font-size:1.25rem;">⚡</span>
+                <div>
+                  <div style="color:#ffffff; font-weight:600; font-size:0.9rem;">First Milestone Conquered</div>
+                  <div style="color:var(--text-muted); font-size:0.78rem;">Started foundational career roadmap</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 UNLOST. Not lost. Just finding my way.</div>
+        <div><a href="./dashboard.html" style="color:var(--silver-metallic); text-decoration:underline;">Back to Dashboard</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./assets/js/data.js"></script>
+  <script src="./assets/js/auth.js"></script>
+  <script src="./assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const completedMilestones = JSON.parse(localStorage.getItem('unlost_completed_milestones') || '["sw-m1"]');
+      const completedSkills = JSON.parse(localStorage.getItem('unlost_completed_skills') || '["sk-problem-solving"]');
+      const bookmarks = window.UnlostApp.getBookmarks();
+      const profile = window.UnlostApp.getStudentProfile();
+
+      // Counts
+      document.getElementById('stat-milestones-count').textContent = completedMilestones.length;
+      document.getElementById('stat-skills-count').textContent = completedSkills.length;
+      const totalSaved = (bookmarks.careers?.length || 0) + (bookmarks.colleges?.length || 0) + (bookmarks.exams?.length || 0) + (bookmarks.roadmaps?.length || 0) + (bookmarks.scholarships?.length || 0);
+      document.getElementById('stat-bookmarks-count').textContent = totalSaved;
+      document.getElementById('stat-hours').textContent = (profile.weeklyGoalHours || 12) + 'h';
+
+      // Render milestones list
+      const mListEl = document.getElementById('completed-milestones-list');
+      const allRoadmaps = window.UNLOST_DATA.roadmaps;
+      let matchedMilestones = [];
+      allRoadmaps.forEach(rm => {
+        rm.milestones.forEach(m => {
+          if (completedMilestones.includes(m.id)) {
+            matchedMilestones.push({ ...m, roadmapTitle: rm.title });
+          }
+        });
+      });
+
+      if (matchedMilestones.length === 0) {
+        mListEl.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">No milestones completed yet. Check off items in your roadmaps!</p>`;
+      } else {
+        mListEl.innerHTML = matchedMilestones.map(m => `
+          <div style="padding:0.75rem 1rem; background:var(--bg-pitch); border-radius:var(--radius-md); border:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="color:#ffffff; font-weight:600; font-size:0.9rem;">✓ ${m.title}</div>
+              <div style="color:var(--text-muted); font-size:0.75rem;">${m.roadmapTitle} • ${m.phase}</div>
+            </div>
+            <span class="tag tag-success">Completed</span>
+          </div>
+        `).join('');
+      }
+
+      // Render skills list
+      const sListEl = document.getElementById('mastered-skills-list');
+      const allSkills = window.UNLOST_DATA.skills;
+      const matchedSkills = allSkills.filter(s => completedSkills.includes(s.id));
+
+      if (matchedSkills.length === 0) {
+        sListEl.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">No skills marked mastered yet.</p>`;
+      } else {
+        sListEl.innerHTML = matchedSkills.map(s => `
+          <div style="padding:0.75rem 1rem; background:var(--bg-pitch); border-radius:var(--radius-md); border:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="color:#ffffff; font-weight:600; font-size:0.9rem;">${s.title}</div>
+              <div style="color:var(--text-muted); font-size:0.75rem;">${s.category} • ${s.level}</div>
+            </div>
+            <span class="tag tag-success">Mastered</span>
+          </div>
+        `).join('');
+      }
+    });
+  </script>
+</body>
+</html>

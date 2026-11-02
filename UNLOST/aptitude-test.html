@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aptitude & Career Discovery Test — UNLOST</title>
+  <meta name="description" content="Discover your problem-solving strengths, traits, and suggested career disciplines.">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="site-nav">
+    <div class="nav-container">
+      <div class="nav-left">
+        <a href="./index.html" class="unlost-logo">
+          <span class="un">UN</span><span class="lost">LOST</span>
+        </a>
+        <nav>
+          <ul class="nav-links">
+            <li><a href="./index.html" class="nav-link">Home</a></li>
+            <li><a href="./career-explorer.html" class="nav-link">Explore Careers</a></li>
+            <li><a href="./roadmaps.html" class="nav-link">Roadmaps</a></li>
+            <li><a href="./skill-development.html" class="nav-link">Skills</a></li>
+            <li><a href="./colleges.html" class="nav-link">Colleges</a></li>
+            <li><a href="./entrance-exams.html" class="nav-link">Exams</a></li>
+            <li><a href="./scholarships.html" class="nav-link">Scholarships</a></li>
+            <li><a href="./about.html" class="nav-link">About</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="nav-actions">
+        <a href="./login.html" class="btn btn-ghost btn-sm">Login</a>
+        <a href="./register.html" class="btn btn-primary btn-sm">Get Started</a>
+        <button class="menu-toggle" aria-label="Toggle Navigation">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 4.5rem 0 6rem;">
+    <div class="container-narrow">
+      <div id="quiz-intro" style="text-align:center; margin-bottom: 2.5rem;">
+        <span class="section-eyebrow">Interactive Assessment</span>
+        <h1 class="section-title">APTITUDE & CAREER DISCOVERY</h1>
+        <p class="section-subtitle">A 5-question exploratory tool designed to highlight your natural problem-solving tendencies and guide your next steps.</p>
+      </div>
+
+      <!-- Quiz Card -->
+      <div id="quiz-card-wrapper" class="charcoal-card" style="padding: 2.5rem 2rem; box-shadow:0 12px 36px rgba(0,0,0,0.5);">
+        <!-- Progress Bar -->
+        <div style="margin-bottom: 2rem;">
+          <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">
+            <span id="quiz-progress-text">Question 1 of 5</span>
+            <span id="quiz-progress-pct">20%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="quiz-progress-fill" style="width: 20%;"></div>
+          </div>
+        </div>
+
+        <!-- Question View -->
+        <div id="question-container">
+          <h2 id="question-text" style="color:#ffffff; font-size:1.35rem; font-weight:700; line-height:1.4; margin-bottom:1.5rem;">
+            <!-- Injected via JS -->
+          </h2>
+
+          <div id="options-container" style="display:flex; flex-direction:column; gap:0.75rem;">
+            <!-- Options injected via JS -->
+          </div>
+        </div>
+
+        <!-- Navigation buttons -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2.5rem; padding-top:1.5rem; border-top:1px solid var(--border-subtle);">
+          <button id="quiz-prev-btn" class="btn btn-outline" style="visibility:hidden;">
+            ← Previous
+          </button>
+          <button id="quiz-next-btn" class="btn btn-primary" disabled>
+            Next Question →
+          </button>
+        </div>
+      </div>
+
+      <!-- Results View (Hidden Initially) -->
+      <div id="results-container" class="charcoal-card" style="display:none; padding:2.5rem 2rem;">
+        <div style="text-align:center; margin-bottom:2rem;">
+          <span class="tag tag-silver" style="font-size:0.8rem; margin-bottom:0.75rem;">Discovery Complete</span>
+          <h2 class="card-title" style="font-size:1.85rem;">YOUR SUGGESTED DIRECTION</h2>
+          <p id="result-trait-headline" style="color:var(--silver-metallic); font-size:1.15rem; font-weight:700; margin-top:0.35rem;"></p>
+        </div>
+
+        <!-- Result Trait Breakdown -->
+        <div style="margin-bottom:2rem; background:var(--bg-pitch); padding:1.5rem; border-radius:var(--radius-lg); border:1px solid var(--border-subtle);">
+          <h3 style="color:#ffffff; font-size:1rem; margin-bottom:1rem; font-weight:600;">Trait Alignment Breakdown</h3>
+          <div id="trait-bars" style="display:flex; flex-direction:column; gap:0.85rem;">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Recommended Careers -->
+        <div style="margin-bottom:2rem;">
+          <h3 style="color:#ffffff; font-size:1.1rem; margin-bottom:1rem; font-weight:700;">Recommended Career Pathways to Explore</h3>
+          <div id="recommended-careers-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:1rem;">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Mandatory Disclaimer -->
+        <div style="background:rgba(255, 255, 255, 0.03); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:1rem 1.25rem; font-size:0.825rem; color:var(--text-muted); line-height:1.5; margin-bottom:2rem;">
+          <strong style="color:#ffffff;">Important Note:</strong> This assessment is an exploratory tool intended to guide self-reflection and spark discovery. It is not a scientifically validated psychological diagnosis or a rigid career lock-in. Your strengths and interests will continue to evolve through practice and experience.
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+          <a href="./dashboard.html" class="btn btn-primary">Save to My Dashboard</a>
+          <button onclick="window.location.reload()" class="btn btn-outline">Retake Test</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 UNLOST. Not lost. Just finding my way.</div>
+        <div><a href="./career-explorer.html" style="color:var(--silver-metallic); text-decoration:underline;">Explore Careers</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./assets/js/data.js"></script>
+  <script src="./assets/js/auth.js"></script>
+  <script src="./assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const questions = window.UNLOST_DATA.aptitudeQuestions;
+      let currentIndex = 0;
+      const userAnswers = [];
+
+      const questionText = document.getElementById('question-text');
+      const optionsContainer = document.getElementById('options-container');
+      const progressText = document.getElementById('quiz-progress-text');
+      const progressPct = document.getElementById('quiz-progress-pct');
+      const progressFill = document.getElementById('quiz-progress-fill');
+      const prevBtn = document.getElementById('quiz-prev-btn');
+      const nextBtn = document.getElementById('quiz-next-btn');
+
+      const renderQuestion = () => {
+        const q = questions[currentIndex];
+        questionText.textContent = `${currentIndex + 1}. ${q.text}`;
+
+        const pct = Math.round(((currentIndex + 1) / questions.length) * 100);
+        progressText.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+        progressPct.textContent = `${pct}%`;
+        progressFill.style.width = `${pct}%`;
+
+        prevBtn.style.visibility = currentIndex > 0 ? 'visible' : 'hidden';
+        nextBtn.textContent = currentIndex === questions.length - 1 ? 'Finish Discovery →' : 'Next Question →';
+
+        const selectedOption = userAnswers[currentIndex];
+        nextBtn.disabled = !selectedOption;
+
+        optionsContainer.innerHTML = q.options.map((opt, i) => {
+          const isChecked = selectedOption && selectedOption.trait === opt.trait;
+          return `
+            <label class="interactive-item" style="cursor:pointer; padding:1rem 1.25rem; ${isChecked ? 'border-color:var(--silver-metallic); background-color:var(--bg-card-hover);' : ''}">
+              <div style="display:flex; align-items:center; gap:0.85rem;">
+                <input type="radio" name="quiz_opt" value="${i}" ${isChecked ? 'checked' : ''} style="accent-color:var(--silver-metallic); width:18px; height:18px;">
+                <span style="font-size:0.95rem; color:#ffffff;">${opt.label}</span>
+              </div>
+            </label>
+          `;
+        }).join('');
+
+        optionsContainer.querySelectorAll('input[name="quiz_opt"]').forEach(radio => {
+          radio.addEventListener('change', (e) => {
+            const optIdx = parseInt(e.target.value);
+            userAnswers[currentIndex] = q.options[optIdx];
+            nextBtn.disabled = false;
+            // update highlighting
+            renderQuestion();
+          });
+        });
+      };
+
+      prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) {
+          currentIndex--;
+          renderQuestion();
+        }
+      });
+
+      nextBtn.addEventListener('click', () => {
+        if (currentIndex < questions.length - 1) {
+          currentIndex++;
+          renderQuestion();
+        } else {
+          showResults();
+        }
+      });
+
+      const showResults = () => {
+        document.getElementById('quiz-intro').style.display = 'none';
+        document.getElementById('quiz-card-wrapper').style.display = 'none';
+        const resultsEl = document.getElementById('results-container');
+        resultsEl.style.display = 'block';
+
+        // Calculate scores
+        const scores = { analytical: 0, creative: 0, scientific: 0, social: 0, systematic: 0 };
+        userAnswers.forEach(ans => {
+          if (ans && ans.trait) {
+            scores[ans.trait] += ans.weight || 2;
+          }
+        });
+
+        let topTrait = 'analytical';
+        let maxVal = -1;
+        for (const [trait, val] of Object.entries(scores)) {
+          if (val > maxVal) {
+            maxVal = val;
+            topTrait = trait;
+          }
+        }
+
+        const traitNames = {
+          analytical: 'Systems, Logic & Software Architecture',
+          creative: 'Design, Aesthetics & Creative Problem Solving',
+          scientific: 'Medical Sciences, Biology & Research Inquiry',
+          social: 'Law, Public Administration & Governance',
+          systematic: 'Finance, Banking & Quantitative Valuation'
+        };
+
+        document.getElementById('result-trait-headline').textContent = traitNames[topTrait] || 'Analytical Problem Solver';
+
+        // Trait bars
+        const maxPossible = questions.length * 2;
+        const traitBarsEl = document.getElementById('trait-bars');
+        traitBarsEl.innerHTML = Object.entries(scores).map(([tr, score]) => {
+          const pct = Math.round((score / maxPossible) * 100);
+          return `
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.25rem;">
+                <span style="text-transform:capitalize;">${tr} Thinking</span>
+                <span>${pct}%</span>
+              </div>
+              <div class="progress-track" style="height:6px;">
+                <div class="progress-fill" style="width:${pct}%;"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Careers
+        const careersListEl = document.getElementById('recommended-careers-list');
+        const allCareers = window.UNLOST_DATA.careers;
+        let matched = allCareers.slice(0, 3);
+        if (topTrait === 'creative') {
+          matched = allCareers.filter(c => c.category === 'Design' || c.id === 'software-engineer');
+        } else if (topTrait === 'scientific') {
+          matched = allCareers.filter(c => c.category === 'Medicine');
+        } else if (topTrait === 'social') {
+          matched = allCareers.filter(c => c.category === 'Law' || c.category === 'Government');
+        } else if (topTrait === 'systematic') {
+          matched = allCareers.filter(c => c.category === 'Finance' || c.id === 'data-scientist');
+        }
+
+        careersListEl.innerHTML = matched.map(c => `
+          <div style="background:var(--bg-pitch); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--border-subtle); display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <span class="tag tag-silver" style="font-size:0.7rem;">${c.category}</span>
+              <h4 style="color:#ffffff; font-size:1rem; font-weight:700; margin:0.5rem 0 0.25rem;">${c.title}</h4>
+              <p style="color:var(--text-muted); font-size:0.8rem; line-height:1.4;">${c.overview.substring(0, 80)}...</p>
+            </div>
+            <a href="./career-details.html?id=${c.id}" class="btn btn-outline btn-sm" style="margin-top:0.75rem;">View Profile</a>
+          </div>
+        `).join('');
+
+        // Store test result in student profile
+        const prof = window.UnlostApp.getStudentProfile();
+        prof.dominantTrait = topTrait;
+        prof.careerGoals = matched.map(m => m.title);
+        window.UnlostApp.saveStudentProfile(prof);
+      };
+
+      renderQuestion();
+    });
+  </script>
+</body>
+</html>

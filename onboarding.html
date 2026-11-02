@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Onboarding — UNLOST</title>
+  <meta name="description" content="Personalize your UNLOST career journey and workspace.">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body style="background-color: var(--bg-pitch); min-height:100vh; display:flex; flex-direction:column;">
+
+  <!-- Header -->
+  <header style="border-bottom: 1px solid var(--border-subtle); padding: 1.25rem 2rem; display:flex; justify-content:space-between; align-items:center;">
+    <a href="./index.html" class="unlost-logo">
+      <span class="un">UN</span><span class="lost">LOST</span>
+    </a>
+    <div style="font-size:0.85rem; color:var(--text-muted);">
+      Personalizing Your Workspace
+    </div>
+  </header>
+
+  <main style="flex:1; display:flex; align-items:center; justify-content:center; padding: 2.5rem 1.5rem;">
+    <div style="max-width: 680px; width: 100%;">
+      <!-- Progress Bar -->
+      <div style="margin-bottom: 2rem;">
+        <div style="display:flex; justify-content:space-between; font-size:0.825rem; color:var(--text-muted); margin-bottom:0.5rem;">
+          <span id="step-indicator-label">Step 1 of 5: Basic Information</span>
+          <span id="step-percentage">20%</span>
+        </div>
+        <div class="progress-track" style="height: 6px;">
+          <div class="progress-fill" id="onboarding-progress-fill" style="width: 20%;"></div>
+        </div>
+      </div>
+
+      <!-- Main Card -->
+      <div class="charcoal-card" style="padding: 2.5rem 2.25rem; box-shadow: 0 16px 40px rgba(0,0,0,0.7);">
+        <form id="onboarding-form">
+          <!-- STEP 1: Basic Information -->
+          <div class="step-panel" id="step-1">
+            <span class="section-eyebrow">Step 01 / 05</span>
+            <h2 class="card-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Basic Information</h2>
+            <p class="card-desc">Help us tailor relevant roadmaps and entrance recommendations for your context.</p>
+
+            <div class="form-group">
+              <label class="form-label" for="ob-name">Student Full Name</label>
+              <input type="text" id="ob-name" class="form-input" required>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label" for="ob-level">Education Level</label>
+                <select id="ob-level" class="form-input">
+                  <option value="High School (11th-12th)">High School (Class 11 - 12)</option>
+                  <option value="Secondary School (9th-10th)">Secondary School (Class 9 - 10)</option>
+                  <option value="Undergraduate (College)">Undergraduate (College / University)</option>
+                  <option value="Gap Year / Preparing">Gap Year / Exam Preparation</option>
+                  <option value="Postgraduate">Postgraduate</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="ob-class">Current Class / Year</label>
+                <input type="text" id="ob-class" class="form-input" placeholder="e.g. Class 12 or 2nd Year" required>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label" for="ob-country">Country</label>
+                <input type="text" id="ob-country" class="form-input" value="India" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="ob-state">State / Region</label>
+                <input type="text" id="ob-state" class="form-input" placeholder="e.g. Maharashtra, Karnataka, Delhi" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: Education -->
+          <div class="step-panel" id="step-2" style="display:none;">
+            <span class="section-eyebrow">Step 02 / 05</span>
+            <h2 class="card-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Academic Background</h2>
+            <p class="card-desc">Your stream and curriculum help us suggest accurate eligibility criteria.</p>
+
+            <div class="form-group">
+              <label class="form-label" for="ob-stream">Current Stream</label>
+              <select id="ob-stream" class="form-input">
+                <option value="Science (PCM - Physics, Chem, Math)">Science (PCM - Engineering track)</option>
+                <option value="Science (PCB - Physics, Chem, Bio)">Science (PCB - Medical & Biotech track)</option>
+                <option value="Science (PCMB - Math & Bio)">Science (PCMB - Dual Math & Bio)</option>
+                <option value="Commerce with Math">Commerce with Mathematics</option>
+                <option value="Commerce without Math">Commerce without Mathematics</option>
+                <option value="Arts / Humanities">Arts / Humanities & Social Sciences</option>
+                <option value="Vocational / Applied Sciences">Vocational / Applied Sciences</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="ob-subjects">Key Subjects</label>
+              <input type="text" id="ob-subjects" class="form-input" placeholder="e.g. Physics, Chemistry, Math, Computer Science">
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label" for="ob-board">Educational Board or University</label>
+                <input type="text" id="ob-board" class="form-input" placeholder="e.g. CBSE, ICSE/ISC, State Board">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="ob-status">Academic Status</label>
+                <select id="ob-status" class="form-input">
+                  <option value="Enrolled">Currently Enrolled</option>
+                  <option value="Appearing for Finals">Appearing for Final Board/Sem Exams</option>
+                  <option value="Graduated">Completed / Graduated</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: Interests -->
+          <div class="step-panel" id="step-3" style="display:none;">
+            <span class="section-eyebrow">Step 03 / 05</span>
+            <h2 class="card-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Your Interests & Fields</h2>
+            <p class="card-desc">Select all sectors that spark your curiosity (select at least one).</p>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; margin-top: 1rem;" id="interests-grid">
+              <!-- Dynamically populated or static -->
+              <label class="interactive-item" style="cursor:pointer;">
+                <input type="checkbox" name="interest" value="Technology" class="item-checkbox" checked>
+                <span>Technology</span>
+              </label>
+              <label class="interactive-item" style="cursor:pointer;">
+                <input type="checkbox" name="interest" value="Engineering" class="item-checkbox" checked>
+                <span>Engineering</span>
+              </label>
+              <label class="interactive-item" style="cursor:pointer;">
+                <input type="checkbox" name="interest" value="Design" class="item-checkbox" checked>
+                <span>Design</span>
+              </label>
+              <label class="interactive-item" style="cursor:pointer;">
+                <input type="checkbox" name="interest" value="Medicine" class="item-checkbox">
+                <span>Medicine</span>
+              </label>
+              <label class="interactive-item" style="cursor:pointer;">
+                <input type="checkbox" name="interest" value="Finance" class="item-checkbox">
+                <span>Finance</span>
+              </label>
+              <label class="interactive-item" style="cursor:pointer;">
+                <input type="checkbox" name="interest" value="Business" class="item-checkbox">
+                <span>Business</span>
+              </label>
+              <label class="interactive-item" style="cursor:pointer;">
+                <input type="checkbox" name="interest" value="Law" class="item-checkbox">
+                <span>Law</span>
+              </label>
+              <label class="interactive-item" style="cursor:pointer;">
+                <input type="checkbox" name="interest" value="Science and research" class="item-checkbox">
+                <span>Science & Research</span>
+              </label>
+              <label class="interactive-item" style="cursor:pointer;">
+                <input type="checkbox" name="interest" value="Arts and humanities" class="item-checkbox">
+                <span>Arts & Humanities</span>
+              </label>
+              <label class="interactive-item" style="cursor:pointer;">
+                <input type="checkbox" name="interest" value="Government and public services" class="item-checkbox">
+                <span>Public Services / IAS</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- STEP 4: Career Goals -->
+          <div class="step-panel" id="step-4" style="display:none;">
+            <span class="section-eyebrow">Step 04 / 05</span>
+            <h2 class="card-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Goals & Ambitions</h2>
+            <p class="card-desc">Tell us where you want to go and what feels uncertain right now.</p>
+
+            <div class="form-group">
+              <label class="form-label" for="ob-careers">Target Careers or Roles</label>
+              <input type="text" id="ob-careers" class="form-input" placeholder="e.g. Software Engineer, AI Researcher, Product Designer">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="ob-courses">Preferred College Degrees / Courses</label>
+              <input type="text" id="ob-courses" class="form-input" placeholder="e.g. B.Tech Computer Science, B.Des, MBBS, Economics Hons">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="ob-uncertainties">What is your biggest current confusion or uncertainty?</label>
+              <textarea id="ob-uncertainties" class="form-textarea" rows="3" placeholder="e.g. Whether to focus entirely on JEE Advanced or also build practical coding projects..."></textarea>
+            </div>
+          </div>
+
+          <!-- STEP 5: Learning Preferences -->
+          <div class="step-panel" id="step-5" style="display:none;">
+            <span class="section-eyebrow">Step 05 / 05</span>
+            <h2 class="card-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;">Learning Preferences</h2>
+            <p class="card-desc">Set your pace and habits for your student dashboard.</p>
+
+            <div class="form-group">
+              <label class="form-label" for="ob-style">Preferred Learning Style</label>
+              <select id="ob-style" class="form-input">
+                <option value="Hands-on Projects & Problem Solving">Hands-on Projects & Coding</option>
+                <option value="Structured Video Lectures & Theory">Structured Video Courses & Visual Modules</option>
+                <option value="Books, Reading & Deep Documentation">Books & In-Depth Text Documentation</option>
+                <option value="Mentorship & Peer Study Groups">Mentorship & Collaborative Study</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="ob-skills-goal">Top Skill You Want to Develop First</label>
+              <input type="text" id="ob-skills-goal" class="form-input" placeholder="e.g. Algorithmic Problem Solving, UI Design, or Public Speaking">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="ob-hours">Target Self-Study / Skill Hours Per Week</label>
+              <input type="number" id="ob-hours" class="form-input" value="12" min="1" max="60">
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--border-subtle);">
+            <button type="button" id="prev-step-btn" class="btn btn-outline" style="display:none;">
+              ← Previous
+            </button>
+            <div style="display:flex; gap:0.75rem; margin-left:auto;">
+              <button type="button" id="skip-step-btn" class="btn btn-ghost btn-sm" style="color:var(--text-dim);">
+                Skip Optional
+              </button>
+              <button type="button" id="next-step-btn" class="btn btn-primary">
+                Next Step →
+              </button>
+              <button type="submit" id="finish-btn" class="btn btn-metallic" style="display:none;">
+                Launch My Workspace
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="./assets/js/data.js"></script>
+  <script src="./assets/js/auth.js"></script>
+  <script src="./assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Require auth
+      const user = window.UnlostAuth.requireAuth(false);
+      let currentStep = 1;
+      const totalSteps = 5;
+
+      const prof = window.UnlostApp.getStudentProfile();
+      if (user && user.name) {
+        document.getElementById('ob-name').value = user.name;
+      } else {
+        document.getElementById('ob-name').value = prof.fullName || '';
+      }
+      document.getElementById('ob-class').value = prof.currentClass || 'Class 12';
+      document.getElementById('ob-state').value = prof.state || 'Maharashtra';
+
+      const updateUI = () => {
+        // Hide all steps
+        for (let i = 1; i <= totalSteps; i++) {
+          const p = document.getElementById(`step-${i}`);
+          if (p) p.style.display = i === currentStep ? 'block' : 'none';
+        }
+
+        const pct = Math.round((currentStep / totalSteps) * 100);
+        document.getElementById('onboarding-progress-fill').style.width = pct + '%';
+        document.getElementById('step-percentage').textContent = pct + '%';
+
+        const labels = [
+          'Basic Information',
+          'Academic Background',
+          'Interests & Fields',
+          'Goals & Ambitions',
+          'Learning Preferences'
+        ];
+        document.getElementById('step-indicator-label').textContent = `Step ${currentStep} of 5: ${labels[currentStep - 1]}`;
+
+        document.getElementById('prev-step-btn').style.display = currentStep > 1 ? 'inline-flex' : 'none';
+        document.getElementById('next-step-btn').style.display = currentStep < totalSteps ? 'inline-flex' : 'none';
+        document.getElementById('finish-btn').style.display = currentStep === totalSteps ? 'inline-flex' : 'none';
+      };
+
+      document.getElementById('next-step-btn').addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+          currentStep++;
+          updateUI();
+        }
+      });
+
+      document.getElementById('prev-step-btn').addEventListener('click', () => {
+        if (currentStep > 1) {
+          currentStep--;
+          updateUI();
+        }
+      });
+
+      document.getElementById('skip-step-btn').addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+          currentStep++;
+          updateUI();
+        } else {
+          document.getElementById('onboarding-form').requestSubmit();
+        }
+      });
+
+      document.getElementById('onboarding-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const selectedInterests = Array.from(document.querySelectorAll('input[name="interest"]:checked')).map(i => i.value);
+
+        const updatedProfile = {
+          fullName: document.getElementById('ob-name').value || 'Student',
+          email: (user && user.email) || 'student@unlost.in',
+          educationLevel: document.getElementById('ob-level').value,
+          currentClass: document.getElementById('ob-class').value,
+          country: document.getElementById('ob-country').value,
+          state: document.getElementById('ob-state').value,
+          stream: document.getElementById('ob-stream').value,
+          subjects: document.getElementById('ob-subjects').value,
+          board: document.getElementById('ob-board').value,
+          interests: selectedInterests.length > 0 ? selectedInterests : ['Technology', 'Engineering'],
+          careerGoals: [document.getElementById('ob-careers').value || 'Software Engineer'],
+          preferredCourses: [document.getElementById('ob-courses').value || 'B.Tech'],
+          uncertainties: document.getElementById('ob-uncertainties').value,
+          learningStyle: document.getElementById('ob-style').value,
+          skillsGoal: document.getElementById('ob-skills-goal').value,
+          weeklyGoalHours: Number(document.getElementById('ob-hours').value) || 12
+        };
+
+        window.UnlostApp.saveStudentProfile(updatedProfile);
+
+        // Mark user as onboarded in session
+        if (user) {
+          user.onboarded = true;
+          window.UnlostAuth.setSession(user, true);
+        }
+
+        window.UnlostApp.showToast('Workspace initialized! Entering dashboard...');
+        setTimeout(() => {
+          window.location.href = './dashboard.html';
+        }, 400);
+      });
+    });
+  </script>
+</body>
+</html>

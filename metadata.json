@@ -1,0 +1,6 @@
+{
+  "name": "UNLOST - Student Career Discovery & Guidance Platform",
+  "description": "Student career discovery and guidance platform: explore careers, roadmaps, colleges, entrance exams, skills, scholarships, and personalized student workspaces.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

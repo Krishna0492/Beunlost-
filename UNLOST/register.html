@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — UNLOST Student Platform</title>
+  <meta name="description" content="Create your student profile on UNLOST and start building your career roadmap.">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body style="display:flex; flex-direction:column; min-height:100vh; justify-content:center; background-color:var(--bg-pitch);">
+
+  <div style="padding: 2.5rem 1.5rem; width: 100%; max-width: 480px; margin: auto;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <a href="./index.html" class="unlost-logo" style="font-size: 2rem;">
+        <span class="un">UN</span><span class="lost">LOST</span>
+      </a>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">
+        Start finding your way. Create your student account.
+      </p>
+    </div>
+
+    <div class="charcoal-card" style="padding: 2.25rem 2rem; box-shadow: 0 12px 36px rgba(0,0,0,0.6);">
+      <div id="auth-alert" style="display:none; padding:0.75rem 1rem; border-radius:var(--radius-md); font-size:0.85rem; margin-bottom:1.25rem;"></div>
+
+      <form id="register-form">
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Full Name</label>
+          <input type="text" id="reg-name" class="form-input" placeholder="e.g. Aarav Sharma" required autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Student Email Address</label>
+          <input type="email" id="reg-email" class="form-input" placeholder="e.g. aarav@student.in" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password</label>
+          <div class="password-input-wrap">
+            <input type="password" id="reg-password" class="form-input" placeholder="At least 6 characters" required autocomplete="new-password">
+            <button type="button" class="password-toggle-btn" id="toggle-reg-pass" aria-label="Toggle password visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+          <div class="password-strength-bar">
+            <div class="password-strength-fill" id="strength-fill"></div>
+          </div>
+          <div id="strength-text" style="font-size:0.75rem; color:var(--text-dim); margin-top:0.3rem;">Password strength</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-confirm">Confirm Password</label>
+          <input type="password" id="reg-confirm" class="form-input" placeholder="Re-enter password" required autocomplete="new-password">
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <label style="display:flex; align-items:flex-start; gap:0.6rem; font-size:0.825rem; color:var(--text-muted); cursor:pointer;">
+            <input type="checkbox" id="reg-terms" required style="accent-color:var(--silver-metallic); width:16px; height:16px; margin-top:2px;">
+            <span>I agree to the <a href="./terms.html" target="_blank" style="color:#ffffff; text-decoration:underline;">Terms of Service</a> and <a href="./privacy-policy.html" target="_blank" style="color:#ffffff; text-decoration:underline;">Privacy Policy</a>.</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="reg-submit-btn" style="width:100%; padding:0.8rem;">
+          Create My Student Account
+        </button>
+      </form>
+    </div>
+
+    <div style="text-align: center; margin-top: 1.5rem;">
+      <p style="color: var(--text-muted); font-size: 0.88rem;">
+        Already registered? <a href="./login.html" style="color: #ffffff; font-weight: 600; text-decoration: underline;">Sign in here</a>
+      </p>
+      <div style="margin-top: 1.25rem;">
+        <a href="./index.html" style="color: var(--text-dim); font-size: 0.8rem;">← Back to Homepage</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="./assets/js/data.js"></script>
+  <script src="./assets/js/auth.js"></script>
+  <script src="./assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('register-form');
+      const nameInput = document.getElementById('reg-name');
+      const emailInput = document.getElementById('reg-email');
+      const passInput = document.getElementById('reg-password');
+      const confirmInput = document.getElementById('reg-confirm');
+      const termsCheckbox = document.getElementById('reg-terms');
+      const alertBox = document.getElementById('auth-alert');
+      const submitBtn = document.getElementById('reg-submit-btn');
+      const strengthFill = document.getElementById('strength-fill');
+      const strengthText = document.getElementById('strength-text');
+
+      // Toggle password
+      document.getElementById('toggle-reg-pass').addEventListener('click', () => {
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';
+      });
+
+      // Password strength indicator
+      passInput.addEventListener('input', () => {
+        const val = passInput.value;
+        let score = 0;
+        if (val.length >= 6) score += 25;
+        if (val.length >= 10) score += 25;
+        if (/[A-Z]/.test(val)) score += 25;
+        if (/[0-9!@#$%^&*]/.test(val)) score += 25;
+
+        strengthFill.style.width = score + '%';
+        if (score <= 25) {
+          strengthFill.style.backgroundColor = '#ef4444';
+          strengthText.textContent = 'Weak password';
+          strengthText.style.color = '#ef4444';
+        } else if (score <= 50) {
+          strengthFill.style.backgroundColor = '#f59e0b';
+          strengthText.textContent = 'Moderate password';
+          strengthText.style.color = '#f59e0b';
+        } else if (score <= 75) {
+          strengthFill.style.backgroundColor = '#3b82f6';
+          strengthText.textContent = 'Good password';
+          strengthText.style.color = '#3b82f6';
+        } else {
+          strengthFill.style.backgroundColor = '#10b981';
+          strengthText.textContent = 'Strong password';
+          strengthText.style.color = '#10b981';
+        }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alertBox.style.display = 'none';
+
+        if (passInput.value !== confirmInput.value) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          alertBox.style.border = '1px solid #ef4444';
+          alertBox.style.color = '#fca5a5';
+          alertBox.textContent = 'Passwords do not match. Please re-enter.';
+          return;
+        }
+
+        if (!termsCheckbox.checked) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          alertBox.style.border = '1px solid #ef4444';
+          alertBox.style.color = '#fca5a5';
+          alertBox.textContent = 'You must agree to the Terms and Privacy Policy.';
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating student account...';
+
+        try {
+          const session = await window.UnlostAuth.register(
+            nameInput.value,
+            emailInput.value,
+            passInput.value
+          );
+
+          // Update default student profile name
+          const prof = window.UnlostApp.getStudentProfile();
+          prof.fullName = nameInput.value;
+          prof.email = emailInput.value;
+          window.UnlostApp.saveStudentProfile(prof);
+
+          window.UnlostApp.showToast('Account created! Welcome to UNLOST.');
+          setTimeout(() => {
+            window.location.href = './onboarding.html';
+          }, 450);
+        } catch (err) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          alertBox.style.border = '1px solid #ef4444';
+          alertBox.style.color = '#fca5a5';
+          alertBox.textContent = err.message;
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create My Student Account';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saved Items & Bookmarks — UNLOST</title>
+  <meta name="description" content="Your bookmarked careers, colleges, entrance exams, and scholarships.">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/responsive.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="site-nav">
+    <div class="nav-container">
+      <div class="nav-left">
+        <a href="./index.html" class="unlost-logo">
+          <span class="un">UN</span><span class="lost">LOST</span>
+        </a>
+        <nav>
+          <ul class="nav-links">
+            <li><a href="./dashboard.html" class="nav-link">Dashboard</a></li>
+            <li><a href="./career-explorer.html" class="nav-link">Explore Careers</a></li>
+            <li><a href="./roadmaps.html" class="nav-link">Roadmaps</a></li>
+            <li><a href="./colleges.html" class="nav-link">Colleges</a></li>
+            <li><a href="./saved-items.html" class="nav-link active">Saved Items</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="nav-actions">
+        <a href="./dashboard.html" class="btn btn-outline btn-sm">Workspace</a>
+        <button onclick="window.UnlostAuth.logout()" class="btn btn-ghost btn-sm">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 4rem 0 6rem;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Personal Library</span>
+        <h1 class="section-title">SAVED RESOURCES & BOOKMARKS.</h1>
+        <p class="section-subtitle">All your shortlisted careers, colleges, roadmap milestones, and scholarship applications in one workspace.</p>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div style="display:flex; gap:0.5rem; margin-bottom:2rem; overflow-x:auto; padding-bottom:0.5rem;" id="saved-tabs">
+        <button class="btn btn-sm btn-metallic active-tab" data-tab="all">All Saved</button>
+        <button class="btn btn-sm btn-outline" data-tab="careers">Careers</button>
+        <button class="btn btn-sm btn-outline" data-tab="colleges">Colleges</button>
+        <button class="btn btn-sm btn-outline" data-tab="exams">Exams</button>
+        <button class="btn btn-sm btn-outline" data-tab="roadmaps">Roadmaps</button>
+        <button class="btn btn-sm btn-outline" data-tab="scholarships">Scholarships</button>
+      </div>
+
+      <!-- Items Grid -->
+      <div id="saved-items-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <div>© 2026 UNLOST. Not lost. Just finding my way.</div>
+        <div><a href="./dashboard.html" style="color:var(--silver-metallic); text-decoration:underline;">Back to Dashboard</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./assets/js/data.js"></script>
+  <script src="./assets/js/auth.js"></script>
+  <script src="./assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let activeTab = 'all';
+      const grid = document.getElementById('saved-items-grid');
+      const tabs = document.querySelectorAll('#saved-tabs button');
+
+      const render = () => {
+        const bookmarks = window.UnlostApp.getBookmarks();
+        const data = window.UNLOST_DATA;
+        let items = [];
+
+        if (activeTab === 'all' || activeTab === 'careers') {
+          (bookmarks.careers || []).forEach(id => {
+            const c = data.careers.find(x => x.id === id);
+            if (c) items.push({ ...c, itemType: 'careers', link: `./career-details.html?id=${c.id}` });
+          });
+        }
+
+        if (activeTab === 'all' || activeTab === 'colleges') {
+          (bookmarks.colleges || []).forEach(id => {
+            const col = data.colleges.find(x => x.id === id);
+            if (col) items.push({ id: col.id, title: col.name, overview: col.overview, category: 'College', itemType: 'colleges', link: `./college-details.html?id=${col.id}` });
+          });
+        }
+
+        if (activeTab === 'all' || activeTab === 'exams') {
+          (bookmarks.exams || []).forEach(id => {
+            const ex = data.entranceExams.find(x => x.id === id);
+            if (ex) items.push({ id: ex.id, title: ex.name, overview: ex.targetPrograms, category: 'Entrance Exam', itemType: 'exams', link: `./exam-details.html?id=${ex.id}` });
+          });
+        }
+
+        if (activeTab === 'all' || activeTab === 'roadmaps') {
+          (bookmarks.roadmaps || []).forEach(id => {
+            const rm = data.roadmaps.find(x => x.id === id);
+            if (rm) items.push({ id: rm.id, title: rm.title, overview: rm.overview, category: 'Roadmap', itemType: 'roadmaps', link: `./roadmap-details.html?id=${rm.id}` });
+          });
+        }
+
+        if (activeTab === 'all' || activeTab === 'scholarships') {
+          (bookmarks.scholarships || []).forEach(id => {
+            const sc = data.scholarships.find(x => x.id === id);
+            if (sc) items.push({ id: sc.id, title: sc.name, overview: sc.amount + ' — ' + sc.provider, category: 'Scholarship', itemType: 'scholarships', link: `./scholarship-details.html?id=${sc.id}` });
+          });
+        }
+
+        if (items.length === 0) {
+          grid.innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:4rem 1rem;">
+              <p style="color:var(--text-muted); font-size:1.1rem;">No saved items in this category.</p>
+              <a href="./career-explorer.html" class="btn btn-outline btn-sm" style="margin-top:1rem;">Explore Directory</a>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = items.map(item => `
+          <div class="charcoal-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+                <span class="tag tag-silver">${item.category || item.itemType}</span>
+                <button onclick="removeBookmark('${item.itemType}', '${item.id}')" class="btn btn-ghost btn-sm" style="color:#ef4444;" title="Remove from saved">
+                  Remove
+                </button>
+              </div>
+              <h3 class="card-title">${item.title}</h3>
+              <p class="card-desc">${(item.overview || '').substring(0, 110)}...</p>
+            </div>
+            <div style="border-top:1px solid var(--border-subtle); padding-top:1rem; margin-top:1rem;">
+              <a href="${item.link}" class="btn btn-outline btn-sm" style="width:100%;">View Details</a>
+            </div>
+          </div>
+        `).join('');
+      };
+
+      window.removeBookmark = (type, id) => {
+        window.UnlostApp.toggleBookmark(type, id);
+        render();
+      };
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => {
+            t.classList.remove('btn-metallic');
+            t.classList.add('btn-outline');
+          });
+          tab.classList.remove('btn-outline');
+          tab.classList.add('btn-metallic');
+          activeTab = tab.getAttribute('data-tab');
+          render();
+        });
+      });
+
+      render();
+    });
+  </script>
+</body>
+</html>
