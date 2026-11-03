@@ -87,8 +87,24 @@ window.UnlostAuth = {
     return Boolean(cached && cached.email === PRIMARY_ADMIN_EMAIL && cached.emailVerified);
   },
 
+  // Wait for window.UnlostFirebase module to bootstrap
+  async waitForFirebaseModule(timeoutMs = 6000) {
+    const start = Date.now();
+    while (!window.UnlostFirebase && (Date.now() - start < timeoutMs)) {
+      await new Promise(r => setTimeout(r, 50));
+    }
+    if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
+      await window.UnlostFirebase.waitForAuth();
+    }
+    if (!window.UnlostFirebase) {
+      throw new Error('Authentication service failed to load. Please verify your internet connection or refresh the page.');
+    }
+    return window.UnlostFirebase;
+  },
+
   // Wait for Firebase auth readiness
   async waitForAuth() {
+    await this.waitForFirebaseModule();
     if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
       return await window.UnlostFirebase.waitForAuth();
     }
@@ -108,10 +124,7 @@ window.UnlostAuth = {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-
-    if (!window.UnlostFirebase || typeof window.UnlostFirebase.signUpWithEmail !== 'function') {
-      throw new Error('Authentication service is initializing. Please wait a moment and try again.');
-    }
+    await this.waitForFirebaseModule();
 
     try {
       const { user, verificationSent, message } = await window.UnlostFirebase.signUpWithEmail(name.trim(), normalizedEmail, password);
@@ -140,9 +153,7 @@ window.UnlostAuth = {
 
   // Resend Email Verification Link via Firebase
   async resendVerificationEmail() {
-    if (!window.UnlostFirebase || typeof window.UnlostFirebase.sendVerificationLink !== 'function') {
-      throw new Error('Firebase Authentication is not available. Please refresh the page.');
-    }
+    await this.waitForFirebaseModule();
 
     try {
       await window.UnlostFirebase.sendVerificationLink();
@@ -155,6 +166,7 @@ window.UnlostAuth = {
 
   // Check verification status from live Firebase Auth (Reloads user token & claims)
   async checkVerificationStatus() {
+    await this.waitForFirebaseModule();
     if (window.UnlostFirebase && typeof window.UnlostFirebase.checkVerificationStatus === 'function') {
       const isVerified = await window.UnlostFirebase.checkVerificationStatus();
       const fbUser = window.UnlostFirebase.auth.currentUser;
@@ -175,6 +187,7 @@ window.UnlostAuth = {
 
   // Apply Verification Link Out-Of-Band Code directly
   async applyVerificationCode(oobCode) {
+    await this.waitForFirebaseModule();
     if (window.UnlostFirebase && typeof window.UnlostFirebase.applyEmailVerificationCode === 'function') {
       const res = await window.UnlostFirebase.applyEmailVerificationCode(oobCode);
       const user = window.UnlostFirebase.auth.currentUser;
@@ -198,10 +211,7 @@ window.UnlostAuth = {
       throw new Error('Please enter both email and password.');
     }
     const normalizedEmail = email.toLowerCase().trim();
-
-    if (!window.UnlostFirebase || typeof window.UnlostFirebase.loginWithEmail !== 'function') {
-      throw new Error('Authentication service is initializing. Please wait a moment and try again.');
-    }
+    await this.waitForFirebaseModule();
 
     try {
       const user = await window.UnlostFirebase.loginWithEmail(normalizedEmail, password);
@@ -223,6 +233,7 @@ window.UnlostAuth = {
 
   // Google Sign-In
   async loginWithGoogle() {
+    await this.waitForFirebaseModule();
     if (window.UnlostFirebase && typeof window.UnlostFirebase.loginWithGoogle === 'function') {
       const user = await window.UnlostFirebase.loginWithGoogle();
       const isVerified = Boolean(user.emailVerified);
@@ -245,6 +256,7 @@ window.UnlostAuth = {
       throw new Error('Please enter a valid registered email address.');
     }
     const normalizedEmail = email.toLowerCase().trim();
+    await this.waitForFirebaseModule();
 
     if (window.UnlostFirebase && typeof window.UnlostFirebase.resetPassword === 'function') {
       try {
@@ -259,8 +271,7 @@ window.UnlostAuth = {
         throw new Error(fbErr.message || 'Failed to send password reset email.');
       }
     }
-
-    throw new Error('Password reset service is unavailable. Please try again later.');
+    throw new Error('Password reset service is not available. Please refresh the page.');
   },
 
   // Logout - Clears Firebase Auth state and local session

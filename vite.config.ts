@@ -3,8 +3,13 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
 
-export default defineConfig(() => {
+export default defineConfig(({ command }) => {
+  // Use root base for Vite dev server so AI Studio preview works seamlessly at http://localhost:3000/
+  // Use '/Beunlost-/' for GitHub Pages production build (or VITE_BASE if explicitly overridden)
+  const base = command === 'serve' ? '/' : (process.env.VITE_BASE || '/Beunlost-/');
+
   return {
+    base,
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
@@ -12,6 +17,7 @@ export default defineConfig(() => {
       },
     },
     build: {
+      outDir: 'dist',
       rollupOptions: {
         input: {
           main: path.resolve(__dirname, 'index.html'),
@@ -44,6 +50,7 @@ export default defineConfig(() => {
           privacyPolicy: path.resolve(__dirname, 'privacy-policy.html'),
           terms: path.resolve(__dirname, 'terms.html'),
           admin: path.resolve(__dirname, 'admin.html'),
+          diagnostics: path.resolve(__dirname, 'diagnostics.html'),
         },
       },
     },

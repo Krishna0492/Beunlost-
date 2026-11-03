@@ -115,5 +115,10 @@ service cloud.firestore {
       allow create: if isValidId(eventId);
       allow update, delete: if isAdmin();
     }
+
+    // Health check & connection diagnostic endpoint
+    match /test/{testId} {
+      allow get: if true;
+    }
   }
 }

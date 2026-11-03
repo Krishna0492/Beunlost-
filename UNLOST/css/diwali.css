@@ -235,8 +235,9 @@
   margin-bottom: 1.75rem;
 }
 
-/* Subtle Login Page Festive Corner Badge */
-.login-diwali-badge {
+/* Subtle Login & Registration Festive Corner Badges */
+.login-diwali-badge,
+.register-diwali-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -247,7 +248,70 @@
   font-size: 0.78rem;
   color: #fde68a;
   margin-bottom: 1.25rem;
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.08);
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.1);
+  animation: diyaIgnite 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Gradual Diya Illumination Entrance */
+@keyframes diyaIgnite {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+    filter: brightness(0.4) blur(4px);
+  }
+  60% {
+    filter: brightness(1.3) blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: brightness(1);
+  }
+}
+
+/* Subtle Rangoli Decorative Corner Pattern */
+.diwali-rangoli-corner {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  opacity: 0.16;
+  pointer-events: none;
+  stroke: #fbbf24;
+  fill: none;
+}
+.diwali-rangoli-top-left { top: 10px; left: 10px; }
+.diwali-rangoli-top-right { top: 10px; right: 10px; transform: scaleX(-1); }
+
+/* Elegant Ambient Light Ray Background */
+.diwali-light-rays {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1200px;
+  height: 480px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(251, 191, 36, 0.12) 0%, rgba(245, 158, 11, 0.04) 45%, transparent 75%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Section Gentle Glow Highlight */
+.diwali-glow-section {
+  position: relative;
+}
+.diwali-glow-section::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.3) 0%, transparent 50%, rgba(245, 158, 11, 0.2) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* Respect Reduced Motion */
@@ -257,6 +321,12 @@
   }
   .diwali-halo {
     animation: none !important;
+  }
+  .login-diwali-badge,
+  .register-diwali-badge {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
   .diwali-modal-backdrop,
   .diwali-modal-card {

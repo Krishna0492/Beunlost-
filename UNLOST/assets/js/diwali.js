@@ -46,7 +46,18 @@ window.UnlostDiwali = {
     `;
   },
 
-  // Initialize Canvas Sparkles
+  getRangoliSvg() {
+    return `
+      <svg class="diwali-rangoli-corner" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="50" cy="50" r="40" stroke="#FBBF24" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <circle cx="50" cy="50" r="24" stroke="#F59E0B" stroke-width="1.2"/>
+        <polygon points="50,15 60,35 85,35 68,50 78,75 50,60 22,75 32,50 15,35 40,35" stroke="#FBBF24" stroke-width="1" fill="none"/>
+        <circle cx="50" cy="50" r="6" fill="#F59E0B" opacity="0.6"/>
+      </svg>
+    `;
+  },
+
+  // Initialize Canvas Sparkles & Distant Ambient Fireworks
   initSparkles() {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
@@ -85,11 +96,46 @@ window.UnlostDiwali = {
       });
     }
 
+    // Distant Ambient Fireworks System
+    const fireworkEmbers = [];
+    let lastBurstTime = Date.now();
+
+    const spawnDistantFirework = () => {
+      const originX = width * 0.15 + Math.random() * (width * 0.7);
+      const originY = height * 0.12 + Math.random() * (height * 0.25);
+      const emberCount = window.innerWidth < 768 ? 8 : 14;
+      const palette = ['#fef08a', '#fbbf24', '#f59e0b', '#fb923c'];
+      const chosenColor = palette[Math.floor(Math.random() * palette.length)];
+
+      for (let j = 0; j < emberCount; j++) {
+        const angle = (Math.PI * 2 * j) / emberCount + (Math.random() * 0.2 - 0.1);
+        const speed = Math.random() * 1.2 + 0.6;
+        fireworkEmbers.push({
+          x: originX,
+          y: originY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed + 0.15, // soft gravity
+          size: Math.random() * 1.8 + 1,
+          opacity: 1,
+          color: chosenColor,
+          decay: Math.random() * 0.012 + 0.008
+        });
+      }
+    };
+
     let isRunning = true;
     const animate = () => {
       if (!isRunning) return;
       ctx.clearRect(0, 0, width, height);
 
+      // Periodic distant bursts every 5-7 seconds
+      const now = Date.now();
+      if (now - lastBurstTime > 5500 && Math.random() < 0.04) {
+        spawnDistantFirework();
+        lastBurstTime = now;
+      }
+
+      // Render floating gold particles
       particles.forEach((p) => {
         p.y -= p.speedY;
         p.x += p.speedX;
@@ -111,6 +157,29 @@ window.UnlostDiwali = {
         ctx.shadowColor = '#fbbf24';
         ctx.fill();
       });
+
+      // Render distant firework embers
+      for (let i = fireworkEmbers.length - 1; i >= 0; i--) {
+        const e = fireworkEmbers[i];
+        e.x += e.vx;
+        e.y += e.vy;
+        e.opacity -= e.decay;
+        e.vx *= 0.98;
+        e.vy *= 0.98;
+
+        if (e.opacity <= 0) {
+          fireworkEmbers.splice(i, 1);
+          continue;
+        }
+
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+        ctx.fillStyle = e.color;
+        ctx.globalAlpha = Math.max(0, e.opacity * 0.85);
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = e.color;
+        ctx.fill();
+      }
 
       requestAnimationFrame(animate);
     };
@@ -173,6 +242,8 @@ window.UnlostDiwali = {
     modal.className = 'diwali-modal-backdrop';
     modal.innerHTML = `
       <div class="diwali-modal-card" role="dialog" aria-modal="true" aria-labelledby="diwali-title">
+        <div class="diwali-rangoli-corner diwali-rangoli-top-left">${this.getRangoliSvg()}</div>
+        <div class="diwali-rangoli-corner diwali-rangoli-top-right">${this.getRangoliSvg()}</div>
         <button class="diwali-modal-close" id="diwali-close-btn" aria-label="Close Greeting">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
@@ -198,7 +269,7 @@ window.UnlostDiwali = {
             Enter UNLOST 🪔
           </button>
           <a href="./survey.html" class="btn btn-outline" style="border-color: rgba(251, 191, 36, 0.4); color: #fde68a;">
-            Find My Direction →
+            Discover Your Direction →
           </a>
         </div>
       </div>
@@ -226,33 +297,33 @@ window.UnlostDiwali = {
     });
   },
 
-  // Add Subtle Diya Badge to Login Page
-  enhanceLoginPage() {
+  // Add Subtle Diya Badge to Login & Register Pages
+  enhanceAuthPages() {
     const isLogin = window.location.pathname.includes('login.html');
-    if (!isLogin) return;
+    const isRegister = window.location.pathname.includes('register.html');
+    if (!isLogin && !isRegister) return;
 
-    const loginCard = document.querySelector('.charcoal-card');
-    if (!loginCard) return;
+    const card = document.querySelector('.charcoal-card');
+    if (!card) return;
 
-    if (document.getElementById('login-diwali-badge')) return;
+    if (document.getElementById('diwali-auth-badge')) return;
 
     const badge = document.createElement('div');
-    badge.id = 'login-diwali-badge';
-    badge.className = 'login-diwali-badge';
+    badge.id = 'diwali-auth-badge';
+    badge.className = isLogin ? 'login-diwali-badge' : 'register-diwali-badge';
     badge.innerHTML = `
       ${this.getDiyaSvg(20)}
-      <span>Wishing you clarity & bright milestones this Diwali</span>
+      <span>${isLogin ? 'Wishing you clarity & bright milestones this Diwali' : 'Begin your journey with clarity this Festival of Lights 🪔'}</span>
     `;
 
-    // Insert above form heading
-    const firstChild = loginCard.firstChild;
-    loginCard.insertBefore(badge, firstChild);
+    const firstChild = card.firstChild;
+    card.insertBefore(badge, firstChild);
   },
 
   init() {
     this.initSparkles();
     this.renderRibbon();
-    this.enhanceLoginPage();
+    this.enhanceAuthPages();
 
     // Auto-open greeting modal on first homepage visit
     const isHome = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/');

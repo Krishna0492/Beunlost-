@@ -1,0 +1,346 @@
+/* ===================================================
+   UNLOST — Student Dashboard & Workspace CSS
+   Personalized student portal, sidebar, 10 card grid
+   =================================================== */
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+}
+
+/* Sidebar */
+.dashboard-sidebar {
+  width: 270px;
+  background-color: var(--bg-pitch);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-nav {
+  padding: 1rem 0.75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidebar-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  padding: 0.8rem 0.85rem 0.35rem;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 0.85rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: var(--transition-smooth);
+  text-decoration: none;
+}
+
+.sidebar-item:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-item.active {
+  color: #ffffff;
+  background-color: rgba(192, 197, 206, 0.12);
+  border: 1px solid rgba(192, 197, 206, 0.25);
+  font-weight: 600;
+}
+
+.sidebar-item svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  stroke-width: 2px;
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.student-mini-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+}
+
+.student-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--silver-gradient);
+  color: #08080a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.student-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.student-name {
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.student-sub {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* Dashboard Main Content Area */
+.dashboard-main {
+  flex: 1;
+  margin-left: 270px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Dashboard Topbar */
+.dashboard-topbar {
+  height: 70px;
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: rgba(10, 10, 13, 0.8);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+}
+
+.topbar-search {
+  position: relative;
+  width: 340px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Dashboard Body Container */
+.dashboard-content {
+  padding: 2.25rem 2rem 4rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.welcome-banner {
+  margin-bottom: 2rem;
+}
+
+.welcome-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.25rem;
+}
+
+.welcome-subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* 10 Dashboard Cards Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-col-12 { grid-column: span 12; }
+.grid-col-8 { grid-column: span 8; }
+.grid-col-7 { grid-column: span 7; }
+.grid-col-6 { grid-column: span 6; }
+.grid-col-5 { grid-column: span 5; }
+.grid-col-4 { grid-column: span 4; }
+
+/* Dashboard Card Enhancements */
+.dash-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.dash-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.dash-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.dash-card-title svg {
+  color: var(--silver-metallic);
+  width: 18px;
+  height: 18px;
+}
+
+.dash-card-body {
+  flex: 1;
+}
+
+/* Quick Actions Card */
+.quick-action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.85rem;
+}
+
+.quick-action-btn {
+  background-color: var(--bg-pitch);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: var(--transition-smooth);
+  text-decoration: none;
+}
+
+.quick-action-btn:hover {
+  background-color: var(--bg-card-hover);
+  border-color: var(--silver-metallic);
+  transform: translateY(-2px);
+}
+
+.quick-action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: rgba(192, 197, 206, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--silver-metallic);
+}
+
+/* Progress bar in dashboard */
+.progress-bar-wrapper {
+  margin: 1rem 0;
+}
+
+.progress-bar-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 0.35rem;
+  color: var(--text-muted);
+}
+
+.progress-track {
+  height: 8px;
+  background-color: var(--bg-pitch);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--silver-gradient);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* List items inside cards */
+.interactive-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.interactive-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.9rem;
+  background-color: var(--bg-pitch);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  transition: var(--transition-smooth);
+}
+
+.interactive-item:hover {
+  border-color: var(--silver-dark);
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.item-checkbox {
+  cursor: pointer;
+  accent-color: var(--silver-metallic);
+  width: 16px;
+  height: 16px;
+}
