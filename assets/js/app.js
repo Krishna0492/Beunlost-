@@ -10,6 +10,9 @@ window.UnlostApp = {
     this.initMobileNav();
     this.updateNavAuthState();
     this.initScrollAnimations();
+    window.addEventListener('unlost-auth-changed', () => {
+      this.updateNavAuthState();
+    });
   },
 
   // Scroll reveal animation observer
