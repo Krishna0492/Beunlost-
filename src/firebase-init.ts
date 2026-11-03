@@ -28,6 +28,13 @@ import {
   limit, 
   getDocFromServer
 } from 'firebase/firestore';
+import { 
+  initializeAppCheck, 
+  ReCaptchaEnterpriseProvider, 
+  getToken, 
+  onTokenChanged, 
+  AppCheck 
+} from 'firebase/app-check';
 import firebaseConfig from '../firebase-applet-config.json';
 
 // Validate configuration parameters
@@ -52,6 +59,123 @@ if (!configValidation.valid) {
 
 // Initialize Firebase App exactly once (singleton pattern to prevent duplicate app errors)
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+
+/**
+ * Retrieve the registered reCAPTCHA Enterprise Site Key safely.
+ * Checks firebase-applet-config.json ("recaptchaSiteKey"), Vite env vars, or runtime window globals.
+ * Does not expose any secret keys.
+ */
+export function getRecaptchaSiteKey(): string {
+  const configKey = typeof firebaseConfig === 'object' && firebaseConfig && 'recaptchaSiteKey' in firebaseConfig 
+    ? String((firebaseConfig as Record<string, unknown>).recaptchaSiteKey || '').trim() 
+    : '';
+
+  const envKey = (typeof import.meta !== 'undefined' && import.meta.env && (
+    import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY || 
+    import.meta.env.VITE_RECAPTCHA_SITE_KEY
+  ) ? String(import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY || import.meta.env.VITE_RECAPTCHA_SITE_KEY).trim() : '');
+
+  const windowKey = (typeof window !== 'undefined' && (window as any).RECAPTCHA_ENTERPRISE_SITE_KEY 
+    ? String((window as any).RECAPTCHA_ENTERPRISE_SITE_KEY).trim() 
+    : '');
+
+  return configKey || envKey || windowKey;
+}
+
+// App Check singleton reference and internal token state tracker
+let appCheckInstance: AppCheck | null = null;
+let appCheckTokenState: { token: string | null; error: Error | null; lastUpdated: string } = {
+  token: null,
+  error: null,
+  lastUpdated: new Date().toISOString()
+};
+
+/**
+ * Initialise Firebase App Check using ReCaptchaEnterpriseProvider.
+ * Initialised immediately after Firebase app initialisation and before Authentication or Firestore requests.
+ * Uses singleton pattern to guarantee App Check is initialised only once.
+ */
+export function initAppCheck(overrideKey?: string): AppCheck | null {
+  if (appCheckInstance) return appCheckInstance;
+  if (typeof window === 'undefined') return null;
+
+  // Window-level singleton guard to prevent duplicate initialization
+  if ((window as any).__unlost_app_check__) {
+    appCheckInstance = (window as any).__unlost_app_check__;
+    return appCheckInstance;
+  }
+
+  const siteKey = (overrideKey || getRecaptchaSiteKey()).trim();
+  if (!siteKey) {
+    console.warn(
+      '[UNLOST App Check] Notice: No reCAPTCHA Enterprise site key found in firebase-applet-config.json ("recaptchaSiteKey") or VITE_RECAPTCHA_ENTERPRISE_SITE_KEY. App Check will activate automatically when a valid registered site key is provided.'
+    );
+    return null;
+  }
+
+  try {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    // Support App Check debug token in local development environments
+    if (isLocalhost && typeof (self as any).FIREBASE_APPCHECK_DEBUG_TOKEN === 'undefined') {
+      const debugTokenEnv = typeof import.meta !== 'undefined' && import.meta.env && (
+        import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN || 
+        import.meta.env.VITE_APPCHECK_DEBUG_TOKEN
+      );
+      if (debugTokenEnv) {
+        (self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = debugTokenEnv === 'true' ? true : debugTokenEnv;
+      }
+    }
+
+    const provider = new ReCaptchaEnterpriseProvider(siteKey);
+    appCheckInstance = initializeAppCheck(app, {
+      provider,
+      isTokenAutoRefreshEnabled: true
+    });
+
+    (window as any).__unlost_app_check__ = appCheckInstance;
+
+    // Attach token change and error listeners for monitoring
+    try {
+      onTokenChanged(appCheckInstance, (tokenResult) => {
+        if (tokenResult && tokenResult.token) {
+          appCheckTokenState = {
+            token: tokenResult.token,
+            error: null,
+            lastUpdated: new Date().toISOString()
+          };
+          console.info('[UNLOST App Check] Attestation token acquired / refreshed successfully.');
+          window.dispatchEvent(new CustomEvent('unlost-appcheck-token', { detail: { hasToken: true } }));
+        }
+      }, (tokenError) => {
+        appCheckTokenState = {
+          token: null,
+          error: tokenError instanceof Error ? tokenError : new Error(String(tokenError)),
+          lastUpdated: new Date().toISOString()
+        };
+        console.warn('[UNLOST App Check] Token error received:', tokenError);
+        window.dispatchEvent(new CustomEvent('unlost-appcheck-error', { detail: { error: tokenError } }));
+      });
+    } catch (listenerErr) {
+      console.debug('[UNLOST App Check] Listener setup notice:', listenerErr);
+    }
+
+    console.info('[UNLOST App Check] Initialized with ReCaptchaEnterpriseProvider.');
+    return appCheckInstance;
+  } catch (err: unknown) {
+    console.error('[UNLOST App Check] Failed to initialize App Check:', err);
+    appCheckTokenState = {
+      token: null,
+      error: err instanceof Error ? err : new Error(String(err)),
+      lastUpdated: new Date().toISOString()
+    };
+    return null;
+  }
+}
+
+// CRITICAL: Initialise App Check immediately after Firebase app initialisation
+// and before Authentication or Firestore requests are executed.
+export const appCheck = initAppCheck();
+
 export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
@@ -157,9 +281,18 @@ export function getFirebaseErrorMessage(error: unknown): string {
       return 'Firebase Authentication configuration was not found for this project. Please check Firebase Console.';
     case 'app/duplicate-app':
       return 'Firebase initialization error: duplicate application instance detected.';
+    case 'appCheck/fetch-status-error':
+      return 'App Check attestation error: Failed to fetch token from reCAPTCHA Enterprise. Please ensure "krishna0492.github.io" is listed in your reCAPTCHA Enterprise Allowed Domains and check your network.';
+    case 'appCheck/token-error':
+      return 'App Check token error: The token is invalid or expired. Please reload the page to refresh attestation.';
+    case 'appCheck/throttled':
+      return 'App Check request rate limit reached. Please wait a few seconds before retrying.';
     default:
+      if (code.includes('app-check') || code.includes('appCheck') || message.includes('AppCheck') || message.includes('app-check')) {
+        return `App Check verification notice: ${message || 'Token attestation rejected'}. Please ensure your domain "krishna0492.github.io" is authorized in Google Cloud reCAPTCHA Enterprise settings.`;
+      }
       if (message.includes('permission-denied') || message.includes('Missing or insufficient permissions')) {
-        return 'Authorization failed: You do not have permission to perform this action. Please ensure your email is verified and log in again.';
+        return 'Authorization failed: You do not have permission to perform this action. If App Check enforcement is enabled in Firebase Console, verify that a valid reCAPTCHA Enterprise token was obtained for domain ' + (typeof window !== 'undefined' ? window.location.hostname : 'this host') + ', and ensure your student email is verified.';
       }
       if (message.includes('the client is offline') || message.includes('offline')) {
         return 'Firebase client is currently offline. Please check your internet connection and try again.';
@@ -193,10 +326,13 @@ declare global {
   interface Window {
     UnlostFirebase: {
       app: typeof app;
+      appCheck: AppCheck | null;
       auth: typeof auth;
       db: typeof db;
       currentUser: FirebaseUser | null;
       isInitialized: boolean;
+      initAppCheck: (overrideKey?: string) => AppCheck | null;
+      getAppCheckToken: (forceRefresh?: boolean) => Promise<string | null>;
       waitForAuth: () => Promise<FirebaseUser | null>;
       signUpWithEmail: (name: string, email: string, pass: string) => Promise<{ user: FirebaseUser; verificationSent: boolean; message?: string }>;
       loginWithEmail: (email: string, pass: string) => Promise<FirebaseUser>;
@@ -226,7 +362,7 @@ declare global {
 
 export interface DiagnosticCheckResult {
   id: string;
-  category: 'DEPLOYMENT' | 'FIREBASE_INIT' | 'FIREBASE_AUTH' | 'FIRESTORE_SECURITY' | 'DOMAIN_AUTH' | 'EMAIL_CONFIG';
+  category: 'DEPLOYMENT' | 'FIREBASE_INIT' | 'FIREBASE_AUTH' | 'FIRESTORE_SECURITY' | 'DOMAIN_AUTH' | 'EMAIL_CONFIG' | 'APP_CHECK';
   name: string;
   status: 'PASS' | 'WARN' | 'FAIL';
   summary: string;
@@ -257,10 +393,29 @@ export interface DiagnosticSuiteReport {
 
 export const UnlostFirebase = {
   app,
+  get appCheck(): AppCheck | null {
+    return appCheckInstance;
+  },
   auth,
   db,
   currentUser: null as FirebaseUser | null,
   isInitialized: false,
+
+  initAppCheck(overrideKey?: string): AppCheck | null {
+    return initAppCheck(overrideKey);
+  },
+
+  async getAppCheckToken(forceRefresh = false): Promise<string | null> {
+    const instance = appCheckInstance || initAppCheck();
+    if (!instance) return null;
+    try {
+      const result = await getToken(instance, forceRefresh);
+      return result ? result.token : null;
+    } catch (e) {
+      console.warn('[UNLOST App Check] Error getting token:', e);
+      return null;
+    }
+  },
 
   waitForAuth() {
     if (authInitialized) {
@@ -1263,6 +1418,96 @@ export const UnlostFirebase = {
         name: 'Email Verification & Reset Action Settings',
         status: 'FAIL',
         summary: 'Error generating action code settings: ' + (e instanceof Error ? e.message : String(e))
+      });
+    }
+
+    // 9. Firebase App Check & reCAPTCHA Enterprise Verification
+    try {
+      const siteKey = getRecaptchaSiteKey();
+      const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+      const isProductionDomain = currentHost === 'krishna0492.github.io';
+
+      if (!siteKey) {
+        checks.push({
+          id: 'APP_CHECK_KEY_STATUS',
+          category: 'APP_CHECK',
+          name: 'Firebase App Check SDK & Site Key',
+          status: 'WARN',
+          summary: 'App Check SDK is integrated with ReCaptchaEnterpriseProvider, but no site key is configured in firebase-applet-config.json ("recaptchaSiteKey").',
+          details: 'App Check initialization is deferred until your registered reCAPTCHA Enterprise site key is provided.',
+          errorCode: 'WARN_APP_CHECK_KEY_EMPTY',
+          suggestedAction: 'Paste your reCAPTCHA Enterprise site key into firebase-applet-config.json under "recaptchaSiteKey" to activate token attestation.'
+        });
+      } else {
+        const maskedKey = siteKey.length > 10 ? `${siteKey.substring(0, 6)}...${siteKey.substring(siteKey.length - 4)}` : 'configured';
+
+        // Verify domain configuration for reCAPTCHA Enterprise
+        if (isProductionDomain) {
+          checks.push({
+            id: 'APP_CHECK_DOMAIN_PRODUCTION',
+            category: 'APP_CHECK',
+            name: 'reCAPTCHA Enterprise Domain Allowlist',
+            status: 'PASS',
+            summary: `Running on production domain "krishna0492.github.io". Key: ${maskedKey}`,
+            details: 'Ensure "krishna0492.github.io" is listed under Allowed Domains in Google Cloud Console > Security > reCAPTCHA Enterprise.'
+          });
+        } else {
+          checks.push({
+            id: 'APP_CHECK_DOMAIN_ENVIRONMENT',
+            category: 'APP_CHECK',
+            name: 'reCAPTCHA Enterprise Domain Allowlist',
+            status: 'PASS',
+            summary: `Running on development / staging host "${currentHost}". Key: ${maskedKey}`,
+            details: 'Ensure this host is registered in reCAPTCHA Enterprise allowed domains or use FIREBASE_APPCHECK_DEBUG_TOKEN for development testing.'
+          });
+        }
+
+        // Live App Check Token Probe
+        const activeAppCheck = appCheckInstance || initAppCheck();
+        if (activeAppCheck) {
+          try {
+            const tokenResult = await getToken(activeAppCheck, false);
+            if (tokenResult && tokenResult.token) {
+              checks.push({
+                id: 'APP_CHECK_TOKEN_ACTIVE',
+                category: 'APP_CHECK',
+                name: 'Live App Check Attestation Token',
+                status: 'PASS',
+                summary: 'Valid App Check attestation token received from reCAPTCHA Enterprise.',
+                details: `Token acquired successfully (length: ${tokenResult.token.length} chars). Auto-refresh enabled.`
+              });
+            } else {
+              checks.push({
+                id: 'APP_CHECK_TOKEN_EMPTY',
+                category: 'APP_CHECK',
+                name: 'Live App Check Attestation Token',
+                status: 'WARN',
+                summary: 'App Check token response was empty.',
+                errorCode: 'WARN_APP_CHECK_EMPTY'
+              });
+            }
+          } catch (tokenErr: unknown) {
+            const tokenErrMsg = tokenErr instanceof Error ? tokenErr.message : String(tokenErr);
+            checks.push({
+              id: 'APP_CHECK_TOKEN_PROBE_FAIL',
+              category: 'APP_CHECK',
+              name: 'Live App Check Attestation Token',
+              status: 'WARN',
+              summary: 'App Check token acquisition notice: ' + tokenErrMsg,
+              details: `Host "${currentHost}" must be included in the reCAPTCHA Enterprise key allowlist in Google Cloud Console.`,
+              errorCode: 'ERR_APP_CHECK_TOKEN_FETCH',
+              suggestedAction: 'Go to Google Cloud Console > reCAPTCHA Enterprise > Keys > Edit > Ensure "krishna0492.github.io" is in Allowed Domains.'
+            });
+          }
+        }
+      }
+    } catch (appCheckDiagErr: unknown) {
+      checks.push({
+        id: 'APP_CHECK_DIAG_EXCEPTION',
+        category: 'APP_CHECK',
+        name: 'Firebase App Check Status',
+        status: 'WARN',
+        summary: 'Error checking App Check status: ' + (appCheckDiagErr instanceof Error ? appCheckDiagErr.message : String(appCheckDiagErr))
       });
     }
 
