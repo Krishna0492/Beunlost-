@@ -4,7 +4,7 @@
  */
 
 window.UnlostDashboard = {
-  init() {
+  async init() {
     if (window.UnlostAuth) {
       const user = window.UnlostAuth.requireAuth();
       if (!user) return;
@@ -14,6 +14,24 @@ window.UnlostDashboard = {
     this.renderHeader();
     this.renderCards();
     this.setupEventListeners();
+
+    // Asynchronously synchronize with live Firestore profile
+    if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
+      try {
+        const fbUser = await window.UnlostFirebase.waitForAuth();
+        if (fbUser) {
+          const cloudProfile = await window.UnlostFirebase.getStudentProfile(fbUser.uid);
+          if (cloudProfile) {
+            this.student = { ...this.student, ...cloudProfile };
+            window.UnlostApp.saveStudentProfile(this.student);
+            this.renderHeader();
+            this.renderCards();
+          }
+        }
+      } catch (e) {
+        console.debug('Dashboard background profile sync note:', e);
+      }
+    }
   },
 
   renderHeader() {

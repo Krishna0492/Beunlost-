@@ -24,10 +24,16 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    // Admin role verification:
+    // Requires genuine authentication, email verification, AND one of:
+    // 1. Authorized primary admin email (bootstrap)
+    // 2. Verified admin custom claim on Firebase token
+    // 3. Document in trusted /admins/{uid} collection
     function isAdmin() {
-      return isSignedIn() && (
-        (request.auth.token.email == 'k7286113@gmail.com' && request.auth.token.email_verified == true) ||
-        (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && request.auth.token.email_verified == true)
+      return isSignedIn() && isVerified() && (
+        request.auth.token.email == 'k7286113@gmail.com' ||
+        request.auth.token.admin == true ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
     }
 
@@ -40,49 +46,60 @@ service cloud.firestore {
     }
 
     // Users collection
-    // Role escalation prevention: non-admins can never assign role: 'admin' or alter their role/status
+    // Role escalation prevention: students can NEVER assign role: 'admin' or alter roles
     match /users/{userId} {
       allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
       allow list: if isAdmin();
       allow create: if isOwner(userId) && isValidId(userId) && 
-        incoming().role == 'student';
-      allow update: if (isOwner(userId) && 
+        incoming().role == 'student' &&
+        incoming().uid == userId;
+      allow update: if (isOwner(userId) && isValidId(userId) &&
+        // Prevent role tampering
         (!('role' in incoming()) || incoming().role == existing().role) &&
-        (!('status' in incoming()) || incoming().status == existing().status)
+        // Allow status updates: student can move to active only if verified, or request deletion
+        (!('status' in incoming()) || incoming().status == existing().status || 
+          (incoming().status == 'active' && isVerified()) ||
+          incoming().status == 'deletion_requested'
+        )
       ) || isAdmin();
       allow delete: if isAdmin();
     }
 
-    // Student academic & preference profiles - read/update gated to verified users or admin
+    // Student academic & preference profiles
+    // Private to the authenticated student owner or verified admin
     match /studentProfiles/{userId} {
-      allow get: if isVerified() && (isOwner(userId) || isAdmin());
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
       allow list: if isAdmin();
       allow create: if isOwner(userId) && isValidId(userId);
-      allow update: if isVerified() && isOwner(userId) && isValidId(userId);
+      allow update: if isOwner(userId) && isValidId(userId);
       allow delete: if isAdmin();
     }
 
-    // Career survey assessment submissions - gated to verified users or admin
+    // Career survey assessment submissions
     match /surveyResults/{resultId} {
-      allow get: if isVerified() && (existing().userId == request.auth.uid || isAdmin());
-      allow list: if isAdmin() || (isVerified() && existing().userId == request.auth.uid);
-      allow create: if isVerified() && incoming().userId == request.auth.uid && isValidId(resultId);
+      allow get: if (isSignedIn() && existing().userId == request.auth.uid) || isAdmin();
+      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid && isValidId(resultId);
       allow update, delete: if isAdmin();
     }
 
     // Student interaction & platform activity audit logs
+    // Allows logging by authenticated students as well as guest learners exploring careers
     match /studentActivity/{activityId} {
-      allow get: if isVerified() && (existing().userId == request.auth.uid || isAdmin());
-      allow list: if isAdmin() || (isVerified() && existing().userId == request.auth.uid);
-      allow create: if isSignedIn() && incoming().userId == request.auth.uid && isValidId(activityId);
+      allow get: if (isSignedIn() && existing().userId == request.auth.uid) || isAdmin();
+      allow list: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isValidId(activityId) && (
+        (isSignedIn() && incoming().userId == request.auth.uid) ||
+        (!isSignedIn() && incoming().userId == 'guest_user')
+      );
       allow update, delete: if isAdmin();
     }
 
     // Student privacy data erasure / deletion requests
     match /deletionRequests/{requestId} {
-      allow get: if isVerified() && (existing().userId == request.auth.uid || isAdmin());
+      allow get: if (isSignedIn() && existing().userId == request.auth.uid) || isAdmin();
       allow list: if isAdmin();
-      allow create: if isVerified() && incoming().userId == request.auth.uid && isValidId(requestId);
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid && isValidId(requestId);
       allow update, delete: if isAdmin();
     }
 
@@ -100,4 +117,3 @@ service cloud.firestore {
     }
   }
 }
-

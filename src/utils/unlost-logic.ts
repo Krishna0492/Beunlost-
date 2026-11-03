@@ -505,3 +505,56 @@ export function validateEmail(email: string): boolean {
   return re.test(email.trim());
 }
 
+/**
+ * Validates student registration inputs
+ */
+export function validateRegistrationInput(name: string, email: string, pass: string): { valid: boolean; error?: string } {
+  if (!name || name.trim().length < 2) {
+    return { valid: false, error: 'Please enter your full name (at least 2 characters).' };
+  }
+  if (!validateEmail(email)) {
+    return { valid: false, error: 'Please enter a valid student email address.' };
+  }
+  if (!pass || pass.length < 6) {
+    return { valid: false, error: 'Password must be at least 6 characters long.' };
+  }
+  return { valid: true };
+}
+
+/**
+ * Computes remaining cooldown seconds for verification email dispatch
+ */
+export function calculateVerificationCooldown(lastSentMs: number | null, nowMs: number, cooldownSec = 60): { canSend: boolean; remainingSec: number } {
+  if (!lastSentMs) return { canSend: true, remainingSec: 0 };
+  const elapsedSec = (nowMs - lastSentMs) / 1000;
+  if (elapsedSec >= cooldownSec) {
+    return { canSend: true, remainingSec: 0 };
+  }
+  return { canSend: false, remainingSec: Math.ceil(cooldownSec - elapsedSec) };
+}
+
+/**
+ * Validates student account status transitions conforming to Firestore security rules
+ */
+export function isValidStatusTransition(currentStatus: string, nextStatus: string, isEmailVerified: boolean): boolean {
+  if (currentStatus === nextStatus) return true;
+  if (nextStatus === 'deletion_requested') return true;
+  if (currentStatus === 'pending_verification' && nextStatus === 'active') {
+    return isEmailVerified;
+  }
+  return false;
+}
+
+/**
+ * Verifies if user has legitimate administrator privileges
+ * Requires verified email and matching authorized email or admin claim
+ */
+export function isAuthorizedAdmin(user: { email?: string | null; emailVerified?: boolean; hasAdminClaim?: boolean } | null): boolean {
+  if (!user || !user.emailVerified) return false;
+  const primaryAdminEmail = 'k7286113@gmail.com';
+  if (user.email && user.email.toLowerCase() === primaryAdminEmail) return true;
+  if (user.hasAdminClaim === true) return true;
+  return false;
+}
+
+

@@ -14,27 +14,27 @@
 </head>
 <body style="display:flex; flex-direction:column; min-height:100vh; justify-content:center; background-color:var(--bg-pitch);">
 
-  <div style="padding: 2rem 1.5rem; width: 100%; max-width: 480px; margin: auto;">
+  <div style="padding: 2rem 1.5rem; width: 100%; max-width: 500px; margin: auto;">
     <div style="text-align: center; margin-bottom: 2rem;">
       <a href="./index.html" class="unlost-logo" style="font-size: 2rem;">
         <span class="un">UN</span><span class="lost">LOST</span>
       </a>
       <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">
-        Email Verification Required
+        Student Identity & Email Verification
       </p>
     </div>
 
     <div class="charcoal-card" style="padding: 2.25rem 2rem; box-shadow: 0 12px 36px rgba(0,0,0,0.6); text-align: center;">
       <!-- Mail Icon -->
-      <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <div id="status-icon" style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+        <svg id="mail-svg" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#e0e0e0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
           <polyline points="22,6 12,13 2,6"></polyline>
         </svg>
       </div>
 
-      <h2 style="font-size: 1.35rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem;">Check Your Inbox</h2>
-      <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.55; margin-bottom: 1.25rem;">
+      <h2 id="verify-headline" style="font-size: 1.35rem; font-weight: 700; color: #ffffff; margin-bottom: 0.5rem;">Check Your Inbox</h2>
+      <p id="verify-subtext" style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.55; margin-bottom: 1.25rem;">
         A secure verification link has been dispatched to:
       </p>
 
@@ -42,15 +42,22 @@
         loading student email...
       </div>
 
-      <div id="verify-alert" style="display:none; padding:0.75rem 1rem; border-radius:var(--radius-md); font-size:0.85rem; margin-bottom:1.25rem; text-align: left;"></div>
+      <div id="verify-alert" style="display:none; padding:0.85rem 1rem; border-radius:var(--radius-md); font-size:0.85rem; margin-bottom:1.25rem; text-align: left; line-height: 1.45;"></div>
 
-      <p style="color: var(--text-dim); font-size: 0.8rem; line-height: 1.5; margin-bottom: 1.75rem;">
-        Click the link in the verification email from Firebase to verify your identity. Once confirmed, return here and click the button below. Please check your Spam or Junk folder if it does not appear within two minutes.
-      </p>
+      <div style="background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.12); border-radius: 6px; padding: 0.85rem; margin-bottom: 1.5rem; text-align: left;">
+        <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--silver-metallic); font-weight: 700; margin-bottom: 0.35rem;">
+          📬 Can't find the email?
+        </div>
+        <p style="color: var(--text-dim); font-size: 0.8rem; line-height: 1.45; margin: 0;">
+          1. Check your <strong>Spam</strong>, <strong>Junk</strong>, or <strong>Promotions</strong> folder.<br>
+          2. It is sent from Firebase Auth (<code>noreply@gen-lang-client-0112998738.firebaseapp.com</code>).<br>
+          3. Click the link inside, then return here and click <strong>Check Verification Status</strong>.
+        </p>
+      </div>
 
       <div style="display: flex; flex-direction: column; gap: 0.85rem;">
         <button id="refresh-status-btn" class="btn btn-primary" style="width: 100%; padding: 0.85rem; justify-content: center; font-weight: 600;">
-          I've Verified My Email — Continue →
+          Check Verification Status
         </button>
 
         <button id="resend-email-btn" class="btn btn-secondary" style="width: 100%; padding: 0.75rem; justify-content: center; font-size: 0.85rem;">
@@ -78,6 +85,9 @@
       const refreshBtn = document.getElementById('refresh-status-btn');
       const resendBtn = document.getElementById('resend-email-btn');
       const signoutBtn = document.getElementById('signout-btn');
+      const headline = document.getElementById('verify-headline');
+      const subtext = document.getElementById('verify-subtext');
+      const statusIcon = document.getElementById('status-icon');
 
       function showAlert(msg, isError = true) {
         alertBox.style.display = 'block';
@@ -93,8 +103,32 @@
         alertBox.textContent = msg;
       }
 
-      // Read email from URL param or current session
+      function updateResendCooldown() {
+        const lastSentStr = localStorage.getItem('unlost_last_verification_sent');
+        if (!lastSentStr) {
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Resend Verification Email';
+          return;
+        }
+        const lastSent = parseInt(lastSentStr, 10);
+        const elapsed = (Date.now() - lastSent) / 1000;
+        if (elapsed < 60) {
+          const remaining = Math.ceil(60 - elapsed);
+          resendBtn.disabled = true;
+          resendBtn.textContent = `Resend available in ${remaining}s`;
+          setTimeout(updateResendCooldown, 1000);
+        } else {
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Resend Verification Email';
+        }
+      }
+
+      // Read URL parameters
       const params = new URLSearchParams(window.location.search);
+      const mode = params.get('mode');
+      const oobCode = params.get('oobCode');
+      const isVerifiedParam = params.get('verified') === 'true';
+
       let email = params.get('email');
       const currentUser = window.UnlostAuth.getCurrentUser();
       if (!email && currentUser && currentUser.email) {
@@ -107,32 +141,76 @@
         emailBadge.textContent = 'your registered email';
       }
 
-      // Check if user is already verified on page load
-      if (window.UnlostFirebase) {
-        const checkInitial = async () => {
-          try {
-            if (window.UnlostFirebase.auth && window.UnlostFirebase.auth.currentUser) {
-              await window.UnlostFirebase.auth.currentUser.reload();
-              if (window.UnlostFirebase.auth.currentUser.emailVerified) {
-                if (currentUser) {
-                  currentUser.emailVerified = true;
-                  localStorage.setItem('unlost_student_session', JSON.stringify(currentUser));
-                }
-                showAlert('Your email is verified! Redirecting to workspace...', false);
-                setTimeout(() => {
-                  if (currentUser && currentUser.email === 'k7286113@gmail.com') {
-                    window.location.href = './admin.html';
-                  } else {
-                    window.location.href = './dashboard.html';
-                  }
-                }, 1000);
-              }
-            }
-          } catch (e) {
-            console.warn('Initial verification check note:', e);
+      updateResendCooldown();
+
+      // Check if arriving via Firebase verification action link with oobCode
+      if (mode === 'verifyEmail' && oobCode) {
+        headline.textContent = 'Verifying with Firebase...';
+        subtext.textContent = 'Confirming your verification link...';
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = 'Verifying...';
+
+        try {
+          if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
+            await window.UnlostFirebase.waitForAuth();
           }
-        };
-        setTimeout(checkInitial, 500);
+          await window.UnlostAuth.applyVerificationCode(oobCode);
+          
+          // Success State
+          statusIcon.style.background = 'rgba(16, 185, 129, 0.15)';
+          statusIcon.style.borderColor = '#10b981';
+          statusIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+          headline.textContent = 'Email Verified Successfully!';
+          subtext.textContent = 'Your UNLOST student account is active.';
+          showAlert('🎉 Identity verified! Launching your workspace...', false);
+          
+          setTimeout(() => {
+            window.location.href = './dashboard.html';
+          }, 1200);
+          return;
+        } catch (err) {
+          showAlert(err.message || 'Unable to apply verification code. Please request a new link.');
+          refreshBtn.disabled = false;
+          refreshBtn.textContent = 'Check Verification Status';
+        }
+      }
+
+      // Check if user is already verified
+      const checkLiveStatus = async (silent = false) => {
+        try {
+          if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
+            await window.UnlostFirebase.waitForAuth();
+          }
+          const isVerified = await window.UnlostAuth.checkVerificationStatus();
+          if (isVerified) {
+            statusIcon.style.background = 'rgba(16, 185, 129, 0.15)';
+            statusIcon.style.borderColor = '#10b981';
+            statusIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            headline.textContent = 'Email Verified!';
+            subtext.textContent = 'Your student account is active and confirmed.';
+            showAlert('Success! Your email has been verified. Redirecting to workspace...', false);
+            setTimeout(() => {
+              const u = window.UnlostAuth.getCurrentUser();
+              if (u && u.email === 'k7286113@gmail.com') {
+                window.location.href = './admin.html';
+              } else {
+                window.location.href = './dashboard.html';
+              }
+            }, 800);
+            return true;
+          } else if (!silent) {
+            showAlert('Email is not verified yet. Please click the link in the email sent by Firebase to your inbox.');
+          }
+        } catch (e) {
+          if (!silent) showAlert(e.message || 'Unable to check verification status.');
+        }
+        return false;
+      };
+
+      if (isVerifiedParam) {
+        checkLiveStatus(false);
+      } else {
+        setTimeout(() => checkLiveStatus(true), 600);
       }
 
       // 1. Refresh Status Button Handler
@@ -141,29 +219,10 @@
         refreshBtn.textContent = 'Checking Firebase status...';
         alertBox.style.display = 'none';
 
-        try {
-          const isVerified = await window.UnlostAuth.checkVerificationStatus();
-          if (isVerified) {
-            showAlert('Success! Your email has been verified. Launching your workspace...', false);
-            setTimeout(() => {
-              const user = window.UnlostAuth.getCurrentUser();
-              if (user && user.email === 'k7286113@gmail.com') {
-                window.location.href = './admin.html';
-              } else if (user && !user.onboarded) {
-                window.location.href = './onboarding.html';
-              } else {
-                window.location.href = './dashboard.html';
-              }
-            }, 800);
-          } else {
-            showAlert('Email not yet verified. Please open the verification link sent by Firebase to your inbox and try again.');
-            refreshBtn.disabled = false;
-            refreshBtn.textContent = "I've Verified My Email — Continue →";
-          }
-        } catch (err) {
-          showAlert(err.message || 'Unable to check verification status. Please try again.');
+        const ok = await checkLiveStatus(false);
+        if (!ok) {
           refreshBtn.disabled = false;
-          refreshBtn.textContent = "I've Verified My Email — Continue →";
+          refreshBtn.textContent = 'Check Verification Status';
         }
       });
 
@@ -176,13 +235,11 @@
         try {
           const res = await window.UnlostAuth.resendVerificationEmail();
           showAlert(res.message || 'Verification link has been resent! Please check your inbox.', false);
+          localStorage.setItem('unlost_last_verification_sent', Date.now().toString());
+          updateResendCooldown();
         } catch (err) {
-          showAlert(err.message || 'Failed to resend verification email. Please try again later.');
-        } finally {
-          setTimeout(() => {
-            resendBtn.disabled = false;
-            resendBtn.textContent = 'Resend Verification Email';
-          }, 3500);
+          showAlert(err.message || 'Failed to resend verification email.');
+          updateResendCooldown();
         }
       });
 

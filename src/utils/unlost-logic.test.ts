@@ -9,6 +9,10 @@ import {
   generateStudyTimetable,
   generateOtpCode,
   validateEmail,
+  validateRegistrationInput,
+  calculateVerificationCooldown,
+  isValidStatusTransition,
+  isAuthorizedAdmin,
   type AptitudeAnswer,
 } from './unlost-logic';
 
@@ -141,4 +145,50 @@ test('validateEmail and generateOtpCode perform rigorous checks', () => {
   assert.equal(otp.length, 6);
   assert.match(otp, /^\d{6}$/);
 });
+
+test('validateRegistrationInput enforces name, email and password strength', () => {
+  assert.equal(validateRegistrationInput('', 'test@unlost.in', 'pass123').valid, false);
+  assert.equal(validateRegistrationInput('A', 'test@unlost.in', 'pass123').valid, false);
+  assert.equal(validateRegistrationInput('Aarav', 'invalid-email', 'pass123').valid, false);
+  assert.equal(validateRegistrationInput('Aarav', 'aarav@unlost.in', '123').valid, false);
+  assert.equal(validateRegistrationInput('Aarav', 'aarav@unlost.in', 'securePassword123').valid, true);
+});
+
+test('calculateVerificationCooldown calculates elapsed time accurately', () => {
+  const now = 100000;
+  // First time (no previous sent)
+  assert.equal(calculateVerificationCooldown(null, now).canSend, true);
+  // Just sent 10s ago
+  const res10s = calculateVerificationCooldown(now - 10000, now);
+  assert.equal(res10s.canSend, false);
+  assert.equal(res10s.remainingSec, 50);
+  // Sent 65s ago (cooldown expired)
+  const res65s = calculateVerificationCooldown(now - 65000, now);
+  assert.equal(res65s.canSend, true);
+  assert.equal(res65s.remainingSec, 0);
+});
+
+test('isValidStatusTransition verifies email before active status and allows deletion request', () => {
+  // Pending to active requires verified email
+  assert.equal(isValidStatusTransition('pending_verification', 'active', false), false);
+  assert.equal(isValidStatusTransition('pending_verification', 'active', true), true);
+  // Deletion request is always allowed
+  assert.equal(isValidStatusTransition('active', 'deletion_requested', true), true);
+  assert.equal(isValidStatusTransition('pending_verification', 'deletion_requested', false), true);
+  // Same status is allowed
+  assert.equal(isValidStatusTransition('active', 'active', true), true);
+});
+
+test('isAuthorizedAdmin rejects unverified users and non-admin emails', () => {
+  assert.equal(isAuthorizedAdmin(null), false);
+  // Unverified admin email -> rejected
+  assert.equal(isAuthorizedAdmin({ email: 'k7286113@gmail.com', emailVerified: false }), false);
+  // Verified student email -> rejected
+  assert.equal(isAuthorizedAdmin({ email: 'student@gmail.com', emailVerified: true }), false);
+  // Verified primary admin email -> accepted
+  assert.equal(isAuthorizedAdmin({ email: 'k7286113@gmail.com', emailVerified: true }), true);
+  // Verified user with custom claim -> accepted
+  assert.equal(isAuthorizedAdmin({ email: 'customadmin@unlost.in', emailVerified: true, hasAdminClaim: true }), true);
+});
+
 

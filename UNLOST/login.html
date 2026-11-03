@@ -7,6 +7,7 @@
   <meta name="description" content="Sign in to your personalized UNLOST student workspace.">
   <link rel="stylesheet" href="./assets/css/style.css">
   <link rel="stylesheet" href="./assets/css/responsive.css">
+  <link rel="stylesheet" href="./assets/css/diwali.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -25,7 +26,7 @@
     </div>
 
     <div class="charcoal-card" style="padding: 2.25rem 2rem; box-shadow: 0 12px 36px rgba(0,0,0,0.6);">
-      <div id="auth-alert" style="display:none; padding:0.75rem 1rem; border-radius:var(--radius-md); font-size:0.85rem; margin-bottom:1.25rem;"></div>
+      <div id="auth-alert" style="display:none; padding:0.85rem 1rem; border-radius:var(--radius-md); font-size:0.85rem; margin-bottom:1.25rem; line-height: 1.45;"></div>
 
       <form id="login-form">
         <div class="form-group">
@@ -46,14 +47,14 @@
           </div>
         </div>
 
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+        <div style="margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center;">
           <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; color:var(--text-muted); cursor:pointer;">
             <input type="checkbox" id="remember-me" checked style="accent-color:var(--silver-metallic); width:15px; height:15px;">
             <span>Remember me</span>
           </label>
         </div>
 
-        <button type="submit" class="btn btn-primary" id="login-submit-btn" style="width:100%; padding:0.8rem;">
+        <button type="submit" class="btn btn-primary" id="login-submit-btn" style="width:100%; padding:0.85rem; font-weight: 600;">
           Sign In to UNLOST
         </button>
 
@@ -73,7 +74,7 @@
 
     <div style="text-align: center; margin-top: 1.5rem;">
       <p style="color: var(--text-muted); font-size: 0.88rem;">
-        New student? <a href="./register.html" style="color: #ffffff; font-weight: 600; text-decoration: underline;">Create an account</a>
+        New student? <a href="./register.html" style="color: #ffffff; font-weight: 600; text-decoration: underline;">Create a free account</a>
       </p>
       <div style="margin-top: 1.25rem;">
         <a href="./index.html" style="color: var(--text-dim); font-size: 0.8rem;">← Back to Homepage</a>
@@ -84,16 +85,11 @@
   <script src="./assets/js/data.js"></script>
   <script src="./assets/js/auth.js"></script>
   <script src="./assets/js/app.js"></script>
+  <script src="./assets/js/diwali.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const currentUser = window.UnlostAuth.getCurrentUser();
+    document.addEventListener('DOMContentLoaded', async () => {
       const params = new URLSearchParams(window.location.search);
       const redirectParam = params.get('redirect');
-
-      if (currentUser && !redirectParam) {
-        window.location.href = currentUser.role === 'admin' ? './admin.html' : './dashboard.html';
-        return;
-      }
 
       const form = document.getElementById('login-form');
       const emailInput = document.getElementById('login-email');
@@ -108,8 +104,6 @@
         passInput.type = passInput.type === 'password' ? 'text' : 'password';
       });
 
-
-
       function showAlert(msg, isError = true) {
         alertBox.style.display = 'block';
         if (isError) {
@@ -121,7 +115,16 @@
           alertBox.style.border = '1px solid #10b981';
           alertBox.style.color = '#6ee7b7';
         }
-        alertBox.textContent = msg;
+        alertBox.innerHTML = msg;
+      }
+
+      // Check if user is already verified and authenticated
+      if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
+        window.UnlostFirebase.waitForAuth().then((fbUser) => {
+          if (fbUser && fbUser.emailVerified && !redirectParam) {
+            window.location.href = fbUser.email === 'k7286113@gmail.com' ? './admin.html' : './dashboard.html';
+          }
+        });
       }
 
       // Email + Password Sign In
@@ -139,17 +142,18 @@
           );
 
           if (!user.emailVerified) {
-            showAlert('Your email address is not yet verified. Redirecting to verification screen...', false);
+            showAlert('Your email address is not yet verified. Please verify your email to access your workspace. Redirecting...', false);
             setTimeout(() => {
               window.location.href = `./verify-email.html?email=${encodeURIComponent(user.email || '')}`;
-            }, 600);
+            }, 900);
             return;
           }
 
           if (window.UnlostApp && typeof window.UnlostApp.showToast === 'function') {
-            window.UnlostApp.showToast('Login successful. Redirecting...');
+            window.UnlostApp.showToast('Login successful. Redirecting to workspace...');
           }
 
+          submitBtn.textContent = 'Launching workspace...';
           setTimeout(() => {
             if (redirectParam) {
               window.location.href = decodeURIComponent(redirectParam);

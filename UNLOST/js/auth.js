@@ -1,37 +1,52 @@
 /**
- * UNLOST — Authentication & Session Manager
- * Provides client session persistence, secure hashing/token abstractions,
- * Firebase Auth integration hooks, and route protection.
+ * UNLOST — Unified Authentication & Session Manager
+ * Powered Authoritatively by Firebase Authentication & Firestore.
+ * Zero insecure local storage of credentials or password hashes.
  */
 
 const UNLOST_AUTH_KEY = 'unlost_student_session';
-const UNLOST_STUDENTS_STORE = 'unlost_registered_users';
-const UNLOST_PENDING_STORE = 'unlost_pending_verifications';
-const UNLOST_RESET_STORE = 'unlost_password_resets';
+const PRIMARY_ADMIN_EMAIL = 'k7286113@gmail.com';
 
 window.UnlostAuth = {
-  // Check current session
+  // Check current session and synchronize live Firebase verification state
   getCurrentUser() {
     try {
+      // 1. Authoritative check from live Firebase Auth if available
+      if (window.UnlostFirebase && window.UnlostFirebase.auth && window.UnlostFirebase.auth.currentUser) {
+        const fbUser = window.UnlostFirebase.auth.currentUser;
+        const isPrimaryAdmin = fbUser.email && fbUser.email.toLowerCase() === PRIMARY_ADMIN_EMAIL && Boolean(fbUser.emailVerified);
+        return {
+          uid: fbUser.uid,
+          name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'Student'),
+          email: fbUser.email ? fbUser.email.toLowerCase().trim() : '',
+          role: isPrimaryAdmin ? 'admin' : 'student',
+          emailVerified: Boolean(fbUser.emailVerified),
+          onboarded: true
+        };
+      }
+
+      // 2. Fallback to cached session
       const data = localStorage.getItem(UNLOST_AUTH_KEY);
       if (!data) return null;
-      return JSON.parse(data);
+      const user = JSON.parse(data);
+      return user;
     } catch (e) {
       console.error('Failed to parse session:', e);
       return null;
     }
   },
 
-  // Set session
-  setSession(user, remember = false) {
+  // Set session - never grants admin role via client manipulation
+  setSession(user, remember = true) {
+    const isPrimaryAdmin = user.email && user.email.toLowerCase() === PRIMARY_ADMIN_EMAIL && Boolean(user.emailVerified);
     const sessionData = {
       uid: user.uid || 'usr_' + Date.now(),
-      name: user.name || 'Student',
-      email: user.email,
-      role: 'student',
-      emailVerified: user.emailVerified !== false,
+      name: user.name || user.fullName || user.displayName || (user.email ? user.email.split('@')[0] : 'Student'),
+      email: user.email ? user.email.toLowerCase().trim() : '',
+      role: isPrimaryAdmin ? 'admin' : 'student', // Client can NEVER self-elevate
+      emailVerified: Boolean(user.emailVerified),
       loggedInAt: new Date().toISOString(),
-      onboarded: user.onboarded || false
+      onboarded: user.onboarded !== undefined ? user.onboarded : true
     };
     localStorage.setItem(UNLOST_AUTH_KEY, JSON.stringify(sessionData));
     if (!remember) {
@@ -40,21 +55,47 @@ window.UnlostAuth = {
     return sessionData;
   },
 
-  // Salted client-side SHA-256 hash helper
-  async hashPassword(password) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password + '_unlost_salt_2025_sec');
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  // Check if current user is an authorized, verified administrator
+  async isAdmin() {
+    if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
+      await window.UnlostFirebase.waitForAuth();
+    }
+
+    if (window.UnlostFirebase && window.UnlostFirebase.auth && window.UnlostFirebase.auth.currentUser) {
+      const fbUser = window.UnlostFirebase.auth.currentUser;
+      if (!fbUser.emailVerified) return false;
+
+      // 1. Check primary bootstrap admin
+      if (fbUser.email && fbUser.email.toLowerCase() === PRIMARY_ADMIN_EMAIL) {
+        return true;
+      }
+
+      // 2. Check custom claim on ID token
+      try {
+        const tokenResult = await fbUser.getIdTokenResult();
+        if (tokenResult.claims && tokenResult.claims.admin === true) {
+          return true;
+        }
+      } catch (e) {
+        console.debug('Admin claim check note:', e);
+      }
+
+      return false;
+    }
+
+    const cached = this.getCurrentUser();
+    return Boolean(cached && cached.email === PRIMARY_ADMIN_EMAIL && cached.emailVerified);
   },
 
-  // Generate random 6-digit OTP
-  _generateOtp() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+  // Wait for Firebase auth readiness
+  async waitForAuth() {
+    if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
+      return await window.UnlostFirebase.waitForAuth();
+    }
+    return null;
   },
 
-  // Step 1 of registration: validate and generate 6-digit OTP
+  // Initiate Student Registration with Firebase Email Verification Link
   async initiateRegistration(name, email, password) {
     if (!name || name.trim().length < 2) {
       throw new Error('Please enter your full name (minimum 2 characters).');
@@ -67,222 +108,219 @@ window.UnlostAuth = {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    const users = this._getRegisteredUsers();
 
-    if (users[normalizedEmail]) {
-      throw new Error('An account with this email already exists. Please log in.');
+    if (!window.UnlostFirebase || typeof window.UnlostFirebase.signUpWithEmail !== 'function') {
+      throw new Error('Authentication service is initializing. Please wait a moment and try again.');
     }
 
-    const hashedPassword = await this.hashPassword(password);
-    const otp = this._generateOtp();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+    try {
+      const { user, verificationSent, message } = await window.UnlostFirebase.signUpWithEmail(name.trim(), normalizedEmail, password);
+      
+      const session = this.setSession({
+        uid: user.uid,
+        name: name.trim(),
+        email: normalizedEmail,
+        emailVerified: false,
+        role: 'student',
+        onboarded: false
+      }, true);
 
-    const pending = this._getPendingStore();
-    pending[normalizedEmail] = {
-      name: name.trim(),
-      email: normalizedEmail,
-      passwordHash: hashedPassword,
-      otp,
-      expiresAt,
-      createdAt: Date.now()
-    };
-    localStorage.setItem(UNLOST_PENDING_STORE, JSON.stringify(pending));
-
-    return {
-      success: true,
-      email: normalizedEmail,
-      otp, // provided so the client UI can display instant dispatch notice
-      expiresAt
-    };
+      return {
+        success: true,
+        isFirebase: true,
+        email: normalizedEmail,
+        verificationSent,
+        message,
+        session
+      };
+    } catch (fbErr) {
+      throw new Error(fbErr.message || 'Registration failed. Please check your details and try again.');
+    }
   },
 
-  // Step 2 of registration: verify OTP code and activate account
-  async verifyOtpAndComplete(email, enteredOtp) {
-    const normalizedEmail = email.toLowerCase().trim();
-    const pending = this._getPendingStore();
-    const pendingUser = pending[normalizedEmail];
-
-    if (!pendingUser) {
-      throw new Error('No pending registration found for this email. Please register again.');
+  // Resend Email Verification Link via Firebase
+  async resendVerificationEmail() {
+    if (!window.UnlostFirebase || typeof window.UnlostFirebase.sendVerificationLink !== 'function') {
+      throw new Error('Firebase Authentication is not available. Please refresh the page.');
     }
 
-    if (Date.now() > pendingUser.expiresAt) {
-      delete pending[normalizedEmail];
-      localStorage.setItem(UNLOST_PENDING_STORE, JSON.stringify(pending));
-      throw new Error('This verification code has expired. Please request a new code.');
+    try {
+      await window.UnlostFirebase.sendVerificationLink();
+      return { success: true, message: 'Verification email has been sent to your inbox. Please check Spam or Promotions folders.' };
+    } catch (e) {
+      console.warn('Firebase resend error:', e);
+      throw new Error(e.message || 'Failed to dispatch verification email.');
     }
-
-    if (pendingUser.otp.trim() !== enteredOtp.toString().trim()) {
-      throw new Error('Invalid 6-digit verification code. Please check and try again.');
-    }
-
-    // Activated user
-    const users = this._getRegisteredUsers();
-    const newUser = {
-      uid: 'stu_' + Math.random().toString(36).substring(2, 9),
-      name: pendingUser.name,
-      email: normalizedEmail,
-      passwordHash: pendingUser.passwordHash,
-      createdAt: new Date().toISOString(),
-      emailVerified: true,
-      onboarded: false
-    };
-
-    users[normalizedEmail] = newUser;
-    localStorage.setItem(UNLOST_STUDENTS_STORE, JSON.stringify(users));
-
-    // Clear pending
-    delete pending[normalizedEmail];
-    localStorage.setItem(UNLOST_PENDING_STORE, JSON.stringify(pending));
-
-    // Set active session
-    const session = this.setSession(newUser, true);
-    return session;
   },
 
-  // Resend OTP for registration
-  async resendRegistrationOtp(email) {
-    const normalizedEmail = email.toLowerCase().trim();
-    const pending = this._getPendingStore();
-    const record = pending[normalizedEmail];
-
-    if (!record) {
-      throw new Error('No pending registration found for this email.');
+  // Check verification status from live Firebase Auth (Reloads user token & claims)
+  async checkVerificationStatus() {
+    if (window.UnlostFirebase && typeof window.UnlostFirebase.checkVerificationStatus === 'function') {
+      const isVerified = await window.UnlostFirebase.checkVerificationStatus();
+      const fbUser = window.UnlostFirebase.auth.currentUser;
+      
+      if (fbUser) {
+        this.setSession({
+          uid: fbUser.uid,
+          name: fbUser.displayName || fbUser.email?.split('@')[0] || 'Student',
+          email: fbUser.email,
+          emailVerified: isVerified,
+          role: isVerified && fbUser.email === PRIMARY_ADMIN_EMAIL ? 'admin' : 'student'
+        }, true);
+      }
+      return isVerified;
     }
-
-    const newOtp = this._generateOtp();
-    record.otp = newOtp;
-    record.expiresAt = Date.now() + 10 * 60 * 1000;
-    pending[normalizedEmail] = record;
-    localStorage.setItem(UNLOST_PENDING_STORE, JSON.stringify(pending));
-
-    return { success: true, otp: newOtp };
+    return false;
   },
 
-  // Direct register (fallback)
-  async register(name, email, password) {
-    const step1 = await this.initiateRegistration(name, email, password);
-    return await this.verifyOtpAndComplete(email, step1.otp);
+  // Apply Verification Link Out-Of-Band Code directly
+  async applyVerificationCode(oobCode) {
+    if (window.UnlostFirebase && typeof window.UnlostFirebase.applyEmailVerificationCode === 'function') {
+      const res = await window.UnlostFirebase.applyEmailVerificationCode(oobCode);
+      const user = window.UnlostFirebase.auth.currentUser;
+      if (user) {
+        this.setSession({
+          uid: user.uid,
+          name: user.displayName || user.email?.split('@')[0] || 'Student',
+          email: user.email,
+          emailVerified: true,
+          role: user.email === PRIMARY_ADMIN_EMAIL ? 'admin' : 'student'
+        }, true);
+      }
+      return res;
+    }
+    return false;
   },
 
-  // Login student
-  async login(email, password, remember = false) {
+  // Direct login with email and password via Firebase Auth
+  async login(email, password, remember = true) {
     if (!email || !password) {
       throw new Error('Please enter both email and password.');
     }
     const normalizedEmail = email.toLowerCase().trim();
-    const users = this._getRegisteredUsers();
-    const user = users[normalizedEmail];
 
-    if (!user) {
-      // Demo student account
-      if (normalizedEmail === 'demo@unlost.in' && password === 'student123') {
-        const demoUser = {
-          uid: 'demo_student',
-          name: 'Aarav Sharma',
-          email: 'demo@unlost.in',
-          emailVerified: true,
-          onboarded: true
-        };
-        return this.setSession(demoUser, remember);
-      }
-      throw new Error('No student account found with this email. Please check your credentials or register.');
+    if (!window.UnlostFirebase || typeof window.UnlostFirebase.loginWithEmail !== 'function') {
+      throw new Error('Authentication service is initializing. Please wait a moment and try again.');
     }
 
-    const testHash = await this.hashPassword(password);
-    if (user.passwordHash !== testHash) {
-      throw new Error('Incorrect password. Please try again.');
-    }
+    try {
+      const user = await window.UnlostFirebase.loginWithEmail(normalizedEmail, password);
+      
+      const isVerified = Boolean(user.emailVerified);
+      const isPrimaryAdmin = normalizedEmail === PRIMARY_ADMIN_EMAIL && isVerified;
 
-    return this.setSession(user, remember);
+      return this.setSession({
+        uid: user.uid,
+        name: user.displayName || normalizedEmail.split('@')[0],
+        email: user.email,
+        emailVerified: isVerified,
+        role: isPrimaryAdmin ? 'admin' : 'student'
+      }, remember);
+    } catch (fbErr) {
+      throw new Error(fbErr.message || 'Login failed. Please check your credentials.');
+    }
   },
 
-  // Request Password Reset OTP
+  // Google Sign-In
+  async loginWithGoogle() {
+    if (window.UnlostFirebase && typeof window.UnlostFirebase.loginWithGoogle === 'function') {
+      const user = await window.UnlostFirebase.loginWithGoogle();
+      const isVerified = Boolean(user.emailVerified);
+      const isPrimaryAdmin = user.email?.toLowerCase() === PRIMARY_ADMIN_EMAIL && isVerified;
+
+      return this.setSession({
+        uid: user.uid,
+        name: user.displayName || user.email?.split('@')[0] || 'Student',
+        email: user.email,
+        emailVerified: isVerified,
+        role: isPrimaryAdmin ? 'admin' : 'student'
+      }, true);
+    }
+    throw new Error('Google Sign-In is initializing. Please try again in a moment.');
+  },
+
+  // Request Password Reset Link via Firebase
   async requestPasswordReset(email) {
     if (!email || !email.includes('@')) {
       throw new Error('Please enter a valid registered email address.');
     }
     const normalizedEmail = email.toLowerCase().trim();
-    const users = this._getRegisteredUsers();
-    if (!users[normalizedEmail]) {
-      throw new Error('No account found with this email address.');
+
+    if (window.UnlostFirebase && typeof window.UnlostFirebase.resetPassword === 'function') {
+      try {
+        await window.UnlostFirebase.resetPassword(normalizedEmail);
+        return {
+          success: true,
+          email: normalizedEmail,
+          message: `A secure password reset link has been dispatched to ${normalizedEmail}. Please check your inbox and Spam folder.`
+        };
+      } catch (fbErr) {
+        console.warn('Firebase reset password note:', fbErr);
+        throw new Error(fbErr.message || 'Failed to send password reset email.');
+      }
     }
 
-    const otp = this._generateOtp();
-    const resets = this._getResetStore();
-    resets[normalizedEmail] = {
-      otp,
-      expiresAt: Date.now() + 10 * 60 * 1000
-    };
-    localStorage.setItem(UNLOST_RESET_STORE, JSON.stringify(resets));
-
-    return {
-      success: true,
-      email: normalizedEmail,
-      otp,
-      message: `A 6-digit recovery code has been sent to ${normalizedEmail}.`
-    };
+    throw new Error('Password reset service is unavailable. Please try again later.');
   },
 
-  // Verify Reset OTP and update password
-  async verifyPasswordReset(email, enteredOtp, newPassword) {
-    if (!newPassword || newPassword.length < 6) {
-      throw new Error('New password must be at least 6 characters long.');
+  // Logout - Clears Firebase Auth state and local session
+  async logout() {
+    try {
+      if (window.UnlostFirebase && typeof window.UnlostFirebase.logout === 'function') {
+        await window.UnlostFirebase.logout();
+      }
+    } catch (e) {
+      console.warn('Firebase logout note:', e);
     }
-    const normalizedEmail = email.toLowerCase().trim();
-    const resets = this._getResetStore();
-    const record = resets[normalizedEmail];
-
-    if (!record) {
-      throw new Error('No password reset requested for this account.');
-    }
-    if (Date.now() > record.expiresAt) {
-      delete resets[normalizedEmail];
-      localStorage.setItem(UNLOST_RESET_STORE, JSON.stringify(resets));
-      throw new Error('The recovery code has expired. Please request a new one.');
-    }
-    if (record.otp.trim() !== enteredOtp.toString().trim()) {
-      throw new Error('Invalid recovery code. Please check and try again.');
-    }
-
-    const users = this._getRegisteredUsers();
-    const user = users[normalizedEmail];
-    if (!user) {
-      throw new Error('Student account not found.');
-    }
-
-    user.passwordHash = await this.hashPassword(newPassword);
-    users[normalizedEmail] = user;
-    localStorage.setItem(UNLOST_STUDENTS_STORE, JSON.stringify(users));
-
-    delete resets[normalizedEmail];
-    localStorage.setItem(UNLOST_RESET_STORE, JSON.stringify(resets));
-
-    return { success: true };
-  },
-
-  // Logout
-  logout() {
     localStorage.removeItem(UNLOST_AUTH_KEY);
     sessionStorage.removeItem('unlost_session_transient');
     window.location.href = './login.html';
   },
 
-  // Route Guard
+  // Route Guard for authenticated student pages
+  // Asynchronously verifies live Firebase state to prevent race conditions
   requireAuth(redirectOnboarding = true) {
+    const currentFile = window.location.pathname.split('/').pop() || 'index.html';
     const user = this.getCurrentUser();
+
+    // Perform live async verification in background
+    if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
+      window.UnlostFirebase.waitForAuth().then(async (fbUser) => {
+        if (!fbUser) {
+          // Unauthenticated -> redirect
+          localStorage.removeItem(UNLOST_AUTH_KEY);
+          const search = window.location.search || '';
+          const redirectParam = encodeURIComponent(currentFile + search);
+          window.location.href = `./login.html?redirect=${redirectParam}`;
+          return;
+        }
+
+        // Live check emailVerified
+        if (!fbUser.emailVerified && !currentFile.includes('verify-email.html')) {
+          window.location.href = `./verify-email.html?email=${encodeURIComponent(fbUser.email || '')}`;
+          return;
+        }
+      });
+    }
+
+    // 1. Unauthenticated -> redirect to login
     if (!user) {
-      const currentPath = window.location.pathname;
-      if (!currentPath.includes('login.html') && !currentPath.includes('register.html')) {
-        const search = window.location.search || '';
-        const currentFile = window.location.pathname.split('/').pop() || 'index.html';
-        const redirectParam = encodeURIComponent(currentFile + search);
-        window.location.href = `./login.html?redirect=${redirectParam}`;
-      }
+      const search = window.location.search || '';
+      const redirectParam = encodeURIComponent(currentFile + search);
+      window.location.href = `./login.html?redirect=${redirectParam}`;
       return null;
     }
 
-    if (redirectOnboarding && !user.onboarded && !window.location.pathname.includes('onboarding.html')) {
+    // 2. Authenticated but unverified -> redirect to verify-email.html
+    if (!user.emailVerified) {
+      if (!currentFile.includes('verify-email.html')) {
+        window.location.href = `./verify-email.html?email=${encodeURIComponent(user.email || '')}`;
+        return null;
+      }
+    }
+
+    // 3. Verified but not completed onboarding
+    if (redirectOnboarding && !user.onboarded && !currentFile.includes('onboarding.html') && !currentFile.includes('verify-email.html')) {
       window.location.href = './onboarding.html';
       return null;
     }
@@ -290,30 +328,22 @@ window.UnlostAuth = {
     return user;
   },
 
-  _getRegisteredUsers() {
-    try {
-      const data = localStorage.getItem(UNLOST_STUDENTS_STORE);
-      return data ? JSON.parse(data) : {};
-    } catch (e) {
-      return {};
+  // Route Guard for Admin Dashboard
+  async requireAdmin() {
+    if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
+      await window.UnlostFirebase.waitForAuth();
     }
-  },
-
-  _getPendingStore() {
-    try {
-      const data = localStorage.getItem(UNLOST_PENDING_STORE);
-      return data ? JSON.parse(data) : {};
-    } catch (e) {
-      return {};
+    const user = this.getCurrentUser();
+    if (!user) {
+      window.location.href = `./login.html?redirect=admin.html`;
+      return null;
     }
-  },
-
-  _getResetStore() {
-    try {
-      const data = localStorage.getItem(UNLOST_RESET_STORE);
-      return data ? JSON.parse(data) : {};
-    } catch (e) {
-      return {};
+    const isAdm = await this.isAdmin();
+    if (!isAdm) {
+      // Not an authorized admin
+      window.location.href = './dashboard.html';
+      return false;
     }
+    return user;
   }
 };

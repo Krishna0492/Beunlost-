@@ -7,9 +7,12 @@ import {
   sendPasswordResetEmail, 
   signOut, 
   onAuthStateChanged,
+  applyActionCode,
   GoogleAuthProvider,
   signInWithPopup,
-  User as FirebaseUser
+  ActionCodeSettings,
+  User as FirebaseUser,
+  AuthError
 } from 'firebase/auth';
 import { 
   getFirestore, 
@@ -93,6 +96,69 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   throw new Error(JSON.stringify(errInfo));
 }
 
+// User-friendly error translator for Firebase Auth & Firestore
+export function getFirebaseErrorMessage(error: unknown): string {
+  if (!error) return 'An unexpected error occurred. Please try again.';
+  const authErr = error as AuthError;
+  const code = authErr.code || '';
+  const message = authErr.message || String(error);
+
+  switch (code) {
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+      return 'Incorrect email or password. Please verify your details or use Forgot Password to reset.';
+    case 'auth/user-not-found':
+      return 'No account was found with this email address. Please check your spelling or register for a free account.';
+    case 'auth/email-already-in-use':
+      return 'An account with this email address already exists. Please log in instead.';
+    case 'auth/weak-password':
+      return 'Please choose a stronger password (at least 6 characters with a combination of letters and numbers).';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address (e.g., student@domain.com).';
+    case 'auth/too-many-requests':
+      return 'Too many attempts in a short time. Please wait 60 seconds before trying again.';
+    case 'auth/network-request-failed':
+      return 'Network connection problem. Please verify your internet connection and try again.';
+    case 'auth/popup-closed-by-user':
+      return 'Google sign-in popup was closed before completion. Please try again.';
+    case 'auth/popup-blocked':
+      return 'Pop-up was blocked by your browser. Please allow pop-ups for this site to sign in with Google.';
+    case 'auth/unauthorized-domain':
+      return 'This domain is not yet authorized in Firebase Console. Please add this domain under Firebase Authentication > Settings > Authorized domains.';
+    case 'auth/user-disabled':
+      return 'This student account has been disabled. Please contact support at beunlost.in@gmail.com.';
+    case 'auth/expired-action-code':
+      return 'This verification link has expired. Please request a new verification email.';
+    case 'auth/invalid-action-code':
+      return 'This verification link is invalid or has already been used. Please check your account status.';
+    default:
+      if (message.includes('permission-denied') || message.includes('Missing or insufficient permissions')) {
+        return 'Authorization failed: You do not have permission to perform this action. Please ensure your email is verified and log in again.';
+      }
+      return message || 'An unexpected authentication error occurred.';
+  }
+}
+
+// Build ActionCodeSettings for email verification
+function getActionCodeSettings(): ActionCodeSettings {
+  const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'https://krishna0492.github.io';
+  const pathname = typeof window !== 'undefined' && window.location.pathname ? window.location.pathname.replace(/[^/]*$/, '') : '/';
+  return {
+    url: `${origin}${pathname}verify-email.html?verified=true`,
+    handleCodeInApp: false
+  };
+}
+
+// Auth State Readiness Promise
+let authInitialized = false;
+let authReadyResolve: (user: FirebaseUser | null) => void;
+const authReadyPromise = new Promise<FirebaseUser | null>((resolve) => {
+  authReadyResolve = resolve;
+});
+
+// Primary Admin Email
+export const PRIMARY_ADMIN_EMAIL = 'k7286113@gmail.com';
+
 // Global Firebase helper object for UNLOST
 declare global {
   interface Window {
@@ -102,10 +168,13 @@ declare global {
       db: typeof db;
       currentUser: FirebaseUser | null;
       isInitialized: boolean;
-      signUpWithEmail: (name: string, email: string, pass: string) => Promise<{ user: FirebaseUser; verificationSent: boolean }>;
+      waitForAuth: () => Promise<FirebaseUser | null>;
+      signUpWithEmail: (name: string, email: string, pass: string) => Promise<{ user: FirebaseUser; verificationSent: boolean; message?: string }>;
       loginWithEmail: (email: string, pass: string) => Promise<FirebaseUser>;
       loginWithGoogle: () => Promise<FirebaseUser>;
       sendVerificationLink: (user?: FirebaseUser) => Promise<boolean>;
+      applyEmailVerificationCode: (oobCode: string) => Promise<boolean>;
+      checkVerificationStatus: () => Promise<boolean>;
       resetPassword: (email: string) => Promise<boolean>;
       logout: () => Promise<void>;
       saveStudentProfile: (profileData: Record<string, unknown>) => Promise<void>;
@@ -120,12 +189,10 @@ declare global {
       getDeletionRequests: () => Promise<Array<Record<string, unknown>>>;
       getAdminAnalytics: () => Promise<Record<string, unknown>>;
       trackEvent: (eventName: string, category: string, label: string) => Promise<void>;
+      getFirebaseErrorMessage: (error: unknown) => string;
     };
   }
 }
-
-// Primary Admin Email
-const PRIMARY_ADMIN_EMAIL = 'k7286113@gmail.com';
 
 window.UnlostFirebase = {
   app,
@@ -134,136 +201,349 @@ window.UnlostFirebase = {
   currentUser: null,
   isInitialized: false,
 
+  waitForAuth() {
+    if (authInitialized) {
+      return Promise.resolve(auth.currentUser);
+    }
+    return authReadyPromise;
+  },
+
+  getFirebaseErrorMessage,
+
   async signUpWithEmail(name: string, email: string, pass: string) {
+    const trimmedName = (name || '').trim();
+    const normalizedEmail = (email || '').toLowerCase().trim();
+
+    if (!trimmedName || trimmedName.length < 2) {
+      throw new Error('Please enter your full name (at least 2 characters).');
+    }
+    if (!normalizedEmail || !normalizedEmail.includes('@')) {
+      throw new Error('Please enter a valid email address.');
+    }
+    if (!pass || pass.length < 6) {
+      throw new Error('Password must be at least 6 characters long.');
+    }
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      const userCredential = await createUserWithEmailAndPassword(auth, normalizedEmail, pass);
       const user = userCredential.user;
 
-      // 1. Dispatch genuine Firebase email verification link
+      const now = new Date().toISOString();
+
+      // 1. Create User Document in Firestore
       try {
-        await sendEmailVerification(user);
-      } catch (verifErr: unknown) {
-        console.error('sendEmailVerification failure:', verifErr);
-        const errMsg = verifErr instanceof Error ? verifErr.message : 'Failed to dispatch verification email.';
-        throw new Error(`Account created, but verification email could not be sent: ${errMsg}. Please log in to request a new link.`);
+        const userRef = doc(db, 'users', user.uid);
+        await setDoc(userRef, {
+          uid: user.uid,
+          email: user.email,
+          fullName: trimmedName,
+          emailVerified: false,
+          role: 'student',
+          status: 'pending_verification',
+          createdAt: now,
+          lastSignInAt: now,
+          updatedAt: now
+        });
+      } catch (userDocErr) {
+        console.warn('Initial users doc creation note:', userDocErr);
       }
 
-      const now = new Date().toISOString();
-      const userRef = doc(db, 'users', user.uid);
-      // SECURITY: Never assign admin role upon registration. Role is strictly 'student'.
-      await setDoc(userRef, {
-        uid: user.uid,
-        email: user.email,
-        fullName: name,
-        emailVerified: false,
-        role: 'student',
-        status: 'pending_verification',
-        createdAt: now,
-        lastSignInAt: now,
-        updatedAt: now
-      });
+      // 2. Create Student Profile Document in Firestore
+      try {
+        const profileRef = doc(db, 'studentProfiles', user.uid);
+        await setDoc(profileRef, {
+          userId: user.uid,
+          fullName: trimmedName,
+          email: user.email,
+          grade: '',
+          stream: '',
+          targetExam: '',
+          marksSubmitted: '',
+          careerInterests: [],
+          savedCareers: [],
+          savedColleges: [],
+          savedRoadmaps: [],
+          guidanceChecklist: [],
+          pdfGeneratedCount: 0,
+          updatedAt: now
+        });
+      } catch (profDocErr) {
+        console.warn('Initial studentProfiles doc creation note:', profDocErr);
+      }
 
-      const profileRef = doc(db, 'studentProfiles', user.uid);
-      await setDoc(profileRef, {
-        userId: user.uid,
-        fullName: name,
-        email: user.email,
-        grade: '',
-        stream: '',
-        targetExam: '',
-        marksSubmitted: '',
-        careerInterests: [],
-        savedCareers: [],
-        savedColleges: [],
-        savedRoadmaps: [],
-        guidanceChecklist: [],
-        pdfGeneratedCount: 0,
-        updatedAt: now
-      });
+      // 3. Dispatch genuine Firebase email verification link
+      let verificationSent = false;
+      let emailNotice = '';
+      try {
+        const settings = getActionCodeSettings();
+        try {
+          await sendEmailVerification(user, settings);
+          verificationSent = true;
+        } catch (settingsErr: unknown) {
+          console.warn('sendEmailVerification with continueUrl fell back to default:', settingsErr);
+          // Fall back to default verification link without continueUrl
+          await sendEmailVerification(user);
+          verificationSent = true;
+        }
+      } catch (verifErr: unknown) {
+        console.error('sendEmailVerification failure:', verifErr);
+        const code = (verifErr as AuthError).code;
+        if (code === 'auth/too-many-requests') {
+          emailNotice = 'Account created! Verification email is queued due to a temporary rate-limit cooldown. Please wait 60s and click Resend.';
+        } else {
+          emailNotice = `Account created! Verification email could not be sent: ${getFirebaseErrorMessage(verifErr)}. Please use the Resend button.`;
+        }
+      }
 
-      await this.recordStudentActivity('REGISTERED_ACCOUNT', 'Account created with email verification link dispatched');
-      return { user, verificationSent: true };
+      // Save cooldown timestamp
+      if (typeof localStorage !== 'undefined' && verificationSent) {
+        localStorage.setItem('unlost_last_verification_sent', Date.now().toString());
+      }
+
+      await this.recordStudentActivity('REGISTERED_ACCOUNT', 'Account created on UNLOST');
+      return { 
+        user, 
+        verificationSent, 
+        message: emailNotice || 'Verification link has been sent to your email.' 
+      };
     } catch (error) {
       console.error('Firebase signUp error:', error);
-      throw error;
+      throw new Error(getFirebaseErrorMessage(error));
     }
   },
 
   async loginWithEmail(email: string, pass: string) {
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    if (!normalizedEmail || !pass) {
+      throw new Error('Please enter both email and password.');
+    }
+
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+      const userCredential = await signInWithEmailAndPassword(auth, normalizedEmail, pass);
       let user = userCredential.user;
 
-      // Force fresh reload of the user from Firebase Auth to get authoritative emailVerified property
+      // Force fresh reload of the user from Firebase Auth to get authoritative emailVerified status
       await user.reload();
       if (auth.currentUser) {
         user = auth.currentUser;
       }
 
+      // CRITICAL: Force token refresh so Firestore rules evaluate request.auth.token.email_verified: true!
+      await user.getIdToken(true);
+
       const now = new Date().toISOString();
       const isVerified = Boolean(user.emailVerified);
 
-      // Update last sign in time and sync emailVerified status to Firestore
+      // Auto-repair missing User Document in Firestore if absent
       try {
         const userRef = doc(db, 'users', user.uid);
-        await setDoc(userRef, {
-          lastSignInAt: now,
-          emailVerified: isVerified,
-          status: isVerified ? 'active' : 'pending_verification',
-          updatedAt: now
-        }, { merge: true });
-      } catch (e) {
-        console.debug('Last sign in update notice:', e);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            uid: user.uid,
+            email: user.email,
+            fullName: user.displayName || normalizedEmail.split('@')[0],
+            emailVerified: isVerified,
+            role: 'student',
+            status: isVerified ? 'active' : 'pending_verification',
+            createdAt: now,
+            lastSignInAt: now,
+            updatedAt: now
+          });
+        } else {
+          // Update last sign in and sync verification status
+          await setDoc(userRef, {
+            lastSignInAt: now,
+            emailVerified: isVerified,
+            status: isVerified ? 'active' : 'pending_verification',
+            updatedAt: now
+          }, { merge: true });
+        }
+      } catch (uErr) {
+        console.debug('User document sync note:', uErr);
       }
 
-      await this.recordStudentActivity('LOGIN', isVerified ? 'Student logged into portal' : 'Unverified student attempted sign in');
+      // Auto-repair missing Student Profile Document if absent
+      try {
+        const profileRef = doc(db, 'studentProfiles', user.uid);
+        const profileSnap = await getDoc(profileRef);
+        if (!profileSnap.exists()) {
+          await setDoc(profileRef, {
+            userId: user.uid,
+            fullName: user.displayName || normalizedEmail.split('@')[0],
+            email: user.email,
+            grade: '',
+            stream: '',
+            targetExam: '',
+            marksSubmitted: '',
+            careerInterests: [],
+            savedCareers: [],
+            savedColleges: [],
+            savedRoadmaps: [],
+            guidanceChecklist: [],
+            pdfGeneratedCount: 0,
+            updatedAt: now
+          });
+        }
+      } catch (pErr) {
+        console.debug('Profile document sync note:', pErr);
+      }
+
+      await this.recordStudentActivity('LOGIN', isVerified ? 'Student logged into portal' : 'Unverified student sign in attempt');
       return user;
     } catch (error) {
       console.error('Firebase login error:', error);
-      throw error;
+      throw new Error(getFirebaseErrorMessage(error));
     }
   },
 
   async loginWithGoogle() {
     try {
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
       const userCredential = await signInWithPopup(auth, provider);
-      const user = userCredential.user;
+      let user = userCredential.user;
+
+      // Force token refresh
+      await user.getIdToken(true);
       const now = new Date().toISOString();
 
-      const userRef = doc(db, 'users', user.uid);
-      await setDoc(userRef, {
-        uid: user.uid,
-        email: user.email,
-        fullName: user.displayName || 'UNLOST Student',
-        emailVerified: user.emailVerified,
-        role: 'student', // Always 'student'. No client-side admin assignment.
-        status: user.emailVerified ? 'active' : 'pending_verification',
-        lastSignInAt: now,
-        updatedAt: now
-      }, { merge: true });
+      // Ensure user document exists
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        await setDoc(userRef, {
+          uid: user.uid,
+          email: user.email,
+          fullName: user.displayName || 'UNLOST Student',
+          emailVerified: Boolean(user.emailVerified),
+          role: 'student',
+          status: user.emailVerified ? 'active' : 'pending_verification',
+          lastSignInAt: now,
+          updatedAt: now
+        }, { merge: true });
+      } catch (uErr) {
+        console.debug('Google sign in user doc note:', uErr);
+      }
+
+      // Ensure profile document exists
+      try {
+        const profileRef = doc(db, 'studentProfiles', user.uid);
+        const snap = await getDoc(profileRef);
+        if (!snap.exists()) {
+          await setDoc(profileRef, {
+            userId: user.uid,
+            fullName: user.displayName || 'UNLOST Student',
+            email: user.email,
+            grade: '',
+            stream: '',
+            targetExam: '',
+            marksSubmitted: '',
+            careerInterests: [],
+            savedCareers: [],
+            savedColleges: [],
+            savedRoadmaps: [],
+            guidanceChecklist: [],
+            pdfGeneratedCount: 0,
+            updatedAt: now
+          });
+        }
+      } catch (pErr) {
+        console.debug('Google sign in profile doc note:', pErr);
+      }
 
       await this.recordStudentActivity('LOGIN_GOOGLE', 'Logged in via Google Authentication');
       return user;
     } catch (error) {
       console.error('Firebase Google login error:', error);
-      throw error;
+      throw new Error(getFirebaseErrorMessage(error));
     }
   },
 
   async sendVerificationLink(user = auth.currentUser || undefined) {
-    if (!user) throw new Error('No active user to send verification to.');
-    await sendEmailVerification(user);
-    return true;
+    if (!user) throw new Error('No active user account found. Please log in first.');
+
+    // 60-second cooldown check
+    if (typeof localStorage !== 'undefined') {
+      const lastSentStr = localStorage.getItem('unlost_last_verification_sent');
+      if (lastSentStr) {
+        const lastSent = parseInt(lastSentStr, 10);
+        const elapsed = (Date.now() - lastSent) / 1000;
+        if (elapsed < 60) {
+          const remaining = Math.ceil(60 - elapsed);
+          throw new Error(`Cooldown active: Please wait ${remaining} more seconds before requesting another email.`);
+        }
+      }
+    }
+
+    try {
+      const settings = getActionCodeSettings();
+      try {
+        await sendEmailVerification(user, settings);
+      } catch (e: unknown) {
+        console.warn('sendEmailVerification with continueUrl fell back:', e);
+        await sendEmailVerification(user);
+      }
+
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('unlost_last_verification_sent', Date.now().toString());
+      }
+      return true;
+    } catch (error) {
+      console.error('Firebase sendVerificationLink error:', error);
+      throw new Error(getFirebaseErrorMessage(error));
+    }
+  },
+
+  async applyEmailVerificationCode(oobCode: string) {
+    if (!oobCode) throw new Error('Missing verification code.');
+    try {
+      await applyActionCode(auth, oobCode);
+      if (auth.currentUser) {
+        await auth.currentUser.reload();
+        await auth.currentUser.getIdToken(true);
+      }
+      return true;
+    } catch (error) {
+      console.error('applyEmailVerificationCode error:', error);
+      throw new Error(getFirebaseErrorMessage(error));
+    }
+  },
+
+  async checkVerificationStatus() {
+    if (auth.currentUser) {
+      await auth.currentUser.reload();
+      // CRITICAL: force ID token refresh so email_verified claim is updated!
+      await auth.currentUser.getIdToken(true);
+      return Boolean(auth.currentUser.emailVerified);
+    }
+    return false;
   },
 
   async resetPassword(email: string) {
-    await sendPasswordResetEmail(auth, email);
-    return true;
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    if (!normalizedEmail || !normalizedEmail.includes('@')) {
+      throw new Error('Please enter a valid registered email address.');
+    }
+    try {
+      const settings = getActionCodeSettings();
+      try {
+        await sendPasswordResetEmail(auth, normalizedEmail, settings);
+      } catch (e) {
+        await sendPasswordResetEmail(auth, normalizedEmail);
+      }
+      return true;
+    } catch (error) {
+      console.error('Firebase resetPassword error:', error);
+      throw new Error(getFirebaseErrorMessage(error));
+    }
   },
 
   async logout() {
-    await signOut(auth);
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.warn('Firebase logout note:', e);
+    }
   },
 
   async saveStudentProfile(profileData: Record<string, unknown>) {
@@ -337,7 +617,6 @@ window.UnlostFirebase = {
       };
       await setDoc(survRef, payload);
 
-      // Also update studentProfile with education details & marks
       if (user) {
         const profileRef = doc(db, 'studentProfiles', user.uid);
         await setDoc(profileRef, {
@@ -360,7 +639,7 @@ window.UnlostFirebase = {
     }
   },
 
-  // Admin Data Management: Get all registered students with full profiles & surveys
+  // Admin Data Management
   async getAllStudents() {
     try {
       const [usersSnap, profilesSnap, surveysSnap] = await Promise.all([
@@ -384,41 +663,7 @@ window.UnlostFirebase = {
       });
 
       if (usersSnap.docs.length === 0) {
-        // If Firestore users collection is currently fresh, check localStorage or return verified directory
-        const localData = typeof localStorage !== 'undefined' ? localStorage.getItem('unlost_registered_users') : null;
-        const localUsers = localData ? Object.values(JSON.parse(localData)) as any[] : [];
-        if (localUsers.length > 0) {
-          return localUsers.map(u => ({
-            uid: u.uid || 'usr_' + Date.now(),
-            fullName: u.name || 'Student',
-            email: u.email,
-            emailVerified: Boolean(u.emailVerified),
-            role: 'student',
-            status: u.emailVerified ? 'active' : 'pending_verification',
-            createdAt: u.createdAt || new Date().toISOString(),
-            lastSignInAt: u.createdAt || new Date().toISOString(),
-            grade: 'Class 11',
-            stream: 'Science (PCM)',
-            targetExam: 'JEE Main / Advanced',
-            marksSubmitted: 'Class 10: 88.5%',
-            careerInterests: ['Software Systems', 'Emerging Tech'],
-            savedCareers: ['software-engineer'],
-            savedColleges: ['iit-bombay'],
-            surveysCount: 1,
-            latestSurvey: {
-              id: 'surv_local',
-              createdAt: new Date().toISOString(),
-              stream: 'Science (PCM)',
-              grade: 'Class 11',
-              workingStyle: 'Analytical problem solving',
-              topCareers: [{ name: 'Software Engineer & Systems Architect', matchPercentage: 95 }]
-            },
-            pdfGeneratedCount: 1,
-            lastReportDate: new Date().toISOString()
-          }));
-        }
-        // Return default verified student records
-        throw new Error('Fresh directory');
+        throw new Error('No user records found in Firestore directory.');
       }
 
       return usersSnap.docs.map(doc => {
@@ -439,8 +684,8 @@ window.UnlostFirebase = {
           grade: profile.grade || latestSurvey?.grade || 'Class 11',
           stream: profile.stream || latestSurvey?.stream || 'Science (PCM)',
           targetExam: profile.targetExam || 'JEE Main / Advanced',
-          marksSubmitted: profile.marksSubmitted || latestSurvey?.marksDetails || 'Class 10: 88%, Class 11: 82%',
-          careerInterests: profile.careerInterests || latestSurvey?.interests || ['Artificial Intelligence', 'Software Systems'],
+          marksSubmitted: profile.marksSubmitted || latestSurvey?.marksDetails || 'Class 10: 88%',
+          careerInterests: profile.careerInterests || latestSurvey?.interests || ['Software Systems'],
           savedCareers: profile.savedCareers || ['software-engineer'],
           savedColleges: profile.savedColleges || ['iit-bombay'],
           surveysCount: surveys.length,
@@ -450,8 +695,7 @@ window.UnlostFirebase = {
         };
       });
     } catch (err) {
-      console.warn('Firestore fetch failed, returning stored accounts with verified profiles:', err);
-      // Return structured registered student directory for admin display
+      console.warn('Firestore fetch fallback:', err);
       return [
         {
           uid: 'stu_aarav01',
@@ -465,141 +709,21 @@ window.UnlostFirebase = {
           grade: 'Class 12',
           stream: 'Science (PCM)',
           targetExam: 'JEE Advanced, BITSAT',
-          marksSubmitted: 'Class 10: 92.4%, Class 11: 88.0%, Latest: 89.5%',
-          careerInterests: ['Artificial Intelligence', 'Distributed Systems', 'Robotics'],
+          marksSubmitted: 'Class 10: 92.4%, Class 11: 88.0%',
+          careerInterests: ['Artificial Intelligence', 'Distributed Systems'],
           savedCareers: ['software-engineer', 'ai-ml-specialist'],
-          savedColleges: ['iit-bombay', 'bits-pilani', 'iiit-hyderabad'],
+          savedColleges: ['iit-bombay', 'bits-pilani'],
           surveysCount: 1,
           latestSurvey: {
             id: 'surv_101',
             createdAt: '2025-02-20T11:15:00.000Z',
             stream: 'Science (PCM)',
             grade: 'Class 12',
-            workingStyle: 'Deep focused solo problem solving with analytical frameworks',
-            topCareers: [
-              { name: 'Software Engineer & Systems Architect', matchPercentage: 96 },
-              { name: 'Artificial Intelligence & Machine Learning Specialist', matchPercentage: 92 },
-              { name: 'Aerospace Systems Engineer', matchPercentage: 84 }
-            ]
+            workingStyle: 'Deep focused solo problem solving',
+            topCareers: [{ name: 'Software Engineer & Systems Architect', matchPercentage: 96 }]
           },
           pdfGeneratedCount: 2,
           lastReportDate: '2025-02-20T11:20:00.000Z'
-        },
-        {
-          uid: 'stu_ananya02',
-          fullName: 'Ananya Deshmukh',
-          email: 'ananya.d@outlook.com',
-          emailVerified: true,
-          role: 'student',
-          status: 'active',
-          createdAt: '2025-02-22T14:10:00.000Z',
-          lastSignInAt: '2025-03-01T18:45:00.000Z',
-          grade: 'Class 11',
-          stream: 'Science (PCB)',
-          targetExam: 'NEET UG, CUET',
-          marksSubmitted: 'Class 10: 94.6%, Class 11: 91.2%',
-          careerInterests: ['Clinical Medicine', 'Genomics', 'Biomedical Research'],
-          savedCareers: ['neurosurgeon', 'bioinformatician'],
-          savedColleges: ['aiims-delhi', 'cmc-vellore', 'iisc-bangalore'],
-          surveysCount: 1,
-          latestSurvey: {
-            id: 'surv_102',
-            createdAt: '2025-02-24T16:00:00.000Z',
-            stream: 'Science (PCB)',
-            grade: 'Class 11',
-            workingStyle: 'Collaborative clinical environments with patient empathy',
-            topCareers: [
-              { name: 'Physician & Clinical Neurosurgeon', matchPercentage: 95 },
-              { name: 'Computational Biology Specialist', matchPercentage: 89 },
-              { name: 'Clinical Data Scientist', matchPercentage: 83 }
-            ]
-          },
-          pdfGeneratedCount: 1,
-          lastReportDate: '2025-02-24T16:05:00.000Z'
-        },
-        {
-          uid: 'stu_rohan03',
-          fullName: 'Rohan Kulkarni',
-          email: 'rohan.kulkarni@yahoo.in',
-          emailVerified: false,
-          role: 'student',
-          status: 'pending_verification',
-          createdAt: '2025-03-01T11:05:00.000Z',
-          lastSignInAt: '2025-03-01T11:05:00.000Z',
-          grade: 'Class 11',
-          stream: 'Science (PCM)',
-          targetExam: 'MHT CET, JEE Main',
-          marksSubmitted: 'Class 10: 84.2%, Class 11: In Progress',
-          careerInterests: ['Mechanical Engineering', 'Automotive Systems'],
-          savedCareers: ['mechanical-engineer'],
-          savedColleges: ['coep-pune', 'vjti-mumbai'],
-          surveysCount: 0,
-          latestSurvey: null,
-          pdfGeneratedCount: 0,
-          lastReportDate: null
-        },
-        {
-          uid: 'stu_meera04',
-          fullName: 'Meera Sen',
-          email: 'meera.sen@gmail.com',
-          emailVerified: true,
-          role: 'student',
-          status: 'active',
-          createdAt: '2025-02-26T16:40:00.000Z',
-          lastSignInAt: '2025-03-02T09:12:00.000Z',
-          grade: 'Class 12',
-          stream: 'Commerce with Mathematics',
-          targetExam: 'CUET UG, IPMAT',
-          marksSubmitted: 'Class 10: 91.0%, Class 11: 89.5%',
-          careerInterests: ['Quantitative Finance', 'FinTech', 'Data Analytics'],
-          savedCareers: ['quantitative-analyst'],
-          savedColleges: ['srcc-delhi', 'st-xaviers-mumbai', 'iim-indore'],
-          surveysCount: 1,
-          latestSurvey: {
-            id: 'surv_104',
-            createdAt: '2025-02-28T12:00:00.000Z',
-            stream: 'Commerce',
-            grade: 'Class 12',
-            workingStyle: 'Data-driven algorithmic analysis and financial modeling',
-            topCareers: [
-              { name: 'Quantitative Analyst & Risk Strategist', matchPercentage: 94 },
-              { name: 'FinTech Systems Engineer', matchPercentage: 88 },
-              { name: 'Corporate Investment Analyst', matchPercentage: 82 }
-            ]
-          },
-          pdfGeneratedCount: 1,
-          lastReportDate: '2025-02-28T12:05:00.000Z'
-        },
-        {
-          uid: 'stu_tanvi05',
-          fullName: 'Tanvi Iyer',
-          email: 'tanvi.iyer@proton.me',
-          emailVerified: true,
-          role: 'student',
-          status: 'deletion_requested',
-          createdAt: '2025-01-20T10:00:00.000Z',
-          lastSignInAt: '2025-02-28T17:30:00.000Z',
-          grade: 'Undergraduate (1st Year)',
-          stream: 'Humanities & Design',
-          targetExam: 'UCEED, CEED',
-          marksSubmitted: 'Class 12: 93.0%',
-          careerInterests: ['Product Design (UI/UX)', 'Visual Communication'],
-          savedCareers: ['product-designer'],
-          savedColleges: ['nid-ahmedabad', 'idc-iit-bombay'],
-          surveysCount: 1,
-          latestSurvey: {
-            id: 'surv_105',
-            createdAt: '2025-01-25T14:30:00.000Z',
-            stream: 'Humanities & Design',
-            grade: 'Undergraduate',
-            workingStyle: 'Creative visual prototyping and user psychology testing',
-            topCareers: [
-              { name: 'Product Designer & UI/UX Specialist', matchPercentage: 97 },
-              { name: 'Brand & Interaction Architect', matchPercentage: 90 }
-            ]
-          },
-          pdfGeneratedCount: 1,
-          lastReportDate: '2025-01-25T14:35:00.000Z'
         }
       ];
     }
@@ -648,9 +772,7 @@ window.UnlostFirebase = {
 
   async deleteStudentData(userId: string) {
     try {
-      // 1. Delete user record
       await deleteDoc(doc(db, 'users', userId));
-      // 2. Delete student profile
       await deleteDoc(doc(db, 'studentProfiles', userId));
       await this.recordStudentActivity('ADMIN_DATA_DELETION', `Student data purged for UID: ${userId}`);
     } catch (err) {
@@ -673,7 +795,6 @@ window.UnlostFirebase = {
         createdAt: new Date().toISOString()
       });
 
-      // Update user status
       const userRef = doc(db, 'users', user.uid);
       await setDoc(userRef, { status: 'deletion_requested', updatedAt: new Date().toISOString() }, { merge: true });
 
@@ -746,23 +867,36 @@ window.UnlostFirebase = {
   }
 };
 
-// Wire Auth State Listener
-onAuthStateChanged(auth, (user) => {
+// Wire Live Auth State Listener
+onAuthStateChanged(auth, async (user) => {
   window.UnlostFirebase.currentUser = user;
   window.UnlostFirebase.isInitialized = true;
+  authInitialized = true;
+  authReadyResolve(user);
 
   if (user) {
+    try {
+      // Light token check
+      await user.getIdToken(false);
+    } catch (e) {
+      console.debug('Token silent check notice:', e);
+    }
+
     const sessionData = {
       uid: user.uid,
       name: user.displayName || user.email?.split('@')[0] || 'Student',
       email: user.email || '',
       role: user.email?.toLowerCase() === PRIMARY_ADMIN_EMAIL ? 'admin' : 'student',
-      emailVerified: user.emailVerified,
+      emailVerified: Boolean(user.emailVerified),
       loggedInAt: new Date().toISOString(),
       onboarded: true
     };
-    localStorage.setItem('unlost_student_session', JSON.stringify(sessionData));
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('unlost_student_session', JSON.stringify(sessionData));
+    }
   }
 
-  window.dispatchEvent(new CustomEvent('unlost-auth-changed', { detail: { user } }));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('unlost-auth-changed', { detail: { user } }));
+  }
 });
