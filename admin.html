@@ -1049,7 +1049,7 @@
       const logoutBtn = document.getElementById('admin-logout-btn');
 
       // Check Admin Privileges
-      const user = window.UnlostAuth.requireAdmin();
+      const user = await window.UnlostAuth.requireAdmin();
       if (!user) {
         accessDeniedView.style.display = 'flex';
         adminView.style.display = 'none';

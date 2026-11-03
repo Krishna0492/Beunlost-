@@ -61,25 +61,64 @@ if (!configValidation.valid) {
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
 /**
+ * Validate that a reCAPTCHA Enterprise Site Key is genuine and not a placeholder.
+ * Legitimate Google reCAPTCHA Enterprise keys are alphanumeric strings (usually 40 characters).
+ */
+export function isValidRecaptchaSiteKey(key: unknown): boolean {
+  if (!key || typeof key !== 'string') return false;
+  const trimmed = key.trim();
+  const lower = trimmed.toLowerCase();
+  if (['krishna', 'placeholder', 'your_key', 'your-key', 'todo', 'undefined', 'null', 'none', ''].includes(lower)) {
+    return false;
+  }
+  return trimmed.length >= 20;
+}
+
+/**
+ * Validate that an App Check debug token is genuine.
+ * Must be either boolean true or a registered UUID string.
+ */
+export function isValidDebugToken(token: unknown): boolean {
+  if (token === true) return true;
+  if (!token || typeof token !== 'string') return false;
+  const trimmed = token.trim();
+  if (trimmed.toLowerCase() === 'krishna') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed);
+}
+
+/**
  * Retrieve the registered reCAPTCHA Enterprise Site Key safely.
  * Checks firebase-applet-config.json ("recaptchaSiteKey"), Vite env vars, or runtime window globals.
- * Does not expose any secret keys.
+ * Does not expose any secret keys and strictly rejects invalid placeholders.
  */
 export function getRecaptchaSiteKey(): string {
-  const configKey = typeof firebaseConfig === 'object' && firebaseConfig && 'recaptchaSiteKey' in firebaseConfig 
-    ? String((firebaseConfig as Record<string, unknown>).recaptchaSiteKey || '').trim() 
-    : '';
+  const candidates = [
+    typeof firebaseConfig === 'object' && firebaseConfig && 'recaptchaSiteKey' in firebaseConfig 
+      ? String((firebaseConfig as Record<string, unknown>).recaptchaSiteKey || '').trim() 
+      : '',
+    typeof import.meta !== 'undefined' && import.meta.env && (
+      import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY || 
+      import.meta.env.VITE_RECAPTCHA_SITE_KEY
+    ) ? String(import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY || import.meta.env.VITE_RECAPTCHA_SITE_KEY).trim() : '',
+    typeof window !== 'undefined' && (window as any).RECAPTCHA_ENTERPRISE_SITE_KEY 
+      ? String((window as any).RECAPTCHA_ENTERPRISE_SITE_KEY).trim() 
+      : '',
+    (() => {
+      try {
+        return typeof localStorage !== 'undefined' ? (localStorage.getItem('unlost_recaptcha_site_key') || '').trim() : '';
+      } catch {
+        return '';
+      }
+    })()
+  ];
 
-  const envKey = (typeof import.meta !== 'undefined' && import.meta.env && (
-    import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY || 
-    import.meta.env.VITE_RECAPTCHA_SITE_KEY
-  ) ? String(import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY || import.meta.env.VITE_RECAPTCHA_SITE_KEY).trim() : '');
+  for (const c of candidates) {
+    if (isValidRecaptchaSiteKey(c)) {
+      return c;
+    }
+  }
 
-  const windowKey = (typeof window !== 'undefined' && (window as any).RECAPTCHA_ENTERPRISE_SITE_KEY 
-    ? String((window as any).RECAPTCHA_ENTERPRISE_SITE_KEY).trim() 
-    : '');
-
-  return configKey || envKey || windowKey;
+  return '';
 }
 
 // App Check singleton reference and internal token state tracker
@@ -96,32 +135,46 @@ let appCheckTokenState: { token: string | null; error: Error | null; lastUpdated
  * Uses singleton pattern to guarantee App Check is initialised only once.
  */
 export function initAppCheck(overrideKey?: string): AppCheck | null {
-  if (appCheckInstance) return appCheckInstance;
+  if (overrideKey && isValidRecaptchaSiteKey(overrideKey) && typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem('unlost_recaptcha_site_key', overrideKey.trim());
+    } catch (e) {
+      console.debug('Failed to save override site key:', e);
+    }
+  }
+
+  if (appCheckInstance && !overrideKey) return appCheckInstance;
   if (typeof window === 'undefined') return null;
 
   // Window-level singleton guard to prevent duplicate initialization
-  if ((window as any).__unlost_app_check__) {
+  if ((window as any).__unlost_app_check__ && !overrideKey) {
     appCheckInstance = (window as any).__unlost_app_check__;
     return appCheckInstance;
   }
 
-  const siteKey = (overrideKey || getRecaptchaSiteKey()).trim();
-  if (!siteKey) {
-    console.warn(
-      '[UNLOST App Check] Notice: No reCAPTCHA Enterprise site key found in firebase-applet-config.json ("recaptchaSiteKey") or VITE_RECAPTCHA_ENTERPRISE_SITE_KEY. App Check will activate automatically when a valid registered site key is provided.'
+  // Always delete non-standard or invalid debug tokens to prevent 403 exchangeDebugToken errors
+  if (!isValidDebugToken((self as any).FIREBASE_APPCHECK_DEBUG_TOKEN)) {
+    delete (self as any).FIREBASE_APPCHECK_DEBUG_TOKEN;
+  }
+
+  const siteKey = (overrideKey && isValidRecaptchaSiteKey(overrideKey) ? overrideKey : getRecaptchaSiteKey()).trim();
+  if (!siteKey || !isValidRecaptchaSiteKey(siteKey)) {
+    console.info(
+      '[UNLOST App Check] Notice: No registered reCAPTCHA Enterprise site key configured. App Check attestation is deferred until your registered site key is provided in firebase-applet-config.json ("recaptchaSiteKey").'
     );
     return null;
   }
 
   try {
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    // Support App Check debug token in local development environments
+
+    // Support App Check debug token in local development environments only if a valid token is explicitly configured
     if (isLocalhost && typeof (self as any).FIREBASE_APPCHECK_DEBUG_TOKEN === 'undefined') {
       const debugTokenEnv = typeof import.meta !== 'undefined' && import.meta.env && (
         import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN || 
         import.meta.env.VITE_APPCHECK_DEBUG_TOKEN
       );
-      if (debugTokenEnv) {
+      if (isValidDebugToken(debugTokenEnv)) {
         (self as any).FIREBASE_APPCHECK_DEBUG_TOKEN = debugTokenEnv === 'true' ? true : debugTokenEnv;
       }
     }
@@ -281,6 +334,13 @@ export function getFirebaseErrorMessage(error: unknown): string {
       return 'Firebase Authentication configuration was not found for this project. Please check Firebase Console.';
     case 'app/duplicate-app':
       return 'Firebase initialization error: duplicate application instance detected.';
+    case 'auth/firebase-app-check-token-is-invalid':
+    case 'auth/app-check-token-is-invalid':
+      return 'Firebase App Check error (auth/firebase-app-check-token-is-invalid): App Check attestation token was rejected. To resolve: (1) Ensure your registered reCAPTCHA Enterprise site key is configured in firebase-applet-config.json ("recaptchaSiteKey"), (2) Ensure "krishna0492.github.io" is listed in Allowed Domains in Google Cloud Console > Security > reCAPTCHA Enterprise, and (3) In Firebase Console > App Check > Authentication, check whether enforcement is Enforced or Monitor.';
+    case 'auth/missing-app-check-token':
+      return 'App Check token missing (auth/missing-app-check-token): App Check is enforced for Firebase Authentication, but no valid reCAPTCHA Enterprise token was supplied. Please configure your reCAPTCHA Enterprise site key.';
+    case 'auth/app-check-failed':
+      return 'Firebase App Check service communication failed. Please check your internet connection.';
     case 'appCheck/fetch-status-error':
       return 'App Check attestation error: Failed to fetch token from reCAPTCHA Enterprise. Please ensure "krishna0492.github.io" is listed in your reCAPTCHA Enterprise Allowed Domains and check your network.';
     case 'appCheck/token-error':
