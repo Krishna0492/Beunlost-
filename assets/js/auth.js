@@ -88,18 +88,60 @@ window.UnlostAuth = {
   },
 
   // Wait for window.UnlostFirebase module to bootstrap
-  async waitForFirebaseModule(timeoutMs = 6000) {
-    const start = Date.now();
-    while (!window.UnlostFirebase && (Date.now() - start < timeoutMs)) {
-      await new Promise(r => setTimeout(r, 50));
+  async waitForFirebaseModule(timeoutMs = 8000) {
+    if (window.UnlostFirebase) {
+      if (typeof window.UnlostFirebase.waitForAuth === 'function') {
+        try {
+          await window.UnlostFirebase.waitForAuth();
+        } catch (e) {
+          console.debug('waitForAuth note:', e);
+        }
+      }
+      return window.UnlostFirebase;
     }
-    if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
-      await window.UnlostFirebase.waitForAuth();
-    }
-    if (!window.UnlostFirebase) {
-      throw new Error('Authentication service failed to load. Please verify your internet connection or refresh the page.');
-    }
-    return window.UnlostFirebase;
+
+    return new Promise((resolve, reject) => {
+      let isSettled = false;
+
+      const handleReady = async () => {
+        if (isSettled) return;
+        isSettled = true;
+        cleanup();
+        try {
+          if (window.UnlostFirebase && typeof window.UnlostFirebase.waitForAuth === 'function') {
+            await window.UnlostFirebase.waitForAuth();
+          }
+        } catch (e) {
+          console.debug('waitForAuth in handleReady note:', e);
+        }
+        resolve(window.UnlostFirebase);
+      };
+
+      const cleanup = () => {
+        window.removeEventListener('unlost-firebase-ready', handleReady);
+        clearInterval(pollInterval);
+        clearTimeout(timer);
+      };
+
+      window.addEventListener('unlost-firebase-ready', handleReady, { once: true });
+
+      const pollInterval = setInterval(() => {
+        if (window.UnlostFirebase) {
+          handleReady();
+        }
+      }, 50);
+
+      const timer = setTimeout(() => {
+        if (isSettled) return;
+        isSettled = true;
+        cleanup();
+        const isGH = window.location.hostname.includes('github.io');
+        const diagnosticHelp = isGH
+          ? 'On GitHub Pages, ensure you deploy the compiled dist/ directory using GitHub Actions (not raw TypeScript).'
+          : 'Please check your internet connection or verify Authorized Domains in Firebase Console.';
+        reject(new Error(`Firebase Authentication service could not be initialized within ${timeoutMs / 1000}s. ${diagnosticHelp}`));
+      }, timeoutMs);
+    });
   },
 
   // Wait for Firebase auth readiness

@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { 
   getAuth, 
   createUserWithEmailAndPassword, 
@@ -30,8 +30,28 @@ import {
 } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
-// Initialize Firebase App
-export const app = initializeApp(firebaseConfig);
+// Validate configuration parameters
+export const requiredFirebaseKeys = [
+  'apiKey',
+  'authDomain',
+  'projectId',
+  'storageBucket',
+  'messagingSenderId',
+  'appId'
+] as const;
+
+export function validateFirebaseConfig(config: Record<string, unknown>): { valid: boolean; missing: string[] } {
+  const missing = requiredFirebaseKeys.filter(k => !config[k] || typeof config[k] !== 'string' || !(config[k] as string).trim());
+  return { valid: missing.length === 0, missing };
+}
+
+const configValidation = validateFirebaseConfig(firebaseConfig);
+if (!configValidation.valid) {
+  console.error('[UNLOST Firebase] Configuration is missing required keys:', configValidation.missing);
+}
+
+// Initialize Firebase App exactly once (singleton pattern to prevent duplicate app errors)
+export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
@@ -131,9 +151,18 @@ export function getFirebaseErrorMessage(error: unknown): string {
       return 'This verification link has expired. Please request a new verification email.';
     case 'auth/invalid-action-code':
       return 'This verification link is invalid or has already been used. Please check your account status.';
+    case 'auth/operation-not-allowed':
+      return 'Email/Password sign-in is not enabled in Firebase Console. Please verify that Email/Password provider is enabled in Firebase Authentication settings.';
+    case 'auth/configuration-not-found':
+      return 'Firebase Authentication configuration was not found for this project. Please check Firebase Console.';
+    case 'app/duplicate-app':
+      return 'Firebase initialization error: duplicate application instance detected.';
     default:
       if (message.includes('permission-denied') || message.includes('Missing or insufficient permissions')) {
         return 'Authorization failed: You do not have permission to perform this action. Please ensure your email is verified and log in again.';
+      }
+      if (message.includes('the client is offline') || message.includes('offline')) {
+        return 'Firebase client is currently offline. Please check your internet connection and try again.';
       }
       return message || 'An unexpected authentication error occurred.';
   }
@@ -1267,6 +1296,7 @@ export const UnlostFirebase = {
 
 if (typeof window !== 'undefined') {
   window.UnlostFirebase = UnlostFirebase;
+  window.dispatchEvent(new CustomEvent('unlost-firebase-ready', { detail: UnlostFirebase }));
 }
 
 // Wire Live Auth State Listener
